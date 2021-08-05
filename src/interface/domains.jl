@@ -4,6 +4,7 @@ import Base: getindex, ndims, length, *
 import LinearAlgebra: ×
 
 abstract type AbstractDomain end
+abstract type AbstractTopography end
 
 """
     IntervalDomain
@@ -40,11 +41,12 @@ end
 struct SphericalShell{T} <: AbstractDomain
     radius::T
     height::T
+    topography::AbstractTopography
 end
 
-function SphericalShell(; radius, height)
+function SphericalShell(; radius, height, topography=NoTopography())
     @assert radius > 0 && height > 0
-    return SphericalShell(radius, height)
+    return SphericalShell(radius, height, topography)
 end
 
 """

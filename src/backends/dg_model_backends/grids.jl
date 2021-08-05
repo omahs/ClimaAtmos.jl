@@ -104,13 +104,15 @@ function create_dg_grid(
         elements.horizontal,
         Rrange,
     )
-
     grid = DiscontinuousSpectralElementGrid(
         topl,
         FloatType = FT,
         DeviceArray = array,
         polynomialorder = (horizontal, vertical),
-        meshwarp = equiangular_cubed_sphere_warp,
+        meshwarp = topography_warp(cubed_sphere_topo_warp,
+                                   domain, 
+                                   domain.topography)
+#        meshwarp = equiangular_cubed_sphere_warp,
     )
 
     return grid

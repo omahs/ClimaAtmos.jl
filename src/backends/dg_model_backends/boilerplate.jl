@@ -70,6 +70,7 @@ using ClimateMachine.Thermodynamics: soundspeed_air
 using ClimateMachine.VariableTemplates: flattenednames
 
 # interface includes
+include("topography.jl")
 include("grids.jl")
 include("temperature_profiles.jl")
 include("balance_laws.jl")

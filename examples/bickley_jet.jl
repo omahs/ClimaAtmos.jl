@@ -35,6 +35,7 @@ discretized_domain = DiscretizedDomain(
     domain = SphericalShell(
         radius = 1.0,
         height = 0.2,
+        topography = DCMIPTopography(;peak_height = 0.05),
     ),
     discretization = (
 	    horizontal = SpectralElementGrid(elements = 8, polynomial_order = 3), 
