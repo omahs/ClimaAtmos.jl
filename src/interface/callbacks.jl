@@ -23,7 +23,7 @@ end
 Base.@kwdef struct NetCDF{𝒯, 𝒱,𝒫, ℛ, 𝒞, ℬ} <: AbstractCallback
     iteration::𝒯 = 1
     filepath::𝒱
-    prefix::𝒫 = "nc_out_"
+    prefix::𝒫 = "nc_out"
     resolution::ℛ = (2.0, 2.0, 2000.0)
     counter::𝒞 = [0]
     overwrite::ℬ = false
