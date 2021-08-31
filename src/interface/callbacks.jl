@@ -20,6 +20,15 @@ Base.@kwdef struct JLD2State{𝒜,ℬ,𝒞} <: AbstractCallback
     overwrite::𝒞 = true
 end
 
+Base.@kwdef struct NetCDF{𝒯, 𝒱,𝒫, ℛ, 𝒞, ℬ} <: AbstractCallback
+    iteration::𝒯 = 1
+    filepath::𝒱
+    prefix::𝒫 = "nc_out_"
+    resolution::ℛ = (2.0, 2.0, 2000.0)
+    counter::𝒞 = [0]
+    overwrite::ℬ = false
+end
+
 Base.@kwdef struct PositivityPreservingCallback{𝒜} <: AbstractCallback 
     filterstates::𝒜 = 6:6
 end

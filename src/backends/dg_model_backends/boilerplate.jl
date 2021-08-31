@@ -75,6 +75,7 @@ include("grids.jl")
 include("temperature_profiles.jl")
 include("balance_laws.jl")
 include("callbacks.jl")
+include("gcm_diagnostics.jl")
 include("../../utils/operations.jl")
 
 # TODO! Remove this.

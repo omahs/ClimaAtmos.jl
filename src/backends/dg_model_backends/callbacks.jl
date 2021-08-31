@@ -1,3 +1,5 @@
+using KernelAbstractions
+
 function create_callback(::Info, simulation::Simulation{<:DiscontinuousGalerkinBackend}, odesolver)
     Q = simulation.state
     timeend = simulation.timestepper.finish
@@ -69,6 +71,92 @@ function create_callback(::CFL, simulation::Simulation{<:DiscontinuousGalerkinBa
         end
 
     return cbcfl
+end
+
+function create_callback(output::NetCDF, simulation::Simulation{<:DiscontinuousGalerkinBackend}, odesolver)
+
+    # Initialize output
+    output.overwrite &&
+        isfile(output.filepath) &&
+        rm(output.filepath; force = output.overwrite)
+
+    mkpath(output.filepath)
+
+    resolution = output.resolution
+    if simulation.rhs isa Tuple
+        if simulation.rhs[1] isa AbstractRate 
+            model = simulation.rhs[1].model
+        else
+            model = simulation.rhs[1]
+        end
+    else
+        model = simulation.rhs
+    end
+    parameters = model.balance_law.parameters
+    state = simulation.state
+    aux = model.state_auxiliary
+    
+    domain = simulation.discretized_domain.domain
+    @warn "Currently, only SphericalShell domains supported for NetCDF output" 
+    @assert domain isa SphericalShell 
+
+
+    # interpolate to lat lon height
+    boundaries = [
+        Float64(-90.0) Float64(-180.0) domain.radius
+        Float64(90.0) Float64(180.0) Float64(domain.radius + domain.height)
+    ]
+    axes = (
+            collect(range(
+                boundaries[1, 1],
+                boundaries[2, 1],
+                step = resolution[1],
+            )),
+            collect(range(
+                boundaries[1, 2],
+                boundaries[2, 2],
+                step = resolution[2],
+            )),
+            collect(range(
+                boundaries[1, 3],
+                boundaries[2, 3],
+                step = resolution[3],
+            )),
+        )
+
+    vert_range = grid1d(
+        domain.radius,
+        domain.radius + domain.height,
+        nelem = simulation.discretized_domain.discretization.vertical.elements,
+    )
+
+    interpol = InterpolationCubedSphere(
+        model.grid,
+        vert_range,
+        simulation.discretized_domain.discretization.horizontal.elements,
+        axes[1],
+        axes[2],
+        axes[3];
+    )
+
+    dgngrp = setup_atmos_default_diagnostics(
+        simulation,
+        output.iteration,
+        output.prefix,
+        output.filepath,
+        interpol = interpol,
+    )
+
+    
+    dgngrp.init(dgngrp, simulation, odesolver.t)
+    dgngrp.accumulate(dgngrp, simulation, odesolver.t)
+    netcdf_write = EveryXSimulationSteps(output.iteration) do (init = false)
+        # TODO: collection function in DiagnosticsGroup
+        dgngrp.accumulate(dgngrp, simulation, odesolver.t)
+    end
+    
+    return netcdf_write
+
 end
 
 function create_callback(callback::StateCheck, simulation::Simulation{<:DiscontinuousGalerkinBackend}, _...)
@@ -202,7 +290,6 @@ function create_callback(output::VTKState, simulation::Simulation{<:Discontinuou
     else
         model = simulation.rhs
     end
-    # model = (simulation.rhs isa Tuple) ? simulation.rhs[1] : simulation.rhs 
 
     function do_output(counter, model, state)
         mpicomm = MPI.COMM_WORLD

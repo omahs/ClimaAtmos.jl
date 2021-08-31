@@ -99,6 +99,7 @@ simulation = Simulation(
     callbacks = (
         Info(),
         VTKState(iteration = Int(floor(100.0/1.0)), filepath = "./out/"),
+        NetCDF(iteration = Int(floor(100.0/1.0)), filepath = "./out/"),
         CFL(), 
     ),
 )
