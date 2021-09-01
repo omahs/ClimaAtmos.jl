@@ -1,9 +1,12 @@
+using DiffEqCallbacks
+
 """
     Simulation <: AbstractSimulation
 """
 struct Simulation <: AbstractSimulation
     model::AbstractModel
     integrator::DiffEqBase.DEIntegrator
+    callbacks
 end
 
 """
@@ -15,7 +18,8 @@ function Simulation(
     Y_init = nothing,
     dt,
     tspan,
-    kwargs...,
+    callbacks = nothing,
+    kwargs...
 )
     # inital state is either default or set externally 
     Y = Y_init isa Nothing ? make_initial_conditions(model) : Y_init
@@ -31,14 +35,14 @@ function Simulation(
     ode_problem = DiffEqBase.ODEProblem(ode_function, Y, tspan)
     integrator = DiffEqBase.init(ode_problem, method, dt = dt, kwargs...)
 
-    return Simulation(model, integrator)
+    return Simulation(model, integrator, callbacks)
 end
 
 step!(sim::AbstractSimulation, args...; kwargs...) =
     DiffEqBase.step!(sim.integrator, args...; kwargs...)
 
 run!(sim::AbstractSimulation, args...; kwargs...) =
-    DiffEqBase.solve!(sim.integrator, args...; kwargs...)
+    DiffEqBase.solve!(sim.integrator, args...;  callbacks=sim.callbacks, kwargs...)
 
 function set!(sim::AbstractSimulation; kwargs...)
     for (fldname, value) in kwargs

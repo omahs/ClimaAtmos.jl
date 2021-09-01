@@ -1,12 +1,14 @@
 # Julia ecosystem
 using UnPack: @unpack
 using OrdinaryDiffEq: SSPRK33
+using DiffEqCallbacks
+using Printf
 
 # Clima ecosystem
 using ClimaAtmos.BoundaryConditions: NoFluxCondition, DragLawCondition
 using ClimaAtmos.Domains: Column
 using ClimaAtmos.Models: SingleColumnModel
-using ClimaAtmos.Simulations: Simulation, step!
+using ClimaAtmos.Simulations: Simulation, step!, run!
 using ClimaCore.Geometry: Cartesian12Vector
 
 parameters = (
@@ -75,8 +77,12 @@ model = SingleColumnModel(
 )
 
 # set up & run simulation
-simulation = Simulation(model, SSPRK33(), dt = 0.01, tspan = (0.0, 3600.0))
-step!(simulation)
+function custom_test(integrator)
+    @show ("T")
+end
+cb = PeriodicCallback(custom_test, 0.01)
+simulation = Simulation(model, SSPRK33(), dt = 0.01, tspan = (0.0, 3600.0), callbacks = cb)
+run!(simulation)
 
 # ###
 # # post-processing
@@ -85,20 +91,20 @@ step!(simulation)
 # import Plots
 # import ClimaCore: Fields
 # Plots.GRBackend()
-
+#
 # # make output directory
 # dirname = "single_column_toy"
 # path = joinpath(@__DIR__, "output", dirname)
 # mkpath(path)
-
+#
 # # get cell center and face locations for plotting
 # u_init = solution.u[1]
 # z_centers = parent(Fields.coordinate_field(axes(u_init.x[1])))
 # z_faces = parent(Fields.coordinate_field(axes(u_init.x[2])))
-
+#
 # function ekman_plot(u, parameters; title = "", size = (1024, 600))
 #     @unpack ug, d, vg = parameters
-
+#
 #     u_ref =
 #         ug .-
 #         exp.(-z_centers / d) .*
@@ -112,7 +118,7 @@ step!(simulation)
 #     )
 #     sub_plt1 =
 #         Plots.plot!(sub_plt1, parent(u.x[1].u), z_centers, label = "Comp")
-
+#
 #     v_ref =
 #         vg .+
 #         exp.(-z_centers / d) .*
@@ -126,7 +132,7 @@ step!(simulation)
 #     )
 #     sub_plt2 =
 #         Plots.plot!(sub_plt2, parent(u.x[1].v), z_centers, label = "Comp")
-
+#
 #     return Plots.plot(
 #         sub_plt1,
 #         sub_plt2,
@@ -135,14 +141,14 @@ step!(simulation)
 #         size = size,
 #     )
 # end
-
+#
 # # make video
 # anim = Plots.@animate for (i, u) in enumerate(solution.u)
 #     ekman_plot(u, parameters, title = "Hour $(i)")
 # end
 # Plots.mp4(anim, joinpath(path, "hydrostatic_ekman.mp4"), fps = 10)
 # Plots.png(ekman_plot(solution[end], parameters), joinpath(path, "hydrostatic_ekman_end.png"))
-
+#
 # function linkfig(figpath, alt = "")
 #     # buildkite-agent upload figpath
 #     # link figure in logs if we are running on CI
