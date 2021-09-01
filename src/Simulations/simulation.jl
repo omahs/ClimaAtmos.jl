@@ -6,7 +6,6 @@ using DiffEqCallbacks
 struct Simulation <: AbstractSimulation
     model::AbstractModel
     integrator::DiffEqBase.DEIntegrator
-    callbacks
 end
 
 """
@@ -33,16 +32,16 @@ function Simulation(
     # to set up and an ODE integrator that handles
     # integration in time and callbacks
     ode_problem = DiffEqBase.ODEProblem(ode_function, Y, tspan)
-    integrator = DiffEqBase.init(ode_problem, method, dt = dt, kwargs...)
+    integrator = DiffEqBase.init(ode_problem, method, dt = dt; callback = nothing, kwargs...)
 
-    return Simulation(model, integrator, callbacks)
+    return Simulation(model, integrator)
 end
 
 step!(sim::AbstractSimulation, args...; kwargs...) =
     DiffEqBase.step!(sim.integrator, args...; kwargs...)
 
 run!(sim::AbstractSimulation, args...; kwargs...) =
-    DiffEqBase.solve!(sim.integrator, args...;  callbacks=sim.callbacks, kwargs...)
+    DiffEqBase.solve!(sim.integrator, args...; kwargs...)
 
 function set!(sim::AbstractSimulation; kwargs...)
     for (fldname, value) in kwargs

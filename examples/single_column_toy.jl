@@ -78,7 +78,6 @@ model = SingleColumnModel(
 
 # set up & run simulation
 function custom_test(integrator)
-    @show ("T")
 end
 cb = PeriodicCallback(custom_test, 0.01)
 simulation = Simulation(model, SSPRK33(), dt = 0.01, tspan = (0.0, 3600.0), callbacks = cb)
