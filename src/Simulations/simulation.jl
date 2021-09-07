@@ -14,12 +14,13 @@
 struct Simulation <: AbstractSimulation
     model::AbstractModel
     integrator::DiffEqBase.DEIntegrator
+    callbacks::AbstractCallback
 end
 
 """
     Simulation(model::AbstractModel, method::AbstractTimestepper; dt, tspan, init_state, kwargs...)
 """
-function Simulation(model::AbstractModel, method; Y_init = nothing, dt, tspan)
+function Simulation(model::AbstractModel, method; Y_init = nothing, dt, tspan, callbacks = nothing)
     # inital state is either default or set externally 
     Y = Y_init isa Nothing ? default_initial_conditions(model) : Y_init
 
@@ -32,9 +33,9 @@ function Simulation(model::AbstractModel, method; Y_init = nothing, dt, tspan)
     # to set up and an ODE integrator that handles
     # integration in time and callbacks
     ode_problem = DiffEqBase.ODEProblem(ode_function, Y, tspan)
-    integrator = DiffEqBase.init(ode_problem, method, dt = dt)
+    integrator = DiffEqBase.init(ode_problem, method, dt = dt, callbacks = callbacks)
 
-    return Simulation(model, integrator)
+    return Simulation(model, integrator, callbacks)
 end
 
 """
