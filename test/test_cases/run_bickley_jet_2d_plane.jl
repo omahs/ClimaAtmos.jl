@@ -34,10 +34,13 @@ function run_bickley_jet_2d_plane(
 
     model = ShallowWaterModel(domain = domain, parameters = params)
 
+    cb1 = generate_callback(JLD2Callback("TestFilename",1));
+    cb2 = generate_callback(CFLCallback(1));
+
     # execute differently depending on testing mode
     if mode == :unit
         # TODO!: run with input callbacks = ...
-        simulation = Simulation(model, stepper, dt = dt, tspan = (0.0, 1.0))
+        simulation = Simulation(model, stepper, dt = dt, tspan = (0.0, 1.0), callbacks = cb2)
         @unpack h, u, c = init_bickley_jet_2d_plane(params)
 
         set!(simulation, h = h, u = u, c = c)

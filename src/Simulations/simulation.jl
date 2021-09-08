@@ -14,7 +14,7 @@
 struct Simulation <: AbstractSimulation
     model::AbstractModel
     integrator::DiffEqBase.DEIntegrator
-    callbacks::Union{AbstractCallback,Nothing}
+    callbacks::Union{DiffEqBase.DiscreteCallback,AbstractCallback,Nothing}
 end
 
 """

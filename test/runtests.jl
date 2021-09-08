@@ -11,6 +11,7 @@ using ClimaAtmos.Domains: Plane, PeriodicPlane, Column
 using ClimaAtmos.Models.ShallowWaterModels: ShallowWaterModel
 using ClimaAtmos.Models.SingleColumnModels: SingleColumnModel
 using ClimaAtmos.Simulations: Simulation, set!, step!, run!
+using ClimaAtmos.Callbacks
 using ClimaCore: Geometry, Fields
 
 float_types = (Float32, Float64)
