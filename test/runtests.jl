@@ -2,6 +2,7 @@
 using Test
 using UnPack: @unpack
 using OrdinaryDiffEq: SSPRK33
+using DiffEqBase
 using Plots
 
 # Clima ecosystem

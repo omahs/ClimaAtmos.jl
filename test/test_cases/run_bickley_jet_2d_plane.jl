@@ -40,7 +40,8 @@ function run_bickley_jet_2d_plane(
     # execute differently depending on testing mode
     if mode == :unit
         # TODO!: run with input callbacks = ...
-        simulation = Simulation(model, stepper, dt = dt, tspan = (0.0, 1.0), callbacks = cb2)
+        simulation = Simulation(model, stepper, dt = dt, tspan = (0.0, 1.0), 
+                                callbacks = DiffEqBase.CallbackSet(cb1,cb2))
         @unpack h, u, c = init_bickley_jet_2d_plane(params)
 
         set!(simulation, h = h, u = u, c = c)

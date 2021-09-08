@@ -14,7 +14,10 @@
 struct Simulation <: AbstractSimulation
     model::AbstractModel
     integrator::DiffEqBase.DEIntegrator
-    callbacks::Union{DiffEqBase.DiscreteCallback,AbstractCallback,Nothing}
+    callbacks::Union{DiffEqBase.CallbackSet,
+                     DiffEqBase.DiscreteCallback,
+                     AbstractCallback,
+                     Nothing}
 end
 
 """
@@ -29,18 +32,18 @@ function Simulation(model::AbstractModel, method;
 
     # inital state is either default or set externally 
     Y = Y_init isa Nothing ? default_initial_conditions(model) : Y_init
-
+    
     # contains all information about the 
     # pde systems jacobians and right-hand sides
     # to hook into the DiffEqBase.jl interface
     ode_function = make_ode_function(model)
-
+    
     # we use the DiffEqBase.jl interface
     # to set up and an ODE integrator that handles
     # integration in time and callbacks
     ode_problem = DiffEqBase.ODEProblem(ode_function, Y, tspan)
     integrator = DiffEqBase.init(ode_problem, method, dt = dt, callback = callbacks)
-
+    
     return Simulation(model, integrator, callbacks)
 end
 
@@ -94,7 +97,7 @@ function set!(
             tf = simulation.integrator.sol.prob.tspan[2],
             erase_sol = false,
             reset_dt = false,
-            reinit_callbacks = false,
+            reinit_callbacks = true,
             initialize_save = false,
             reinit_cache = false,
         )
