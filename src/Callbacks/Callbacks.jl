@@ -1,12 +1,13 @@
 module Callbacks
+
 using DiffEqCallbacks
 using UnPack
 using JLD2
 
 export cfl_cb,
+       generate_callback,
        AbstractCallback,
        CFLCallback,
-       generate_callback,
        JLD2Callback
 
 abstract type AbstractCallback end
@@ -44,7 +45,6 @@ struct JLD2Callback <: AbstractCallback
 end
 function g_test!(integrator)
     mkpath("./TestOutput/")
-    @show "YESSSSSSSSSSSSS"
     jldsave(joinpath("./TestOutput/", "Test.jl"); 
             u = integrator.sol.u.swm.u, 
             c = integrator.sol.u.swm.c, 
