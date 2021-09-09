@@ -22,18 +22,27 @@ domain = PeriodicPlane(
            );
 model = ShallowWaterModel(domain = domain, parameters = params);
 
-# Begin Tests
-cb_1 = JLD2Output(model, "TempTestDir1", "TestFilename1", 1);
-cb_2 = JLD2Output(model, "TempTestDir2", "TestFilename2", 2);
+@testset "Callback Operations" begin
+    @info "Testing Callbacks..."
+    # Begin Tests
+   
+    # Populate Callback Containers
+    cb_1 = JLD2Output(model, "TempTestDir1", "TestFilename1", 1);
+    cb_2 = JLD2Output(model, "TempTestDir2", "TestFilename2", 2);
 
-@test generate_callback(cb_1) isa DiffEqBase.DiscreteCallback
-@test generate_callback(cb_2) isa DiffEqBase.DiscreteCallback
-@test DiffEqBase.CallbackSet(generate_callback(cb_1),generate_callback(cb_2)) isa DiffEqBase.CallbackSet
-@test isfile(joinpath(@__DIR__, cb_1.filedir, cb_1.filename*".jl")) == false
-@test isfile(joinpath(@__DIR__, cb_2.filedir, cb_2.filename*".jl")) == false
+    # Generate CallbackSet 
+    cb_set = DiffEqBase.CallbackSet(generate_callback(cb_1), 
+                                    generate_callback(cb_2))
 
-# Generate simple simulation data for test
-simulation = Simulation(model, stepper, dt = 0.01, tspan = (0.0,0.04))
+    # Type Checks
+    @test generate_callback(cb_1) isa DiffEqBase.DiscreteCallback
+    @test generate_callback(cb_2) isa DiffEqBase.DiscreteCallback
+    @test isfile(joinpath(@__DIR__, cb_1.filedir, cb_1.filename*".jld2")) == false
+    @test isfile(joinpath(@__DIR__, cb_2.filedir, cb_2.filename*".jld2")) == false
 
-include("initial_conditions/bickley_jet_2d_plane.jl")
+    # Generate simple simulation data for test
+    
+    simulation = Simulation(model, SSPRK33(), dt = 0.01, tspan = (0.0,0.04), callbacks = cb_set)
+    run!(simulation)
+end
 
