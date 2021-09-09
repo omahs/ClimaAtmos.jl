@@ -28,7 +28,7 @@ cb_2 = JLD2Output(model, "TempTestDir2", "TestFilename2", 2);
 
 @test generate_callback(cb_1) isa DiffEqBase.DiscreteCallback
 @test generate_callback(cb_2) isa DiffEqBase.DiscreteCallback
-@test DiffEqBase.CallbackSet(cb1,cb2) isa DiffEqBase.CallbackSet
+@test DiffEqBase.CallbackSet(generate_callback(cb_1),generate_callback(cb_2)) isa DiffEqBase.CallbackSet
 @test isfile(joinpath(@__DIR__, cb_1.filedir, cb_1.filename*".jl")) == false
 @test isfile(joinpath(@__DIR__, cb_2.filedir, cb_2.filename*".jl")) == false
 
