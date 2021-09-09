@@ -34,7 +34,7 @@ function run_bickley_jet_2d_plane(
 
     model = ShallowWaterModel(domain = domain, parameters = params)
 
- #   cb1 = generate_callback(JLD2Callback("TestFilename",10));
+    cb1 = generate_callback(JLD2Callback("TestFilename",10));
     cb2 = generate_callback(CFLCallback(10));
 
     # execute differently depending on testing mode

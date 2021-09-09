@@ -7,59 +7,52 @@ using JLD2
 export cfl_cb,
        generate_callback,
        AbstractCallback,
-       CFLCallback,
-       JLD2Callback
+       CFLInfo,
+       JLD2Output
 
 abstract type AbstractCallback end
 function generate_callback(::AbstractCallback)
     return nothing
 end
 
-###
-### CFLCallback 
-###
-struct CFLCallback <: AbstractCallback 
+# CFL Information Callback
+struct CFLInfo <: AbstractCallback 
     interval::Number
 end
-function f_test!(integrator)
+function (F::CFLInfo)(integrator)
+    # Simulation out of scope , model need not be
     var = integrator.u.swm
     u = getproperty(integrator.u.swm, :u)
-    # Default callback simulations out of scope
-    # # Default callback simulations out of scope
     u = var.u 
     c = var.c
     h = var.h
     t = integrator.t
     return nothing
 end
-function generate_callback(c::CFLCallback; kwargs...)
-    return PeriodicCallback(f_test!,c.interval; initial_affect=false, kwargs...)
+function generate_callback(F::CFLInfo; kwargs...)
+    return PeriodicCallback(F,F.interval; initial_affect=false, kwargs...)
 end
 
-###
-### JLD2 Callback
-### 
-struct JLD2Callback <: AbstractCallback 
+# JLD2 Callback
+struct JLD2Output <: AbstractCallback 
+    filedir  :: String
     filename :: String
     interval :: Number
 end
-function g_test!(integrator)
-    mkpath("./TestOutput/")
-    jldsave(joinpath("./TestOutput/", "Test.jl"); 
-            h = integrator.u.swm.h,
-            c = integrator.u.swm.c,
-            u = integrator.u.swm.u,
-            t = integrator.t)
+function (F::JLD2Output)(integrator)
+    u = integrator.u.swm.u
+    h = integrator.u.swm.h 
+    c = integrator.u.swm.c
+    t = integrator.t
+    mkpath(F.filedir)
+    jldsave(joinpath("./", F.filedir, F.filename*".jld2"), 
+           u=u,
+           h=h,
+           c=c,
+           t=t)
     return nothing
 end
-function write_output!(::JLD2Callback)
-    return g_test!
+function generate_callback(F::JLD2Output; kwargs...)
+    return PeriodicCallback(F,F.interval; initial_affect=false, kwargs...)
 end
-function generate_callback(c::JLD2Callback; kwargs...)
-    return PeriodicCallback(write_output!(JLD2Callback(c.filename,1)), 
-                            c.interval; 
-                            initial_affect=false, 
-                            kwargs...)
-end
-
 end
