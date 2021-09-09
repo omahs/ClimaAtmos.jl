@@ -28,6 +28,7 @@ group = get(ENV, "TEST_GROUP", :all) |> Symbol
         @testset "Unit tests" begin
             include("test_domains.jl")
             include("test_simulations.jl")
+            include("test_callbacks.jl")
         end
     end
 

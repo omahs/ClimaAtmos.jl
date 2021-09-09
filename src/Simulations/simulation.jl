@@ -5,6 +5,8 @@
         # a DiffEqBase.jl integrator used for time
         # stepping the simulation
         integrator::DiffEqBase.DEIntegrator
+        # user defined callback operations 
+        callbacks::Union{DiffEqBase.CallbackSet, DiffEqBase.DiscreteCallback, Nothing}
     end
 
     A simulation wraps an abstract ClimaAtmos model containing 
