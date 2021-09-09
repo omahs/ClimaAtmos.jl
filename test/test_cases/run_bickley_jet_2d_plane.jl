@@ -34,14 +34,16 @@ function run_bickley_jet_2d_plane(
 
     model = ShallowWaterModel(domain = domain, parameters = params)
 
-    cb1 = generate_callback(JLD2Callback("TestFilename",1));
-    cb2 = generate_callback(CFLCallback(1));
+ #   cb1 = generate_callback(JLD2Callback("TestFilename",10));
+    cb2 = generate_callback(CFLCallback(10));
 
     # execute differently depending on testing mode
     if mode == :unit
         # TODO!: run with input callbacks = ...
+        #simulation = Simulation(model, stepper, dt = dt, tspan = (0.0, 1.0), 
+        #                        callbacks = DiffEqBase.CallbackSet(cb1,cb2))
         simulation = Simulation(model, stepper, dt = dt, tspan = (0.0, 1.0), 
-                                callbacks = DiffEqBase.CallbackSet(cb2,))
+                                callbacks = cb1)
         @unpack h, u, c = init_bickley_jet_2d_plane(params)
 
         set!(simulation, h = h, u = u, c = c)
@@ -49,7 +51,10 @@ function run_bickley_jet_2d_plane(
 
         @test true # either error or integration runs
     elseif mode == :regression
-        simulation = Simulation(model, stepper, dt = dt, tspan = (0.0, 1.0))
+        #simulation = Simulation(model, stepper, dt = dt, tspan = (0.0, 1.0),
+        #                        callbacks = DiffEqBase.CallbackSet(cb1,cb2))
+        simulation = Simulation(model, stepper, dt = dt, tspan = (0.0, 1.0), 
+                                callbacks = cb1)
         @unpack h, u, c = init_bickley_jet_2d_plane(params)
 
         # here we set the initial condition with an array for testing
@@ -68,9 +73,12 @@ function run_bickley_jet_2d_plane(
         @test maximum(parent(u.u)) ≈ current_max atol = 1e-3
     elseif mode == :validation
         # TODO!: run with callbacks = ...
-        simulation = Simulation(model, stepper, dt = dt, tspan = (0.0, 80.0))
+        #simulation = Simulation(model, stepper, dt = dt, tspan = (0.0, 80.0), 
+        #                        callbacks = cb1)
+        simulation = Simulation(model, stepper, dt = dt, tspan = (0.0, 80.0), 
+                                callbacks = DiffEqBase.CallbackSet(cb1,cb2))
         @unpack h, u, c = init_bickley_jet_2d_plane(params)
-        set!(simulation, h = h, u = u, c = c)
+        set!(simulation, :swm, h = h, u = u, c = c)
         run!(simulation)
         u_end = simulation.integrator.u.swm
 

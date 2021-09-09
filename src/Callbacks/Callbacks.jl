@@ -11,7 +11,9 @@ export cfl_cb,
        JLD2Callback
 
 abstract type AbstractCallback end
-
+function generate_callback(::AbstractCallback)
+    return nothing
+end
 
 ###
 ### CFLCallback 
@@ -19,17 +21,15 @@ abstract type AbstractCallback end
 struct CFLCallback <: AbstractCallback 
     interval::Number
 end
-function generate_callback(::AbstractCallback)
-    return nothing
-end
 function f_test!(integrator)
-    var = integrator.sol.u
-    #TODO Unpack from known `Model` variables
-    #Requires generalisation 
-    u = var.swm.u 
-    c = var.swm.c
-    h = var.swm.h
-    t = sol.t
+    var = integrator.u.swm
+    u = getproperty(integrator.u.swm, :u)
+    # Default callback simulations out of scope
+    # # Default callback simulations out of scope
+    u = var.u 
+    c = var.c
+    h = var.h
+    t = integrator.t
     return nothing
 end
 function generate_callback(c::CFLCallback; kwargs...)
@@ -46,10 +46,10 @@ end
 function g_test!(integrator)
     mkpath("./TestOutput/")
     jldsave(joinpath("./TestOutput/", "Test.jl"); 
-            u = integrator.sol.u.swm.u, 
-            c = integrator.sol.u.swm.c, 
-            h = integrator.sol.u.swm.h, 
-            t = integrator.sol.t)
+            h = integrator.u.swm.h,
+            c = integrator.u.swm.c,
+            u = integrator.u.swm.u,
+            t = integrator.t)
     return nothing
 end
 function write_output!(::JLD2Callback)

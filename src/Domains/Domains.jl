@@ -29,8 +29,8 @@ export AbstractDomain
 export AbstractHorizontalDomain
 export AbstractVerticalDomain
 export Column
-export PeriodicRectangle
-export Rectangle
+export PeriodicPlane
+export Plane
 
 export make_function_space
 
