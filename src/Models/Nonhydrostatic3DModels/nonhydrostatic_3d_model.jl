@@ -5,19 +5,13 @@ A three-dimensional non-hydrostatic model, which is typically used for simulatin
 the Euler equations. Required fields are `domain`, `boundary_conditions`, and
 `parameters`.
 """
-Base.@kwdef struct Nonhydrostatic3DModel{
-    D <: AbstractHybridDomain,
-    BC,
-    P,
-    FT,
-} <: AbstractModel
+Base.@kwdef struct Nonhydrostatic3DModel{D <: AbstractHybridDomain, BC, P} <:
+                   AbstractModel
     domain::D
     boundary_conditions::BC
     parameters::P
     name::Symbol = :nhm
-    varnames::Tuple = (:ρ, :uh, :w, :ρe_tot) # ρuh is the horizontal momentum
-    flux_corr::Bool = true
-    hyperdiffusivity::FT
+    varnames::Tuple = (:ρ, :ρuh, :ρw, :ρθ) # ρuh is the horizontal momentum
 end
 
 function Models.default_initial_conditions(model::Nonhydrostatic3DModel)
@@ -29,7 +23,7 @@ function Models.default_initial_conditions(model::Nonhydrostatic3DModel)
     zero_val = zero(Spaces.undertype(space_c))
     zero_scalar(lg) = zero_val # .
     zero_12vector(lg) = Geometry.Covariant12Vector(zero_val, zero_val) # ---->
-    zero_3vector(lg) = Geometry.Covariant3Vector(zero_val) # (-_-') . ┓( ´∀` )┏ 
+    zero_3vector(lg) = Geometry.Covariant3Vector(zero_val)
 
     ρ = zero_scalar.(local_geometry_c)
     uh = zero_12vector.(local_geometry_c)
