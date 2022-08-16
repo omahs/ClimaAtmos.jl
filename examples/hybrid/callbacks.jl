@@ -11,16 +11,8 @@ function get_callbacks(parsed_args, simulation, model_spec, params)
     FT = eltype(params)
     (; dt) = simulation
 
-    callback_filters = ODE.DiscreteCallback(
-        condition_every_iter,
-        affect_filter!;
-        save_positions = (false, false),
-    )
-    tc_callbacks = ODE.DiscreteCallback(
-        condition_every_iter,
-        turb_conv_affect_filter!;
-        save_positions = (false, false),
-    )
+    callback_filters = call_every_n_steps(affect_filter!)
+    tc_callbacks = call_every_n_steps(turb_conv_affect_filter!)
 
     additional_callbacks = if !isnothing(model_spec.radiation_model)
         # TODO: better if-else criteria?
@@ -29,14 +21,7 @@ function get_callbacks(parsed_args, simulation, model_spec, params)
         else
             FT(time_to_seconds(parsed_args["dt_rad"]))
         end
-        (
-            DEQ.PeriodicCallback(
-                rrtmgp_model_callback!,
-                dt_rad; # update RRTMGPModel every dt_rad
-                initial_affect = true, # run callback at t = 0
-                save_positions = (false, false), # do not save Y before and after callback
-            ),
-        )
+        (call_every_dt(rrtmgp_model_callback!, dt_rad),)
     else
         ()
     end
@@ -51,16 +36,11 @@ function get_callbacks(parsed_args, simulation, model_spec, params)
 
     dt_save_to_disk = time_to_seconds(parsed_args["dt_save_to_disk"])
 
-    dss_cb = DEQ.FunctionCallingCallback(dss_callback, func_start = true)
+    dss_cb = call_every_n_steps(dss_callback)
     save_to_disk_callback = if dt_save_to_disk == Inf
         nothing
     else
-        DEQ.PeriodicCallback(
-            save_to_disk_func,
-            dt_save_to_disk;
-            initial_affect = true,
-            save_positions = (false, false),
-        )
+        call_every_dt(save_to_disk_func, dt_save_to_disk)
     end
     return ODE.CallbackSet(
         dss_cb,
@@ -69,23 +49,48 @@ function get_callbacks(parsed_args, simulation, model_spec, params)
     )
 end
 
+function call_every_n_steps(func!, n = 1)
+    previous_step = Ref(0)
+    return ODE.DiscreteCallback(
+        (u, t, integrator) -> (previous_step[] += 1) % n == 0,
+        func!;
+        initialize = (cb, u, t, integrator) -> func!(integrator),
+        save_positions = (false, false),
+    )
+end
 
-condition_every_iter(u, t, integrator) = true
+function call_every_dt(func!, dt)
+    next_t = Ref{typeof(dt)}()
+    affect! = function (integrator)
+        while integrator.t >= next_t[]
+            func!(integrator)
+            next_t[] += dt
+        end
+    end
+    return ODE.DiscreteCallback(
+        (u, t, integrator) -> t >= next_t[],
+        affect!;
+        initialize = (cb, u, t, integrator) ->
+            (func!(integrator); next_t[] = t + dt),
+        save_positions = (false, false),
+    )
+end
 
 function affect_filter!(Y::Fields.FieldVector)
     @. Y.c.ρq_tot = max(Y.c.ρq_tot, 0)
     return nothing
 end
 
-function dss_callback(Y, t, integrator)
-    p = integrator.p
+function dss_callback(integrator)
+    Y = integrator.u
+    ghost_buffer = integrator.p.ghost_buffer
     @nvtx "dss callback" color = colorant"yellow" begin
-        Spaces.weighted_dss_start!(Y.c, p.ghost_buffer.c)
-        Spaces.weighted_dss_start!(Y.f, p.ghost_buffer.f)
-        Spaces.weighted_dss_internal!(Y.c, p.ghost_buffer.c)
-        Spaces.weighted_dss_internal!(Y.f, p.ghost_buffer.f)
-        Spaces.weighted_dss_ghost!(Y.c, p.ghost_buffer.c)
-        Spaces.weighted_dss_ghost!(Y.f, p.ghost_buffer.f)
+        Spaces.weighted_dss_start!(Y.c, ghost_buffer.c)
+        Spaces.weighted_dss_start!(Y.f, ghost_buffer.f)
+        Spaces.weighted_dss_internal!(Y.c, ghost_buffer.c)
+        Spaces.weighted_dss_internal!(Y.f, ghost_buffer.f)
+        Spaces.weighted_dss_ghost!(Y.c, ghost_buffer.c)
+        Spaces.weighted_dss_ghost!(Y.f, ghost_buffer.f)
     end
     # ODE.u_modified!(integrator, false) # TODO: try this
 end
