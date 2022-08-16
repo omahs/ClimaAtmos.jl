@@ -191,6 +191,14 @@ function parse_commandline()
         help = "Define the surface elevation profile [`NoWarp`,`Earth`,`DCMIP200`]"
         arg_type = String
         default = "NoWarp"
+        "--apply_limiters"
+        help = "Whether to apply a limiter to every tracer [`true`, `false` (default)]"
+        arg_type = Bool
+        default = false
+        "--move_K_term"
+        help = "Whether to move the ∂K/∂z term into the implicit tendency [`true`, `false` (default)]"
+        arg_type = Bool
+        default = false
     end
     parsed_args = ArgParse.parse_args(ARGS, s)
     return (s, parsed_args)

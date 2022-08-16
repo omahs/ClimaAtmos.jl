@@ -1,7 +1,7 @@
 using LinearAlgebra: ×, norm, norm_sqr, dot
 
 import ClimaAtmos.Parameters as CAP
-using ClimaCore: Operators, Fields
+using ClimaCore: Operators, Fields, Limiters
 
 using ClimaCore.Geometry: ⊗
 
@@ -79,7 +79,7 @@ get_cache(Y, params, spaces, model_spec, numerics, simulation) = merge(
 )
 
 function default_cache(Y, params, spaces, numerics, simulation)
-    (; upwinding_mode) = numerics
+    (; upwinding_mode, apply_limiters, move_K_term) = numerics
     ᶜcoord = Fields.local_geometry_field(Y.c).coordinates
     ᶠcoord = Fields.local_geometry_field(Y.f).coordinates
     z_sfc = Fields.level(ᶠcoord.z, half)
@@ -106,9 +106,19 @@ function default_cache(Y, params, spaces, numerics, simulation)
         ghost_buffer =
             (ghost_buffer..., ᶜχρq_tot = Spaces.create_ghost_buffer(Y.c.ρ))
     )
+    if apply_limiters
+        tracers = filter(is_tracer_var, propertynames(Y.c))
+        make_limiter = ᶜ𝕋_name ->
+            Limiters.QuasiMonotoneLimiter(getproperty(Y.c, ᶜ𝕋_name), Y.c.ρ)
+        limiters = NamedTuple{tracers}(map(make_limiter, tracers))
+    else
+        limiters = nothing
+    end
     return (;
         simulation,
         spaces,
+        Y1ₜ = apply_limiters ? similar(Y) : nothing,
+        limiters,
         ᶜuvw = similar(Y.c, Geometry.Covariant123Vector{FT}),
         ᶜK = similar(Y.c, FT),
         ᶜΦ = CAP.grav(params) .* ᶜcoord.z,
@@ -132,6 +142,7 @@ function default_cache(Y, params, spaces, numerics, simulation)
         ᶠupwind_product = upwinding_mode == :first_order ? ᶠupwind_product1 :
                           upwinding_mode == :third_order ? ᶠupwind_product3 :
                           nothing,
+        move_K_term,
         ghost_buffer = ghost_buffer,
     )
 end
@@ -160,7 +171,7 @@ function implicit_tendency_special!(Yₜ, Y, p, t)
     ᶜρ = Y.c.ρ
     ᶜuₕ = Y.c.uₕ
     ᶠw = Y.f.w
-    (; ᶜΦ, params, ᶠupwind_product) = p
+    (; ᶜΦ, params, ᶠupwind_product, move_K_term) = p
     thermo_params = CAP.thermodynamics_params(params)
     # Used for automatically computing the Jacobian ∂Yₜ/∂Y. Currently requires
     # allocation because the cache is stored separately from Y, which means that
@@ -217,10 +228,17 @@ function implicit_tendency_special!(Yₜ, Y, p, t)
 
             Yₜ.c.uₕ[colidx] .= ref_zuₕ
 
-            @. Yₜ.f.w[colidx] = -(
-                ᶠgradᵥ(ᶜp[colidx]) / ᶠinterp(ᶜρ[colidx]) +
-                ᶠgradᵥ(ᶜK[colidx] + ᶜΦ[colidx])
-            )
+            if move_K_term
+                @. Yₜ.f.w[colidx] = -(
+                    ᶠgradᵥ(ᶜp[colidx]) / ᶠinterp(ᶜρ[colidx]) +
+                    ᶠgradᵥ(ᶜK[colidx] + ᶜΦ[colidx])
+                )
+            else
+                @. Yₜ.f.w[colidx] = -(
+                    ᶠgradᵥ(ᶜp[colidx]) / ᶠinterp(ᶜρ[colidx]) +
+                    ᶠgradᵥ(ᶜΦ[colidx])
+                )
+            end
 
             for ᶜ𝕋_name in filter(is_tracer_var, propertynames(Y.c))
                 ᶜ𝕋 = getproperty(Y.c, ᶜ𝕋_name)
@@ -248,7 +266,7 @@ function implicit_tendency_generic!(Yₜ, Y, p, t)
         ᶜρ = Y.c.ρ
         ᶜuₕ = Y.c.uₕ
         ᶠw = Y.f.w
-        (; ᶜK, ᶜΦ, ᶜts, ᶜp, params, ᶠupwind_product) = p
+        (; ᶜK, ᶜΦ, ᶜts, ᶜp, params, ᶠupwind_product, move_K_term) = p
         thermo_params = CAP.thermodynamics_params(params)
         # Used for automatically computing the Jacobian ∂Yₜ/∂Y. Currently requires
         # allocation because the cache is stored separately from Y, which means that
@@ -315,7 +333,11 @@ function implicit_tendency_generic!(Yₜ, Y, p, t)
 
         Yₜ.c.uₕ .= Ref(zero(eltype(Yₜ.c.uₕ)))
 
-        @. Yₜ.f.w = -(ᶠgradᵥ(ᶜp) / ᶠinterp(ᶜρ) + ᶠgradᵥ(ᶜK + ᶜΦ))
+        if move_K_term
+            @. Yₜ.f.w = -(ᶠgradᵥ(ᶜp) / ᶠinterp(ᶜρ) + ᶠgradᵥ(ᶜK + ᶜΦ))
+        else
+            @. Yₜ.f.w = -(ᶠgradᵥ(ᶜp) / ᶠinterp(ᶜρ) + ᶠgradᵥ(ᶜΦ))
+        end
 
         for ᶜ𝕋_name in filter(is_tracer_var, propertynames(Y.c))
             ᶜ𝕋 = getproperty(Y.c, ᶜ𝕋_name)
@@ -332,9 +354,13 @@ function implicit_tendency_generic!(Yₜ, Y, p, t)
 end
 
 function remaining_tendency!(Yₜ, Y, p, t)
+    default_tends = p.default_remaining_tendencies
     @nvtx "remaining tendency" color = colorant"yellow" begin
         Yₜ .= zero(eltype(Yₜ))
-        p.default_remaining_tendency!(Yₜ, Y, p, t)
+        if !isnothing(default_tends)
+            default_tends.horizontal_advection_tendency!(Yₜ, Y, p, t)
+            default_tends.explicit_vertical_advection_tendency!(Yₜ, Y, p, t)
+        end
         @nvtx "additional_tendency!" color = colorant"orange" begin
             additional_tendency!(Yₜ, Y, p, t)
         end
@@ -350,11 +376,47 @@ function remaining_tendency!(Yₜ, Y, p, t)
     return Yₜ
 end
 
-function default_remaining_tendency_special!(Yₜ, Y, p, t)
+function remaining_tendency_step!(Y2, Y1, p, t, dtγ)
+    (; Y1ₜ, limiters) = p
+    default_tends = p.default_remaining_tendencies
+    @nvtx "remaining tendency step" color = colorant"yellow" begin
+        Y1ₜ .= zero(eltype(Y1ₜ))
+        if !isnothing(default_tends)
+            default_tends.horizontal_advection_tendency!(Y1ₜ, Y1, p, t)
+            if length(limiters) > 0
+                @. Y2 += dtγ * Y1ₜ
+                for ᶜ𝕋_name in filter(is_tracer_var, propertynames(Y1.c))
+                    𝕋_limiter = getproperty(limiters, ᶜ𝕋_name)
+                    ᶜ𝕋1 = getproperty(Y1.c, ᶜ𝕋_name)
+                    ᶜ𝕋2 = getproperty(Y2.c, ᶜ𝕋_name)
+                    Limiters.compute_bounds!(𝕋_limiter, ᶜ𝕋1, Y1.c.ρ)
+                    Limiters.apply_limiter!(ᶜ𝕋2, Y2.c.ρ, 𝕋_limiter)
+                end
+                Y1ₜ .= zero(eltype(Y1ₜ))
+            end
+            default_tends.explicit_vertical_advection_tendency!(Y1ₜ, Y1, p, t)
+        end
+        @nvtx "additional_tendency!" color = colorant"orange" begin
+            additional_tendency!(Y1ₜ, Y1, p, t)
+        end
+        @. Y2 += dtγ * Y1ₜ
+        @nvtx "dss_remaining_tendency_step" color = colorant"blue" begin
+            Spaces.weighted_dss_start!(Y2.c, p.ghost_buffer.c)
+            Spaces.weighted_dss_start!(Y2.f, p.ghost_buffer.f)
+            Spaces.weighted_dss_internal!(Y2.c, p.ghost_buffer.c)
+            Spaces.weighted_dss_internal!(Y2.f, p.ghost_buffer.f)
+            Spaces.weighted_dss_ghost!(Y2.c, p.ghost_buffer.c)
+            Spaces.weighted_dss_ghost!(Y2.f, p.ghost_buffer.f)
+        end
+    end
+    return Y2
+end
+
+function horizontal_advection_tendency_special!(Yₜ, Y, p, t)
     ᶜρ = Y.c.ρ
     ᶜuₕ = Y.c.uₕ
     ᶠw = Y.f.w
-    (; ᶜuvw, ᶜK, ᶜΦ, ᶜts, ᶜp, ᶜω³, ᶠω¹², ᶠu¹², ᶠu³, ᶜf, params) = p
+    (; ᶜuvw, ᶜK, ᶜΦ, ᶜts, ᶜp, ᶜω³, ᶠω¹², ᶠu¹², ᶠu³, params) = p
     point_type = eltype(Fields.local_geometry_field(axes(Y.c)).coordinates)
     thermo_params = CAP.thermodynamics_params(params)
 
@@ -384,7 +446,6 @@ function default_remaining_tendency_special!(Yₜ, Y, p, t)
         end
     end
 
-
     ### horizontal
     @nvtx "horizontal" color = colorant"orange" begin
         # Mass conservation
@@ -393,7 +454,7 @@ function default_remaining_tendency_special!(Yₜ, Y, p, t)
         # Energy conservation
         @. Yₜ.c.ρe_tot -= divₕ((Y.c.ρe_tot + ᶜp) * ᶜuvw)
 
-
+        # Momentum conservation
         if point_type <: Geometry.Abstract3DPoint
             @. ᶜω³ = curlₕ(ᶜuₕ)
             @. ᶠω¹² = curlₕ(ᶠw)
@@ -408,17 +469,84 @@ function default_remaining_tendency_special!(Yₜ, Y, p, t)
                 Geometry.Covariant12Vector(gradₕ(ᶜp) / ᶜρ + gradₕ(ᶜK + ᶜΦ))
         end
 
+        # Tracer conservation
         for ᶜ𝕋_name in filter(is_tracer_var, propertynames(Y.c))
             ᶜ𝕋 = getproperty(Y.c, ᶜ𝕋_name)
             ᶜ𝕋ₜ = getproperty(Yₜ.c, ᶜ𝕋_name)
             @. ᶜ𝕋ₜ -= divₕ(ᶜ𝕋 * ᶜuvw)
         end
     end
+end
+function horizontal_advection_tendency_generic!(Yₜ, Y, p, t)
+    ᶜρ = Y.c.ρ
+    ᶜuₕ = Y.c.uₕ
+    ᶠw = Y.f.w
+    (; ᶜuvw, ᶜK, ᶜΦ, ᶜts, ᶜp, ᶜω³, ᶠω¹², ᶠu¹², ᶠu³, params) = p
+    point_type = eltype(Fields.local_geometry_field(axes(Y.c)).coordinates)
+    thermo_params = CAP.thermodynamics_params(params)
 
-    ### vertical
+    @. ᶜuvw = C123(ᶜuₕ) + C123(ᶜinterp(ᶠw))
+    @. ᶜK = norm_sqr(ᶜuvw) / 2
+
+    # Mass conservation
+    @. Yₜ.c.ρ -= divₕ(ᶜρ * ᶜuvw)
+
+    # Energy conservation
+    thermo_state!(ᶜts, Y, params, ᶜinterp, ᶜK)
+    @. ᶜp = TD.air_pressure(thermo_params, ᶜts)
+    if :ρθ in propertynames(Y.c)
+        @. Yₜ.c.ρθ -= divₕ(Y.c.ρθ * ᶜuvw)
+    elseif :ρe_tot in propertynames(Y.c)
+        @. Yₜ.c.ρe_tot -= divₕ((Y.c.ρe_tot + ᶜp) * ᶜuvw)
+    elseif :ρe_int in propertynames(Y.c)
+        if point_type <: Geometry.Abstract3DPoint
+            @. Yₜ.c.ρe_int -=
+                divₕ((Y.c.ρe_int + ᶜp) * ᶜuvw) -
+                dot(gradₕ(ᶜp), Geometry.Contravariant12Vector(ᶜuₕ))
+        else
+            @. Yₜ.c.ρe_int -=
+                divₕ((Y.c.ρe_int + ᶜp) * ᶜuvw) -
+                dot(gradₕ(ᶜp), Geometry.Contravariant1Vector(ᶜuₕ))
+        end
+        # or, equivalently,
+        # @. Yₜ.c.ρe_int -= divₕ(Y.c.ρe_int * ᶜuvw) + ᶜp * divₕ(ᶜuvw)
+    end
+
+    # Momentum conservation
+    if point_type <: Geometry.Abstract3DPoint
+        @. ᶜω³ = curlₕ(ᶜuₕ)
+        @. ᶠω¹² = curlₕ(ᶠw)
+    elseif point_type <: Geometry.Abstract2DPoint
+        ᶜω³ .= Ref(zero(eltype(ᶜω³)))
+        @. ᶠω¹² = Geometry.Contravariant12Vector(curlₕ(ᶠw))
+    end
+    @. ᶠu¹² = Geometry.project(Geometry.Contravariant12Axis(), ᶠinterp(ᶜuvw))
+    @. ᶠu³ = Geometry.project(
+        Geometry.Contravariant3Axis(),
+        C123(ᶠinterp(ᶜuₕ)) + C123(ᶠw),
+    )
+    if point_type <: Geometry.Abstract3DPoint
+        @. Yₜ.c.uₕ -= gradₕ(ᶜp) / ᶜρ + gradₕ(ᶜK + ᶜΦ)
+    elseif point_type <: Geometry.Abstract2DPoint
+        @. Yₜ.c.uₕ -=
+            Geometry.Covariant12Vector(gradₕ(ᶜp) / ᶜρ + gradₕ(ᶜK + ᶜΦ))
+    end
+
+    # Tracer conservation
+    for ᶜ𝕋_name in filter(is_tracer_var, propertynames(Y.c))
+        ᶜ𝕋 = getproperty(Y.c, ᶜ𝕋_name)
+        ᶜ𝕋ₜ = getproperty(Yₜ.c, ᶜ𝕋_name)
+        @. ᶜ𝕋ₜ -= divₕ(ᶜ𝕋 * ᶜuvw)
+    end
+end
+
+function explicit_vertical_advection_tendency_special!(Yₜ, Y, p, t)
+    ᶜρ = Y.c.ρ
+    ᶜuₕ = Y.c.uₕ
+    (; ᶜuvw, ᶜK, ᶜp, ᶜω³, ᶠω¹², ᶠu¹², ᶠu³, ᶜf, move_K_term) = p
+
     @nvtx "vertical" color = colorant"orange" begin
         Fields.bycolumn(axes(Y.c)) do colidx
-
             # Mass conservation
             @. Yₜ.c.ρ[colidx] -= ᶜdivᵥ(ᶠinterp(ᶜρ[colidx] * ᶜuₕ[colidx]))
 
@@ -432,10 +560,13 @@ function default_remaining_tendency_special!(Yₜ, Y, p, t)
                 ᶜinterp(ᶠω¹²[colidx] × ᶠu³[colidx]) +
                 (ᶜf[colidx] + ᶜω³[colidx]) ×
                 (Geometry.project(Geometry.Contravariant12Axis(), ᶜuvw[colidx]))
-            @. Yₜ.f.w[colidx] -= ᶠω¹²[colidx] × ᶠu¹²[colidx]
+            if move_K_term
+                @. Yₜ.f.w[colidx] -= ᶠω¹²[colidx] × ᶠu¹²[colidx]
+            else
+                @. Yₜ.f.w[colidx] -= ᶠω¹²[colidx] × ᶠu¹²[colidx] + ᶠgradᵥ(ᶜK)
+            end
 
             # Tracer conservation
-
             for ᶜ𝕋_name in filter(is_tracer_var, propertynames(Y.c))
                 ᶜ𝕋 = getproperty(Y.c, ᶜ𝕋_name)
                 ᶜ𝕋ₜ = getproperty(Yₜ.c, ᶜ𝕋_name)
@@ -444,84 +575,41 @@ function default_remaining_tendency_special!(Yₜ, Y, p, t)
         end
     end
 end
-function default_remaining_tendency_generic!(Yₜ, Y, p, t)
+function explicit_vertical_advection_tendency_generic!(Yₜ, Y, p, t)
     ᶜρ = Y.c.ρ
     ᶜuₕ = Y.c.uₕ
-    ᶠw = Y.f.w
-    (; ᶜuvw, ᶜK, ᶜΦ, ᶜts, ᶜp, ᶜω³, ᶠω¹², ᶠu¹², ᶠu³, ᶜf, params) = p
-    point_type = eltype(Fields.local_geometry_field(axes(Y.c)).coordinates)
-    thermo_params = CAP.thermodynamics_params(params)
-
-    @. ᶜuvw = C123(ᶜuₕ) + C123(ᶜinterp(ᶠw))
-    @. ᶜK = norm_sqr(ᶜuvw) / 2
+    (; ᶜuvw, ᶜp, ᶜω³, ᶠω¹², ᶠu¹², ᶠu³, ᶜf) = p
 
     # Mass conservation
-
-    @. Yₜ.c.ρ -= divₕ(ᶜρ * ᶜuvw)
     @. Yₜ.c.ρ -= ᶜdivᵥ(ᶠinterp(ᶜρ * ᶜuₕ))
 
     # Energy conservation
-
-    thermo_state!(ᶜts, Y, params, ᶜinterp, ᶜK)
-    @. ᶜp = TD.air_pressure(thermo_params, ᶜts)
     if :ρθ in propertynames(Y.c)
-        @. Yₜ.c.ρθ -= divₕ(Y.c.ρθ * ᶜuvw)
         @. Yₜ.c.ρθ -= ᶜdivᵥ(ᶠinterp(Y.c.ρθ * ᶜuₕ))
     elseif :ρe_tot in propertynames(Y.c)
-        @. Yₜ.c.ρe_tot -= divₕ((Y.c.ρe_tot + ᶜp) * ᶜuvw)
         @. Yₜ.c.ρe_tot -= ᶜdivᵥ(ᶠinterp((Y.c.ρe_tot + ᶜp) * ᶜuₕ))
     elseif :ρe_int in propertynames(Y.c)
-        if point_type <: Geometry.Abstract3DPoint
-            @. Yₜ.c.ρe_int -=
-                divₕ((Y.c.ρe_int + ᶜp) * ᶜuvw) -
-                dot(gradₕ(ᶜp), Geometry.Contravariant12Vector(ᶜuₕ))
-        else
-            @. Yₜ.c.ρe_int -=
-                divₕ((Y.c.ρe_int + ᶜp) * ᶜuvw) -
-                dot(gradₕ(ᶜp), Geometry.Contravariant1Vector(ᶜuₕ))
-        end
         @. Yₜ.c.ρe_int -= ᶜdivᵥ(ᶠinterp((Y.c.ρe_int + ᶜp) * ᶜuₕ))
         # or, equivalently,
-        # @. Yₜ.c.ρe_int -= divₕ(Y.c.ρe_int * ᶜuvw) + ᶜp * divₕ(ᶜuvw)
         # @. Yₜ.c.ρe_int -=
         #     ᶜdivᵥ(ᶠinterp(Y.c.ρe_int * ᶜuₕ)) + ᶜp * ᶜdivᵥ(ᶠinterp(ᶜuₕ))
     end
 
     # Momentum conservation
-
-    if point_type <: Geometry.Abstract3DPoint
-        @. ᶜω³ = curlₕ(ᶜuₕ)
-        @. ᶠω¹² = curlₕ(ᶠw)
-    elseif point_type <: Geometry.Abstract2DPoint
-        ᶜω³ .= Ref(zero(eltype(ᶜω³)))
-        @. ᶠω¹² = Geometry.Contravariant12Vector(curlₕ(ᶠw))
-    end
     @. ᶠω¹² += ᶠcurlᵥ(ᶜuₕ)
-
-    @. ᶠu¹² = Geometry.project(Geometry.Contravariant12Axis(), ᶠinterp(ᶜuvw))
-    @. ᶠu³ = Geometry.project(
-        Geometry.Contravariant3Axis(),
-        C123(ᶠinterp(ᶜuₕ)) + C123(ᶠw),
-    )
-
     @. Yₜ.c.uₕ -=
         ᶜinterp(ᶠω¹² × ᶠu³) +
         (ᶜf + ᶜω³) × (Geometry.project(Geometry.Contravariant12Axis(), ᶜuvw))
-    if point_type <: Geometry.Abstract3DPoint
-        @. Yₜ.c.uₕ -= gradₕ(ᶜp) / ᶜρ + gradₕ(ᶜK + ᶜΦ)
-    elseif point_type <: Geometry.Abstract2DPoint
-        @. Yₜ.c.uₕ -=
-            Geometry.Covariant12Vector(gradₕ(ᶜp) / ᶜρ + gradₕ(ᶜK + ᶜΦ))
+    if move_K_term
+        @. Yₜ.f.w -= ᶠω¹² × ᶠu¹²
+    else
+        @. Yₜ.f.w -= ᶠω¹² × ᶠu¹² + ᶠgradᵥ(ᶜK)
     end
 
-    @. Yₜ.f.w -= ᶠω¹² × ᶠu¹²
-
     # Tracer conservation
-
     for ᶜ𝕋_name in filter(is_tracer_var, propertynames(Y.c))
         ᶜ𝕋 = getproperty(Y.c, ᶜ𝕋_name)
         ᶜ𝕋ₜ = getproperty(Yₜ.c, ᶜ𝕋_name)
-        @. ᶜ𝕋ₜ -= divₕ(ᶜ𝕋 * ᶜuvw)
         @. ᶜ𝕋ₜ -= ᶜdivᵥ(ᶠinterp(ᶜ𝕋 * ᶜuₕ))
     end
 end
@@ -540,7 +628,7 @@ function Wfact_special!(W, Y, p, dtγ, t)
     ᶜρ = Y.c.ρ
     ᶜuₕ = Y.c.uₕ
     ᶠw = Y.f.w
-    (; ᶜK, ᶜΦ, ᶜts, ᶜp, ∂ᶜK∂ᶠw_data, params, ᶠupwind_product) = p
+    (; ᶜK, ᶜΦ, ᶜts, ᶜp, ∂ᶜK∂ᶠw_data, params, ᶠupwind_product, move_K_term) = p
     @nvtx "Wfact!" color = colorant"green" begin
         thermo_params = CAP.thermodynamics_params(params)
 
@@ -635,14 +723,24 @@ function Wfact_special!(W, Y, p, dtγ, t)
             )
 
             # elseif :ρe_tot in propertynames(Y.c)
-            @. ∂ᶠ𝕄ₜ∂ᶠ𝕄[colidx] = to_scalar_coefs(
-                compose(
-                    -1 / ᶠinterp(ᶜρ[colidx]) *
-                    ᶠgradᵥ_stencil(-(ᶜρ[colidx] * R_d / cv_d)) +
-                    -1 * ᶠgradᵥ_stencil(one(ᶜK[colidx])),
-                    ∂ᶜK∂ᶠw_data[colidx],
-                ),
-            )
+            if move_K_term
+                @. ∂ᶠ𝕄ₜ∂ᶠ𝕄[colidx] = to_scalar_coefs(
+                    compose(
+                        -1 / ᶠinterp(ᶜρ[colidx]) *
+                        ᶠgradᵥ_stencil(-(ᶜρ[colidx] * R_d / cv_d)) +
+                        -1 * ᶠgradᵥ_stencil(one(ᶜK[colidx])),
+                        ∂ᶜK∂ᶠw_data[colidx],
+                    ),
+                )
+            else
+                @. ∂ᶠ𝕄ₜ∂ᶠ𝕄[colidx] = to_scalar_coefs(
+                    compose(
+                        -1 / ᶠinterp(ᶜρ[colidx]) *
+                        ᶠgradᵥ_stencil(-(ᶜρ[colidx] * R_d / cv_d)),
+                        ∂ᶜK∂ᶠw_data[colidx],
+                    ),
+                )
+            end
 
             for ᶜ𝕋_name in filter(is_tracer_var, propertynames(Y.c))
                 ᶜ𝕋 = getproperty(Y.c, ᶜ𝕋_name)
@@ -679,7 +777,7 @@ function Wfact_generic!(W, Y, p, dtγ, t)
     ᶜρ = Y.c.ρ
     ᶜuₕ = Y.c.uₕ
     ᶠw = Y.f.w
-    (; ᶜK, ᶜΦ, ᶜts, ᶜp, ∂ᶜK∂ᶠw_data, params, ᶠupwind_product) = p
+    (; ᶜK, ᶜΦ, ᶜts, ᶜp, ∂ᶜK∂ᶠw_data, params, ᶠupwind_product, move_K_term) = p
     @nvtx "Wfact!" color = colorant"green" begin
         thermo_params = CAP.thermodynamics_params(params)
 
@@ -994,17 +1092,30 @@ function Wfact_generic!(W, Y, p, dtγ, t)
         # ∂(ᶜK)/∂(ᶠw_data) =
         #     ᶜinterp(ᶠw_data) * norm_sqr(ᶜinterp(ᶠw)_unit) * ᶜinterp_stencil(1)
         if :ρθ in propertynames(Y.c) || :ρe_int in propertynames(Y.c)
-            @. ∂ᶠ𝕄ₜ∂ᶠ𝕄 = to_scalar_coefs(
-                compose(-1 * ᶠgradᵥ_stencil(one(ᶜK)), ∂ᶜK∂ᶠw_data),
-            )
+            if move_K_term
+                @. ∂ᶠ𝕄ₜ∂ᶠ𝕄 = to_scalar_coefs(
+                    compose(-1 * ᶠgradᵥ_stencil(one(ᶜK)), ∂ᶜK∂ᶠw_data),
+                )
+            else
+                @. ∂ᶠ𝕄ₜ∂ᶠ𝕄 .*= 0
+            end
         elseif :ρe_tot in propertynames(Y.c)
-            @. ∂ᶠ𝕄ₜ∂ᶠ𝕄 = to_scalar_coefs(
-                compose(
-                    -1 / ᶠinterp(ᶜρ) * ᶠgradᵥ_stencil(-(ᶜρ * R_d / cv_d)) +
-                    -1 * ᶠgradᵥ_stencil(one(ᶜK)),
-                    ∂ᶜK∂ᶠw_data,
-                ),
-            )
+            if move_K_term
+                @. ∂ᶠ𝕄ₜ∂ᶠ𝕄 = to_scalar_coefs(
+                    compose(
+                        -1 / ᶠinterp(ᶜρ) * ᶠgradᵥ_stencil(-(ᶜρ * R_d / cv_d)) +
+                        -1 * ᶠgradᵥ_stencil(one(ᶜK)),
+                        ∂ᶜK∂ᶠw_data,
+                    ),
+                )
+            else
+                @. ∂ᶠ𝕄ₜ∂ᶠ𝕄 = to_scalar_coefs(
+                    compose(
+                        -1 / ᶠinterp(ᶜρ) * ᶠgradᵥ_stencil(-(ᶜρ * R_d / cv_d)),
+                        ∂ᶜK∂ᶠw_data,
+                    ),
+                )
+            end
         end
 
         for ᶜ𝕋_name in filter(is_tracer_var, propertynames(Y.c))
@@ -1032,7 +1143,7 @@ function Wfact_generic!(W, Y, p, dtγ, t)
         if W.test && !(eltype(ᶜts) <: TD.PhaseEquil)
             # Checking every column takes too long, so just check one.
             i, j, h = 1, 1, 1
-            args = (implicit_tendency!, Y, p, t, i, j, h)
+            args = (implicit_tendency_generic!, Y, p, t, i, j, h)
             ᶜ𝔼_name = filter(is_energy_var, propertynames(Y.c))[1]
 
             @assert matrix_column(∂ᶜρₜ∂ᶠ𝕄, axes(Y.f), i, j, h) ==

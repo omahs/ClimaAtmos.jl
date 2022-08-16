@@ -126,7 +126,9 @@ function get_numerics(parsed_args)
     numerics = (;
         upwinding_mode = Symbol(
             parse_arg(parsed_args, "upwinding", "third_order"),
-        )
+        ),
+        apply_limiters = parsed_args["apply_limiters"],
+        move_K_term = parsed_args["move_K_term"],
     )
     @assert numerics.upwinding_mode in (:none, :first_order, :third_order)
 
@@ -293,16 +295,27 @@ function ode_configuration(Y, parsed_args, model_spec)
     newton_κ = Inf # similar to a reltol for Newton's method (default is 0.01)
     test_implicit_solver = false # makes solver extremely slow when set to `true`
     jacobian_flags = jacobi_flags(model_spec.energy_form)
-    ode_algorithm = getproperty(ODE, Symbol(parsed_args["ode_algo"]))
+    alg_symbol = Symbol(parsed_args["ode_algo"])
+    ode_algorithm = if hasproperty(ODE, alg_symbol)
+        parsed_args["apply_limiters"] &&
+            error("OrdinaryDiffEq algorithms do not support applying limiters")
+        getproperty(ODE, alg_symbol)
+    elseif hasproperty(ClimaTimeSteppers, alg_symbol)
+        getproperty(ClimaTimeSteppers, alg_symbol)
+    end
 
     ode_algorithm_type =
         ode_algorithm isa Function ? typeof(ode_algorithm()) : ode_algorithm
+    use_clima_time_steppers =
+        ode_algorithm_type <: ClimaTimeSteppers.DistributedODEAlgorithm
     if ode_algorithm_type <: Union{
         ODE.OrdinaryDiffEqImplicitAlgorithm,
         ODE.OrdinaryDiffEqAdaptiveImplicitAlgorithm,
-    }
-        use_transform =
-            !(ode_algorithm_type in (ODE.Rosenbrock23, ODE.Rosenbrock32))
+    } || use_clima_time_steppers
+        use_transform = !(
+            use_clima_time_steppers ||
+            ode_algorithm_type in (ODE.Rosenbrock23, ODE.Rosenbrock32)
+        )
         W = SchurComplementW(
             Y,
             use_transform,
@@ -334,12 +347,23 @@ function ode_configuration(Y, parsed_args, model_spec)
                     max_iter = max_newton_iters,
                 ),
             )
+        elseif use_clima_time_steppers
+            newtons_method = NewtonsMethod(;
+                linsolve = linsolve!,
+                convergence_checker = ConvergenceChecker(
+                    norm_condition = MinimumRateOfConvergence(0.9, 1),
+                ),
+                max_iters = 100,
+            )
+            alg_kwargs = (; newtons_method)
         end
     else
         jac_kwargs = alg_kwargs = ()
     end
     return (; jac_kwargs, alg_kwargs, ode_algorithm)
 end
+
+(alg::IMEXARKAlgorithm)(; newtons_method) = alg(newtons_method)
 
 function get_integrator(parsed_args, Y, p, tspan, ode_config, callback)
     (; jac_kwargs, alg_kwargs, ode_algorithm) = ode_config
@@ -356,13 +380,16 @@ function get_integrator(parsed_args, Y, p, tspan, ode_config, callback)
     end
 
     problem = if parsed_args["split_ode"]
+        remaining_func = parsed_args["apply_limiters"] ?
+            ForwardEulerODEFunction(remaining_tendency_step!) :
+            remaining_tendency!
         ODE.SplitODEProblem(
             ODE.ODEFunction(
                 implicit_tendency!;
                 jac_kwargs...,
                 tgrad = (∂Y∂t, Y, p, t) -> (∂Y∂t .= FT(0)),
             ),
-            remaining_tendency!,
+            remaining_func,
             Y,
             tspan,
             p,
