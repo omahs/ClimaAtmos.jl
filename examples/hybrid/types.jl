@@ -350,10 +350,7 @@ function ode_configuration(Y, parsed_args, model_spec)
         elseif use_clima_time_steppers
             newtons_method = NewtonsMethod(;
                 linsolve = linsolve!,
-                convergence_checker = ConvergenceChecker(
-                    norm_condition = MinimumRateOfConvergence(0.9, 1),
-                ),
-                max_iters = 100,
+                max_iters = 3, # 2 doesn't seem to be good enough
             )
             alg_kwargs = (; newtons_method)
         end
@@ -362,8 +359,6 @@ function ode_configuration(Y, parsed_args, model_spec)
     end
     return (; jac_kwargs, alg_kwargs, ode_algorithm)
 end
-
-(alg::IMEXARKAlgorithm)(; newtons_method) = alg(newtons_method)
 
 function get_integrator(parsed_args, Y, p, tspan, ode_config, callback)
     (; jac_kwargs, alg_kwargs, ode_algorithm) = ode_config
@@ -381,7 +376,7 @@ function get_integrator(parsed_args, Y, p, tspan, ode_config, callback)
 
     problem = if parsed_args["split_ode"]
         remaining_func = parsed_args["apply_limiters"] ?
-            ForwardEulerODEFunction(remaining_tendency_step!) :
+            ForwardEulerODEFunction(remaining_tendency_increment!) :
             remaining_tendency!
         ODE.SplitODEProblem(
             ODE.ODEFunction(

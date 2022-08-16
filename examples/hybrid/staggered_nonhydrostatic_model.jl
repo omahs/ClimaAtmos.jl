@@ -376,10 +376,10 @@ function remaining_tendency!(Yₜ, Y, p, t)
     return Yₜ
 end
 
-function remaining_tendency_step!(Y2, Y1, p, t, dtγ)
+function remaining_tendency_increment!(Y2, Y1, p, t, dtγ)
     (; Y1ₜ, limiters) = p
     default_tends = p.default_remaining_tendencies
-    @nvtx "remaining tendency step" color = colorant"yellow" begin
+    @nvtx "remaining tendency increment" color = colorant"yellow" begin
         Y1ₜ .= zero(eltype(Y1ₜ))
         if !isnothing(default_tends)
             default_tends.horizontal_advection_tendency!(Y1ₜ, Y1, p, t)
@@ -396,11 +396,11 @@ function remaining_tendency_step!(Y2, Y1, p, t, dtγ)
             end
             default_tends.explicit_vertical_advection_tendency!(Y1ₜ, Y1, p, t)
         end
-        @nvtx "additional_tendency!" color = colorant"orange" begin
+        @nvtx "additional_tendency! increment" color = colorant"orange" begin
             additional_tendency!(Y1ₜ, Y1, p, t)
+            @. Y2 += dtγ * Y1ₜ
         end
-        @. Y2 += dtγ * Y1ₜ
-        @nvtx "dss_remaining_tendency_step" color = colorant"blue" begin
+        @nvtx "dss_remaining_tendency increment" color = colorant"blue" begin
             Spaces.weighted_dss_start!(Y2.c, p.ghost_buffer.c)
             Spaces.weighted_dss_start!(Y2.f, p.ghost_buffer.f)
             Spaces.weighted_dss_internal!(Y2.c, p.ghost_buffer.c)
@@ -563,7 +563,8 @@ function explicit_vertical_advection_tendency_special!(Yₜ, Y, p, t)
             if move_K_term
                 @. Yₜ.f.w[colidx] -= ᶠω¹²[colidx] × ᶠu¹²[colidx]
             else
-                @. Yₜ.f.w[colidx] -= ᶠω¹²[colidx] × ᶠu¹²[colidx] + ᶠgradᵥ(ᶜK)
+                @. Yₜ.f.w[colidx] -=
+                    ᶠω¹²[colidx] × ᶠu¹²[colidx] + ᶠgradᵥ(ᶜK[colidx])
             end
 
             # Tracer conservation
@@ -578,7 +579,7 @@ end
 function explicit_vertical_advection_tendency_generic!(Yₜ, Y, p, t)
     ᶜρ = Y.c.ρ
     ᶜuₕ = Y.c.uₕ
-    (; ᶜuvw, ᶜp, ᶜω³, ᶠω¹², ᶠu¹², ᶠu³, ᶜf) = p
+    (; ᶜuvw, ᶜp, ᶜω³, ᶠω¹², ᶠu¹², ᶠu³, ᶜf, move_K_term) = p
 
     # Mass conservation
     @. Yₜ.c.ρ -= ᶜdivᵥ(ᶠinterp(ᶜρ * ᶜuₕ))
