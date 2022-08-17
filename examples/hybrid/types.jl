@@ -366,7 +366,6 @@ function get_integrator(parsed_args, Y, p, tspan, ode_config, callback)
     FT = eltype(tspan)
     dt_save_to_sol = time_to_seconds(parsed_args["dt_save_to_sol"])
     show_progress_bar = isinteractive()
-    additional_solver_kwargs = () # e.g., abstol and reltol
 
     if :ρe_tot in propertynames(Y.c) && enable_threading()
         implicit_tendency! = implicit_tendency_special!
@@ -392,16 +391,23 @@ function get_integrator(parsed_args, Y, p, tspan, ode_config, callback)
     else
         ODE.ODEProblem(remaining_tendency!, Y, tspan, p)
     end
+    integrator_kwargs =
+        if ode_algorithm <: ClimaTimeSteppers.DistributedODEAlgorithm
+            (; 
+                adaptive = false,
+                progress = show_progress_bar,
+                progress_steps = isinteractive() ? 1 : 1000,
+            )
+        else
+            (; adjustfinal = true) # TODO: add progress bars!
+        end
     integrator = ODE.init(
         problem,
         ode_algorithm(; alg_kwargs...);
         saveat = dt_save_to_sol == Inf ? last(tspan) : dt_save_to_sol,
         callback = callback,
         dt = dt,
-        adaptive = false,
-        progress = show_progress_bar,
-        progress_steps = isinteractive() ? 1 : 1000,
-        additional_solver_kwargs...,
+        integrator_kwargs...,
     )
     return integrator
 end

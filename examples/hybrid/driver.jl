@@ -14,10 +14,6 @@ parse_arg(pa, key, default) = isnothing(pa[key]) ? default : pa[key]
 
 const FT = parsed_args["FLOAT_TYPE"] == "Float64" ? Float64 : Float32
 
-parsed_args["ode_algo"] = "ARS343"
-parsed_args["dt"] = "600secs"
-parsed_args["move_K_term"] = false
-
 fps = parsed_args["fps"]
 idealized_insolation = parsed_args["idealized_insolation"]
 idealized_clouds = parsed_args["idealized_clouds"]
