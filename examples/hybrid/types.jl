@@ -393,13 +393,13 @@ function get_integrator(parsed_args, Y, p, tspan, ode_config, callback)
     end
     integrator_kwargs =
         if ode_algorithm <: ClimaTimeSteppers.DistributedODEAlgorithm
+            (; adjustfinal = true) # TODO: add progress bars!
+        else
             (; 
                 adaptive = false,
                 progress = show_progress_bar,
                 progress_steps = isinteractive() ? 1 : 1000,
             )
-        else
-            (; adjustfinal = true) # TODO: add progress bars!
         end
     integrator = ODE.init(
         problem,

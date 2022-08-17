@@ -396,7 +396,7 @@ function save_to_disk_func_distributed(integrator)
         )
 
         day = floor(Int, t / (60 * 60 * 24))
-        sec = Int(mod(t, 3600 * 24))
+        sec = floor(Int, t % (60 * 60 * 24))
         @info "Saving prognostic variables to JLD2 file on day $day second $sec"
         suffix = ".jld2"
         output_file = joinpath(output_dir, "day$day.$sec$suffix")
