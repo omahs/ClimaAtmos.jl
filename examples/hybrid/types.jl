@@ -393,7 +393,11 @@ function get_integrator(parsed_args, Y, p, tspan, ode_config, callback)
     end
     integrator_kwargs =
         if ode_algorithm <: ClimaTimeSteppers.DistributedODEAlgorithm
-            (; adjustfinal = true) # TODO: add progress bars!
+            (;
+                kwargshandle = KeywordArgSilent, # allow custom kwargs
+                adjustfinal = true,
+                # TODO: enable progress bars
+            )
         else
             (; 
                 adaptive = false,
