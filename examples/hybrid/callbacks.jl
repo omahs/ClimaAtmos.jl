@@ -60,6 +60,22 @@ function get_callbacks(parsed_args, simulation, model_spec, params)
         save_to_disk_callback,
         save_restart_callback,
         additional_callbacks...,
+        DEQ.FunctionCallingCallback(
+            (Y, t, integrator) -> begin
+                @info exact_column_jacobian_block(
+                    TCU.sgs_flux_tendency!,
+                    Y,
+                    integrator.p,
+                    t,
+                    1, # i
+                    1, # j
+                    1, # h
+                    (:c, :turbconv, :up, :1, :ρarea),
+                    (:c, :turbconv, :up, :1, :ρarea),
+                )
+            end,
+            func_start = true,
+        )
     )
 end
 
