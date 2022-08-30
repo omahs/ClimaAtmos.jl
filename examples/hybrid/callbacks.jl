@@ -56,7 +56,7 @@ function get_callbacks(parsed_args, simulation, model_spec, params)
         call_every_dt(save_restart_func, dt_save_restart)
     end
     return ODE.CallbackSet(
-        call_every_dt(print_diagnostics_func, FT(60 * 60 * 24 * 2))
+        call_every_dt(print_diagnostics_func, FT(60 * 60 * 24 * 2)),
         dss_cb,
         save_to_disk_callback,
         save_restart_callback,
