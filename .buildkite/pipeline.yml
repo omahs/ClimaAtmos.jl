@@ -293,19 +293,19 @@ steps:
 
       # TODO: add/exercise edmf code
       - label: ":computer: Unthreaded performance target"
-        command: "julia --color=yes --project=perf perf/benchmark.jl --job_id perf_target_unthreaded --enable_threading false --forcing held_suarez --vert_diff true --moist equil --rad allskywithclear --microphy 0M --dt 1secs --t_end 10secs --dt_save_to_sol Inf --z_elem 25 --h_elem 12"
+        command: "julia --color=yes --check-bounds=no --project=perf perf/benchmark.jl --job_id perf_target_unthreaded --enable_threading false --forcing held_suarez --vert_diff true --moist equil --rad allskywithclear --microphy 0M --dt 1secs --t_end 10secs --dt_save_to_sol Inf --z_elem 25 --h_elem 12"
         artifact_paths: "perf_target_unthreaded/*"
         agents:
           slurm_mem: 20GB
 
       - label: ":computer: Unthreaded performance target ARS343"
-        command: "julia --color=yes --project=perf perf/benchmark.jl --job_id perf_target_unthreaded_ARS343 --enable_threading false --forcing held_suarez --vert_diff true --moist equil --rad allskywithclear --microphy 0M --ode_algo ARS343 --dt 1secs --t_end 10secs --dt_save_to_sol Inf --z_elem 25 --h_elem 12"
+        command: "julia --color=yes --check-bounds=no --project=perf perf/benchmark.jl --job_id perf_target_unthreaded_ARS343 --enable_threading false --forcing held_suarez --vert_diff true --moist equil --rad allskywithclear --microphy 0M --ode_algo ARS343 --dt 1secs --t_end 10secs --dt_save_to_sol Inf --z_elem 25 --h_elem 12"
         artifact_paths: "perf_target_unthreaded_ARS343/*"
         agents:
           slurm_mem: 20GB
 
       - label: ":computer: Threaded performance target"
-        command: "julia --color=yes --threads 8 --project=perf perf/benchmark.jl --job_id perf_target_threaded --enable_threading true --forcing held_suarez --vert_diff true --moist equil --rad allskywithclear --microphy 0M --dt 1secs --t_end 10secs --dt_save_to_sol Inf --z_elem 25 --h_elem 12"
+        command: "julia --color=yes --check-bounds=no --threads 8 --project=perf perf/benchmark.jl --job_id perf_target_threaded --enable_threading true --forcing held_suarez --vert_diff true --moist equil --rad allskywithclear --microphy 0M --dt 1secs --t_end 10secs --dt_save_to_sol Inf --z_elem 25 --h_elem 12"
         artifact_paths: "perf_target_threaded/*"
         agents:
           slurm_ntasks: 8
@@ -342,7 +342,7 @@ steps:
     steps:
 
       - label: ":rocket: flame graph: perf target (ρe_tot)"
-        command: "julia --color=yes --project=perf perf/flame.jl --job_id flame_perf_target_rhoe"
+        command: "julia --color=yes --check-bounds=no --project=perf perf/flame.jl --job_id flame_perf_target_rhoe"
         artifact_paths: "flame_perf_target_rhoe/*"
         agents:
           slurm_mem: 20GB
@@ -350,12 +350,12 @@ steps:
           CI_PERF_CPUPROFILE: "true"
 
       - label: ":rocket: benchmark: baroclinic wave (ρe_tot)"
-        command: "julia --color=yes --project=perf perf/benchmark.jl --job_id bm_sphere_baroclinic_wave_rhoe"
+        command: "julia --color=yes --check-bounds=no --project=perf perf/benchmark.jl --job_id bm_sphere_baroclinic_wave_rhoe"
         env:
           CI_PERF_CPUPROFILE: "true"
 
       - label: ":mag: Allocations: baroclinic wave (ρe_tot)"
-        command: "julia --color=yes --project=perf perf/allocs.jl"
+        command: "julia --color=yes --check-bounds=no --project=perf perf/allocs.jl"
         env:
           CI_PERF_CPUPROFILE: "true"
 
