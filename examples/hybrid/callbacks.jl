@@ -169,7 +169,7 @@ function save_to_disk_func(integrator)
     @. ᶜK = norm_sqr(C123(ᶜuₕ) + C123(ᶜinterp(ᶠw))) / 2
 
     # thermo state
-    thermo_state!(ᶜts, Y, params, ᶜinterp, ᶜK)
+    thermo_state!(ᶜts, Y, params, ᶜinterp, ᶜK, t)
     @. ᶜp = TD.air_pressure(thermo_params, ᶜts)
     ᶜT = @. TD.air_temperature(thermo_params, ᶜts)
     ᶜθ = @. TD.dry_pottemp(thermo_params, ᶜts)

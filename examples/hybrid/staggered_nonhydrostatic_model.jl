@@ -203,6 +203,7 @@ function implicit_tendency_special!(Yₜ, Y, p, t)
                 ᶜinterp,
                 ᶜK[colidx],
                 Y.f.w[colidx],
+                t,
             )
             @. ᶜp[colidx] = TD.air_pressure(ref_thermo_params, ᶜts[colidx])
             if isnothing(ᶠupwind_product)
@@ -278,7 +279,7 @@ function implicit_tendency_generic!(Yₜ, Y, p, t)
 
         @. Yₜ.c.ρ = -(ᶜdivᵥ(ᶠinterp(ᶜρ) * ᶠw))
 
-        thermo_state!(ᶜts, Y, params, ᶜinterp, ᶜK)
+        thermo_state!(ᶜts, Y, params, ᶜinterp, ᶜK, t)
         @. ᶜp = TD.air_pressure(thermo_params, ᶜts)
         if :ρθ in propertynames(Y.c)
             if isnothing(ᶠupwind_product)
@@ -426,6 +427,7 @@ function horizontal_advection_tendency_special!(Yₜ, Y, p, t)
                 ᶜinterp,
                 ᶜK[colidx],
                 Y.f.w[colidx],
+                t,
             )
             @. ᶜp[colidx] = TD.air_pressure(thermo_params, ᶜts[colidx])
         end
@@ -469,7 +471,7 @@ function horizontal_advection_tendency_generic!(Yₜ, Y, p, t)
     # Precomputed quantities
     @. ᶜuvw = C123(ᶜuₕ) + C123(ᶜinterp(ᶠw))
     @. ᶜK = norm_sqr(ᶜuvw) / 2
-    thermo_state!(ᶜts, Y, params, ᶜinterp, ᶜK)
+    thermo_state!(ᶜts, Y, params, ᶜinterp, ᶜK, t)
     @. ᶜp = TD.air_pressure(thermo_params, ᶜts)
 
     # Mass conservation
@@ -652,6 +654,7 @@ function Wfact_special!(W, Y, p, dtγ, t)
                 ᶜinterp,
                 ᶜK[colidx],
                 ᶠw[colidx],
+                t,
             )
             @. ᶜp[colidx] = TD.air_pressure(ref_thermo_params, ᶜts[colidx])
 
@@ -796,7 +799,7 @@ function Wfact_generic!(W, Y, p, dtγ, t)
         @. ∂ᶜρₜ∂ᶠ𝕄 = -(ᶜdivᵥ_stencil(ᶠinterp(ᶜρ) * one(ᶠw)))
 
         @. ᶜK = norm_sqr(C123(ᶜuₕ) + C123(ᶜinterp(ᶠw))) / 2
-        thermo_state!(ᶜts, Y, params, ᶜinterp, ᶜK)
+        thermo_state!(ᶜts, Y, params, ᶜinterp, ᶜK, t)
         @. ᶜp = TD.air_pressure(thermo_params, ᶜts)
 
         if :ρθ in propertynames(Y.c)

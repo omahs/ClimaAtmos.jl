@@ -37,8 +37,8 @@ function get_energy_model(Yc::Fields.Field)
     end
 end
 
-thermo_state!(ᶜts, Y::Fields.FieldVector, params, ᶜinterp, K = nothing) =
-    thermo_state!(ᶜts, Y.c, params, ᶜinterp, K, Y.f.w)
+thermo_state!(ᶜts, Y::Fields.FieldVector, params, ᶜinterp, K = nothing, t = 0) =
+    thermo_state!(ᶜts, Y.c, params, ᶜinterp, K, Y.f.w, t)
 
 #=
 
@@ -57,7 +57,18 @@ function thermo_state!(
     ᶜinterp,
     K = nothing,
     wf = nothing,
+    t = 0,
 )
+
+    cond = t > 400 * 100
+    if cond
+        FT = Spaces.undertype(axes(Yc))
+        ts_type = thermo_state_type(Yc, FT)
+        ts_old = similar(Yc, ts_type)
+        ts_old .= ᶜts
+    end
+
+
     # Sometimes we want to zero out kinetic energy
     moisture_model = get_moisture_model(Yc)
     energy_model = get_energy_model(Yc)
@@ -76,6 +87,11 @@ function thermo_state!(
         thermo_state_ρθ!(ᶜts, Yc, thermo_params, moisture_model)
     else
         error("Could not determine energy model")
+    end
+    if cond
+        if all(parent(ts_old) .== parent(ᶜts))
+            error("Thermo state call seems unnecessary.")
+        end
     end
     return nothing
 end
