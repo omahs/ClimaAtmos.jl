@@ -56,11 +56,24 @@ function get_callbacks(parsed_args, simulation, model_spec, params)
         call_every_dt(save_restart_func, dt_save_restart)
     end
     return ODE.CallbackSet(
+        call_every_dt(print_diagnostics_func, FT(60 * 60 * 24 * 2))
         dss_cb,
         save_to_disk_callback,
         save_restart_callback,
         additional_callbacks...,
     )
+end
+
+using Statistics: mean
+function print_diagnostics_func(integrator)
+    Y = integrator.u
+    t = integrator.t
+    @info "Diagnostics information at t = $t secs (sum, mean, min, max)"
+    for prop_chain in Fields.property_chains(Y)
+        x = Fields.single_field(Y, prop_chain)
+        name = lpad(join((:Y, prop_chain...), "."), 30)
+        @info "$name: $(sum(x)), $(mean(x)), $(minimum(x)), $(maximum(x))"
+    end
 end
 
 function call_every_n_steps(f!, n = 1; skip_first = false, call_at_end = false)
