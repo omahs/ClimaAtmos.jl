@@ -35,23 +35,23 @@ steps:
     steps:
 
       - label: ":computer: dry BW, 3 iters, 250 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id dry_bw_3_iters_250_secs --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 250secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id dry_bw_3_iters_250_secs --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 250secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "dry_bw_3_iters_250_secs/*"
 
       - label: ":computer: dry BW, 3 iters, 300 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id dry_bw_3_iters_300_secs --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 300secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id dry_bw_3_iters_300_secs --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 300secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "dry_bw_3_iters_300_secs/*"
 
       - label: ":computer: dry BW, 3 iters, 350 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id dry_bw_3_iters_350_secs --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 350secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id dry_bw_3_iters_350_secs --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 350secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "dry_bw_3_iters_350_secs/*"
 
       - label: ":computer: dry BW, 3 iters, 400 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id dry_bw_3_iters_400_secs --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 400secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id dry_bw_3_iters_400_secs --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 400secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "dry_bw_3_iters_400_secs/*"
 
       - label: ":computer: dry BW, 3 iters, 450 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id dry_bw_3_iters_450_secs --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 450secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id dry_bw_3_iters_450_secs --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 450secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "dry_bw_3_iters_450_secs/*"
 
   - group: "Dry Baroclinic Wave (ARS343 with 10 Newton Iters for 1200 Days)"
@@ -59,23 +59,23 @@ steps:
     steps:
 
       - label: ":computer: dry BW, 10 iters, 250 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id dry_bw_10_iters_250_secs --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 10 --dt 250secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id dry_bw_10_iters_250_secs --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 10 --dt 250secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "dry_bw_10_iters_250_secs/*"
 
       - label: ":computer: dry BW, 10 iters, 300 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id dry_bw_10_iters_300_secs --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 10 --dt 300secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id dry_bw_10_iters_300_secs --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 10 --dt 300secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "dry_bw_10_iters_300_secs/*"
 
       - label: ":computer: dry BW, 10 iters, 350 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id dry_bw_10_iters_350_secs --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 10 --dt 350secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id dry_bw_10_iters_350_secs --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 10 --dt 350secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "dry_bw_10_iters_350_secs/*"
 
       - label: ":computer: dry BW, 10 iters, 400 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id dry_bw_10_iters_400_secs --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 10 --dt 400secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id dry_bw_10_iters_400_secs --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 10 --dt 400secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "dry_bw_10_iters_400_secs/*"
 
       - label: ":computer: dry BW, 10 iters, 450 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id dry_bw_10_iters_450_secs --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 10 --dt 450secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id dry_bw_10_iters_450_secs --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 10 --dt 450secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "dry_bw_10_iters_450_secs/*"
 
   - group: "Dry Baroclinic Wave with Diffusion (ARS343 with 3 Newton Iters for 1200 Days)"
@@ -83,23 +83,23 @@ steps:
     steps:
 
       - label: ":computer: dry BW w/ diffusion, 3 iters, 250 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id dry_bw_diff_3_iters_250_secs --vert_diff true --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 250secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id dry_bw_diff_3_iters_250_secs --vert_diff true --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 250secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "dry_bw_diff_3_iters_250_secs/*"
 
       - label: ":computer: dry BW w/ diffusion, 3 iters, 300 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id dry_bw_diff_3_iters_300_secs --vert_diff true --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 300secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id dry_bw_diff_3_iters_300_secs --vert_diff true --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 300secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "dry_bw_diff_3_iters_300_secs/*"
 
       - label: ":computer: dry BW w/ diffusion, 3 iters, 350 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id dry_bw_diff_3_iters_350_secs --vert_diff true --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 350secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id dry_bw_diff_3_iters_350_secs --vert_diff true --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 350secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "dry_bw_diff_3_iters_350_secs/*"
 
       - label: ":computer: dry BW w/ diffusion, 3 iters, 400 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id dry_bw_diff_3_iters_400_secs --vert_diff true --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 400secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id dry_bw_diff_3_iters_400_secs --vert_diff true --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 400secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "dry_bw_diff_3_iters_400_secs/*"
 
       - label: ":computer: dry BW w/ diffusion, 3 iters, 450 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id dry_bw_diff_3_iters_450_secs --vert_diff true --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 450secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id dry_bw_diff_3_iters_450_secs --vert_diff true --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 450secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "dry_bw_diff_3_iters_450_secs/*"
 
   - group: "Moist Baroclinic Wave (ARS343 with 3 Newton Iters for 1200 Days)"
@@ -107,23 +107,23 @@ steps:
     steps:
 
       - label: ":computer: moist BW, 3 iters, 250 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_3_iters_250_secs --moist equil --microphy 0M --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 250secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_3_iters_250_secs --moist equil --microphy 0M --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 250secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "moist_bw_3_iters_250_secs/*"
 
       - label: ":computer: moist BW, 3 iters, 300 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_3_iters_300_secs --moist equil --microphy 0M --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 300secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_3_iters_300_secs --moist equil --microphy 0M --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 300secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "moist_bw_3_iters_300_secs/*"
 
       - label: ":computer: moist BW, 3 iters, 350 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_3_iters_350_secs --moist equil --microphy 0M --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 350secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_3_iters_350_secs --moist equil --microphy 0M --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 350secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "moist_bw_3_iters_350_secs/*"
 
       - label: ":computer: moist BW, 3 iters, 400 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_3_iters_400_secs --moist equil --microphy 0M --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 400secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_3_iters_400_secs --moist equil --microphy 0M --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 400secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "moist_bw_3_iters_400_secs/*"
 
       - label: ":computer: moist BW, 3 iters, 450 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_3_iters_450_secs --moist equil --microphy 0M --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 450secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_3_iters_450_secs --moist equil --microphy 0M --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 450secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "moist_bw_3_iters_450_secs/*"
 
   - group: "Moist Baroclinic Wave (ARS343 with 10 Newton Iters for 1200 Days)"
@@ -131,23 +131,23 @@ steps:
     steps:
 
       - label: ":computer: moist BW, 10 iters, 250 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_10_iters_250_secs --moist equil --microphy 0M --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 10 --dt 250secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_10_iters_250_secs --moist equil --microphy 0M --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 10 --dt 250secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "moist_bw_10_iters_250_secs/*"
 
       - label: ":computer: moist BW, 10 iters, 300 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_10_iters_300_secs --moist equil --microphy 0M --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 10 --dt 300secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_10_iters_300_secs --moist equil --microphy 0M --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 10 --dt 300secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "moist_bw_10_iters_300_secs/*"
 
       - label: ":computer: moist BW, 10 iters, 350 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_10_iters_350_secs --moist equil --microphy 0M --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 10 --dt 350secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_10_iters_350_secs --moist equil --microphy 0M --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 10 --dt 350secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "moist_bw_10_iters_350_secs/*"
 
       - label: ":computer: moist BW, 10 iters, 400 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_10_iters_400_secs --moist equil --microphy 0M --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 10 --dt 400secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_10_iters_400_secs --moist equil --microphy 0M --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 10 --dt 400secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "moist_bw_10_iters_400_secs/*"
 
       - label: ":computer: moist BW, 10 iters, 450 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_10_iters_450_secs --moist equil --microphy 0M --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 10 --dt 450secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_10_iters_450_secs --moist equil --microphy 0M --vert_diff false --apply_limiter false --ode_algo ARS343 --max_newton_iters 10 --dt 450secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "moist_bw_10_iters_450_secs/*"
 
   - group: "Moist Baroclinic Wave with Limiter (ARS343 with 3 Newton Iters for 1200 Days)"
@@ -155,23 +155,23 @@ steps:
     steps:
 
       - label: ":computer: moist BW w/ limiter, 3 iters, 250 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_lim_3_iters_250_secs --moist equil --microphy 0M --vert_diff false --apply_limiter true --ode_algo ARS343 --max_newton_iters 3 --dt 250secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_lim_3_iters_250_secs --moist equil --microphy 0M --vert_diff false --apply_limiter true --ode_algo ARS343 --max_newton_iters 3 --dt 250secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "moist_bw_lim_3_iters_250_secs/*"
 
       - label: ":computer: moist BW w/ limiter, 3 iters, 300 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_lim_3_iters_300_secs --moist equil --microphy 0M --vert_diff false --apply_limiter true --ode_algo ARS343 --max_newton_iters 3 --dt 300secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_lim_3_iters_300_secs --moist equil --microphy 0M --vert_diff false --apply_limiter true --ode_algo ARS343 --max_newton_iters 3 --dt 300secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "moist_bw_lim_3_iters_300_secs/*"
 
       - label: ":computer: moist BW w/ limiter, 3 iters, 350 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_lim_3_iters_350_secs --moist equil --microphy 0M --vert_diff false --apply_limiter true --ode_algo ARS343 --max_newton_iters 3 --dt 350secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_lim_3_iters_350_secs --moist equil --microphy 0M --vert_diff false --apply_limiter true --ode_algo ARS343 --max_newton_iters 3 --dt 350secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "moist_bw_lim_3_iters_350_secs/*"
 
       - label: ":computer: moist BW w/ limiter, 3 iters, 400 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_lim_3_iters_400_secs --moist equil --microphy 0M --vert_diff false --apply_limiter true --ode_algo ARS343 --max_newton_iters 3 --dt 400secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_lim_3_iters_400_secs --moist equil --microphy 0M --vert_diff false --apply_limiter true --ode_algo ARS343 --max_newton_iters 3 --dt 400secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "moist_bw_lim_3_iters_400_secs/*"
 
       - label: ":computer: moist BW w/ limiter, 3 iters, 450 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_lim_3_iters_450_secs --moist equil --microphy 0M --vert_diff false --apply_limiter true --ode_algo ARS343 --max_newton_iters 3 --dt 450secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_lim_3_iters_450_secs --moist equil --microphy 0M --vert_diff false --apply_limiter true --ode_algo ARS343 --max_newton_iters 3 --dt 450secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "moist_bw_lim_3_iters_450_secs/*"
 
   - group: "Moist Baroclinic Wave with Diffusion (ARS343 with 3 Newton Iters for 1200 Days)"
@@ -179,23 +179,23 @@ steps:
     steps:
 
       - label: ":computer: moist BW w/ diffusion, 3 iters, 250 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_diff_3_iters_250_secs --moist equil --microphy 0M --vert_diff true --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 250secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_diff_3_iters_250_secs --moist equil --microphy 0M --vert_diff true --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 250secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "moist_bw_diff_3_iters_250_secs/*"
 
       - label: ":computer: moist BW w/ diffusion, 3 iters, 300 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_diff_3_iters_300_secs --moist equil --microphy 0M --vert_diff true --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 300secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_diff_3_iters_300_secs --moist equil --microphy 0M --vert_diff true --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 300secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "moist_bw_diff_3_iters_300_secs/*"
 
       - label: ":computer: moist BW w/ diffusion, 3 iters, 350 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_diff_3_iters_350_secs --moist equil --microphy 0M --vert_diff true --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 350secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_diff_3_iters_350_secs --moist equil --microphy 0M --vert_diff true --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 350secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "moist_bw_diff_3_iters_350_secs/*"
 
       - label: ":computer: moist BW w/ diffusion, 3 iters, 400 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_diff_3_iters_400_secs --moist equil --microphy 0M --vert_diff true --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 400secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_diff_3_iters_400_secs --moist equil --microphy 0M --vert_diff true --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 400secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "moist_bw_diff_3_iters_400_secs/*"
 
       - label: ":computer: moist BW w/ diffusion, 3 iters, 450 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_diff_3_iters_450_secs --moist equil --microphy 0M --vert_diff true --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 450secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_diff_3_iters_450_secs --moist equil --microphy 0M --vert_diff true --apply_limiter false --ode_algo ARS343 --max_newton_iters 3 --dt 450secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "moist_bw_diff_3_iters_450_secs/*"
 
   - group: "Moist Baroclinic Wave with Diffusion and Limiter (ARS343 with 3 Newton Iters for 1200 Days)"
@@ -203,23 +203,23 @@ steps:
     steps:
 
       - label: ":computer: moist BW w/ diffusion & limiter, 3 iters, 250 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_diff_lim_3_iters_250_secs --moist equil --microphy 0M --vert_diff true --apply_limiter true --ode_algo ARS343 --max_newton_iters 3 --dt 250secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_diff_lim_3_iters_250_secs --moist equil --microphy 0M --vert_diff true --apply_limiter true --ode_algo ARS343 --max_newton_iters 3 --dt 250secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "moist_bw_diff_lim_3_iters_250_secs/*"
 
       - label: ":computer: moist BW w/ diffusion & limiter, 3 iters, 300 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_diff_lim_3_iters_300_secs --moist equil --microphy 0M --vert_diff true --apply_limiter true --ode_algo ARS343 --max_newton_iters 3 --dt 300secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_diff_lim_3_iters_300_secs --moist equil --microphy 0M --vert_diff true --apply_limiter true --ode_algo ARS343 --max_newton_iters 3 --dt 300secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "moist_bw_diff_lim_3_iters_300_secs/*"
 
       - label: ":computer: moist BW w/ diffusion & limiter, 3 iters, 350 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_diff_lim_3_iters_350_secs --moist equil --microphy 0M --vert_diff true --apply_limiter true --ode_algo ARS343 --max_newton_iters 3 --dt 350secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_diff_lim_3_iters_350_secs --moist equil --microphy 0M --vert_diff true --apply_limiter true --ode_algo ARS343 --max_newton_iters 3 --dt 350secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "moist_bw_diff_lim_3_iters_350_secs/*"
 
       - label: ":computer: moist BW w/ diffusion & limiter, 3 iters, 400 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_diff_lim_3_iters_400_secs --moist equil --microphy 0M --vert_diff true --apply_limiter true --ode_algo ARS343 --max_newton_iters 3 --dt 400secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_diff_lim_3_iters_400_secs --moist equil --microphy 0M --vert_diff true --apply_limiter true --ode_algo ARS343 --max_newton_iters 3 --dt 400secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "moist_bw_diff_lim_3_iters_400_secs/*"
 
       - label: ":computer: moist BW w/ diffusion & limiter, 3 iters, 450 secs"
-        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_diff_lim_3_iters_450_secs --moist equil --microphy 0M --vert_diff true --apply_limiter true --ode_algo ARS343 --max_newton_iters 3 --dt 450secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk 10days"
+        command: "julia --color=yes --project=examples --threads=8 examples/hybrid/driver.jl --job_id moist_bw_diff_lim_3_iters_450_secs --moist equil --microphy 0M --vert_diff true --apply_limiter true --ode_algo ARS343 --max_newton_iters 3 --dt 450secs --t_end 1200days --dt_save_to_sol Inf --dt_save_to_disk Inf"
         artifact_paths: "moist_bw_diff_lim_3_iters_450_secs/*"
 
   # - group: "Core Long runs (central difference)"
