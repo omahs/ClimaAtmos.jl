@@ -7,6 +7,8 @@ import OrdinaryDiffEq as ODE
 import ClimaAtmos.Parameters as CAP
 import DiffEqCallbacks as DEQ
 import ClimaCore: InputOutput
+using Statistics: mean
+using Printf: @sprintf
 
 function get_callbacks(parsed_args, simulation, model_spec, params)
     FT = eltype(params)
@@ -56,24 +58,12 @@ function get_callbacks(parsed_args, simulation, model_spec, params)
         call_every_dt(save_restart_func, dt_save_restart)
     end
     return ODE.CallbackSet(
-        call_every_dt(print_diagnostics_func, FT(60 * 60 * 24 * 2)),
+        call_every_dt(print_diagnostics_func, FT(60 * 60 * 24 * 5)),
         dss_cb,
         save_to_disk_callback,
         save_restart_callback,
         additional_callbacks...,
     )
-end
-
-using Statistics: mean
-function print_diagnostics_func(integrator)
-    Y = integrator.u
-    t = integrator.t
-    @info "Diagnostics information at t = $t secs (sum, mean, min, max)"
-    for prop_chain in Fields.property_chains(Y)
-        x = Fields.single_field(Y, prop_chain)
-        name = lpad(join((:Y, prop_chain...), "."), 30)
-        @info "$name: $(sum(x)), $(mean(x)), $(minimum(x)), $(maximum(x))"
-    end
 end
 
 function call_every_n_steps(f!, n = 1; skip_first = false, call_at_end = false)
@@ -335,4 +325,26 @@ function save_restart_func(integrator)
     InputOutput.write!(hdfwriter, Y, "Y")
     Base.close(hdfwriter)
     return nothing
+end
+
+function print_diagnostics_func(integrator)
+    Y = integrator.u
+    day = floor(Int, integrator.t / (60 * 60 * 24))
+    prop_chains = Fields.property_chains(Y)
+    names = map(prop_chain -> join((:Y, prop_chain...), "."), prop_chains)
+    max_name_length = maximum(length, names)
+    diagnostics = map(1:length(prop_chains)) do index
+        var = Fields.single_field(Y, prop_chains[index])
+        title = "Diagnostics for $(rpad(names[index], max_name_length))"
+        values = @sprintf(
+            "% #17.9e, % #17.9e, % #17.9e, % #17.9e, % #17.9e",
+            sum(var),
+            norm(var),
+            mean(var),
+            minimum(var),
+            maximum(var),
+        ) # print 10 sig figs (9 after the decimal point) for each number
+        return Symbol(title) => values
+    end
+    @info "Diagnostics (sum, norm, mean, min, max) on day $day" diagnostics...
 end
