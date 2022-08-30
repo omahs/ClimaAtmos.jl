@@ -419,14 +419,6 @@ function horizontal_advection_tendency_special!(Yₜ, Y, p, t)
         Fields.bycolumn(axes(Y.c)) do colidx
             @. ᶜuvw[colidx] = C123(ᶜuₕ[colidx]) + C123(ᶜinterp(ᶠw[colidx]))
             @. ᶜK[colidx] = norm_sqr(ᶜuvw[colidx]) / 2
-            thermo_state!(
-                ᶜts[colidx],
-                Y.c[colidx],
-                params,
-                ᶜinterp,
-                ᶜK[colidx],
-                Y.f.w[colidx],
-            )
             @. ᶜp[colidx] = TD.air_pressure(thermo_params, ᶜts[colidx])
         end
     end
