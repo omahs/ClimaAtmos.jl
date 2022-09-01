@@ -31,30 +31,58 @@ function exact_column_jacobian_block(
     j,
     h,
     Yₜ_name,
-    Y_name,
+    Y_name;
+    autodiff = false
 )
-    T = eltype(Y)
-    Y_var = get_var(Y, Y_name)
-    Y_var_vert_space = Spaces.column(axes(Y_var), i, j, h)
-    bot_level = Operators.left_idx(Y_var_vert_space)
-    top_level = Operators.right_idx(Y_var_vert_space)
-    n_partials = top_level - bot_level + 1
-    partials = ntuple(_ -> zero(T), top_level - bot_level + 1)
-    DT = Dual{typeof(Tag(:_arbitrary_value_, FT)), FT, n_partials}
-    Yᴰ = DT.(Y, Ref(Partials{n_partials, FT}(partials)))
-    Yᴰ_var = get_var(Yᴰ, Y_name)
-    ith_ε(i) = DT(
-        zero(T),
-        Partials{n_partials, FT}(Base.setindex(partials, one(T), i)),
-    )
-    set_level_εs!(level) =
-        parent(Spaces.level(Yᴰ_var, level)) .+= ith_ε(level - bot_level + 1)
-    foreach(set_level_εs!, bot_level:top_level)
-    Yₜᴰ = similar(Yᴰ)
-    implicit_tendency!(Yₜᴰ, Yᴰ, make_dual(FT, DT, p), t)
-    col = Spaces.column(get_var(Yₜᴰ, Yₜ_name), i, j, h)
-    return vcat(map(dual -> [dual.partials.values...]', parent(col))...)
+    if autodiff
+        T = eltype(Y)
+        Y_var = get_var(Y, Y_name)
+        Y_var_vert_space = Spaces.column(axes(Y_var), i, j, h)
+        bot_level = Operators.left_idx(Y_var_vert_space)
+        top_level = Operators.right_idx(Y_var_vert_space)
+        n_partials = top_level - bot_level + 1
+        partials = ntuple(_ -> zero(T), top_level - bot_level + 1)
+        DT = Dual{typeof(Tag(:_arbitrary_value_, FT)), FT, n_partials}
+        Yᴰ = DT.(Y, Ref(Partials{n_partials, FT}(partials)))
+        Yᴰ_var = get_var(Yᴰ, Y_name)
+        ith_ε(i) = DT(
+            zero(T),
+            Partials{n_partials, FT}(Base.setindex(partials, one(T), i)),
+        )
+        set_level_εs!(level) =
+            parent(Spaces.level(Yᴰ_var, level)) .+= ith_ε(level - bot_level + 1)
+        foreach(set_level_εs!, bot_level:top_level)
+        Yₜᴰ = similar(Yᴰ)
+        implicit_tendency!(Yₜᴰ, Yᴰ, make_dual(FT, DT, p), t)
+        col = Spaces.column(get_var(Yₜᴰ, Yₜ_name), i, j, h)
+        return vcat(map(dual -> [dual.partials.values...]', parent(col))...)
+    else # finite difference
+        Yₜ = similar(Y)
+        implicit_tendency!(Yₜ, Y, p, t)
+        Y_plus_ε = similar(Y)
+        Yₜ_plus_ε = similar(Y)
+        Y_var_column = get_var(Spaces.column(Y, i, j, h), Y_name)
+        ε_value = eps(FT) # might be too small
+        cols = map(1:length(parent(Y_var_column))) do i
+            Y_plus_ε .= Y
+            Y_plus_ε_var_column =
+                get_var(Spaces.column(Y_plus_ε, i, j, h), Y_name)
+            parent(Y_plus_ε_var_column)[i] += ε_value
+            implicit_tendency!(Yₜ_plus_ε, Y_plus_ε, p, t)
+            ΔYₜ = Yₜ_plus_ε .- Yₜ
+            ΔYₜ_var_column = get_var(Spaces.column(ΔYₜ, i, j, h), Yₜ_name)
+            return vec(parent(ΔYₜ_var_column ./ ε_value))
+        end
+        return hcat(cols...)
+    end
 end
+
+#=
+ε = [eps(FT), eps(FT), ..., eps(FT)] # maybe times some constant?
+∂Yₜ(Y)[i]/∂Y[j] = (Yₜ(Y + ε[j])[i] - Yₜ(Y)[i])/ε[j]
+j-th column of the Jacobian: ∂Yₜ(Y)/∂Y[j] = (Yₜ(Y + ε[j]) - Yₜ(Y))/ε[j]
+Jacobian: hcat(map(j -> ∂Yₜ(Y)/∂Y[j], length(Y))...)
+=#
 
 # Note: These only work for scalar stencils.
 vector_column(arg, i, j, h) = parent(Spaces.column(arg, i, j, h))

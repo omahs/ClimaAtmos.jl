@@ -62,8 +62,8 @@ function get_callbacks(parsed_args, simulation, model_spec, params)
         additional_callbacks...,
         DEQ.FunctionCallingCallback(
             (Y, t, integrator) -> begin
-                @info exact_column_jacobian_block(
-                    TCU.sgs_flux_tendency!,
+                exact_block = exact_column_jacobian_block(
+                    TCU.sgs_flux_tendency_testing!,
                     Y,
                     integrator.p,
                     t,
@@ -73,6 +73,11 @@ function get_callbacks(parsed_args, simulation, model_spec, params)
                     (:c, :turbconv, :up, :1, :ρarea),
                     (:c, :turbconv, :up, :1, :ρarea),
                 )
+                @info "t = $t:"
+                @info exact_block
+                if t > 50
+                    error("STOPPING")
+                end
             end,
             func_start = true,
         )
