@@ -73,9 +73,44 @@ function get_callbacks(parsed_args, simulation, model_spec, params)
                     (:c, :turbconv, :up, :1, :ρarea),
                     (:c, :turbconv, :up, :1, :ρarea),
                 )
+                # ρareaₜ = -∇c(wvec(LBF(Ic(ρaw / If(ρarea)) * ρarea)))
+                # ∂ρareaₜ/∂ρarea =
+                #     -∇c_stencil(wvec(1)) * LBF_stencil(1) * ∂(Ic(ρaw / If(ρarea)) * ρarea)/∂ρarea
+                # ∂(Ic(ρaw / If(ρarea)) * ρarea)/∂ρarea =
+                #     ρarea * Ic_stencil(1) * ∂(ρaw / If(ρarea))/∂ρarea +
+                #     Ic(ρaw / If(ρarea))
+                # ∂(ρaw / If(ρarea))/∂ρarea = -ρaw * If_stencil(1) / If(ρarea)^2
+                ρarea = Spaces.column(Y.c.turbconv.up.:(1).ρarea, 1, 1, 1)
+                ρaw = Spaces.column(Y.f.turbconv.up.:(1).ρaw, 1, 1, 1)
+                wvec = CC.Geometry.WVector
+                ∇c = Operators.DivergenceF2C()
+                LBF = Operators.LeftBiasedC2F(;
+                    bottom = Operators.SetValue(FT(0)),
+                )
+                Ic = TC.CCO.InterpolateF2C()
+                If = TC.CCO.InterpolateC2F(;
+                    bottom = Operators.SetValue(FT(0.1)),
+                    top = Operators.SetValue(FT(0.1)),
+                )
+                ∇c_stencil = Operators.Operator2Stencil(∇c)
+                LBF_stencil = Operators.Operator2Stencil(LBF)
+                Ic_stencil = Operators.Operator2Stencil(Ic)
+                If_stencil = Operators.Operator2Stencil(If)
+                compose = Operators.ComposeStencils()
+                approx_block = @. compose(
+                    -∇c_stencil(wvec(one(ρaw))),
+                    compose(
+                        LBF_stencil(one(ρarea)),
+                        compose(
+                            ρarea * Ic_stencil(one(ρaw)),
+                            -ρaw * If_stencil(one(ρarea)) / If(ρarea)^2,
+                        ) + Ic(ρaw / If(ρarea)),
+                    ),
+                )
                 @info "t = $t:"
-                @info exact_block
-                if t > 50
+                @info exact_block[1:10, 1:10]
+                @info approx_block
+                if t >= 500
                     error("STOPPING")
                 end
             end,

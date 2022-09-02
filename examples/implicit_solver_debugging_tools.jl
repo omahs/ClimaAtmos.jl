@@ -63,11 +63,11 @@ function exact_column_jacobian_block(
         Yₜ_plus_ε = similar(Y)
         Y_var_column = get_var(Spaces.column(Y, i, j, h), Y_name)
         ε_value = eps(FT) # might be too small
-        cols = map(1:length(parent(Y_var_column))) do i
+        cols = map(1:length(parent(Y_var_column))) do z_index
             Y_plus_ε .= Y
             Y_plus_ε_var_column =
                 get_var(Spaces.column(Y_plus_ε, i, j, h), Y_name)
-            parent(Y_plus_ε_var_column)[i] += ε_value
+            parent(Y_plus_ε_var_column)[z_index] += ε_value
             implicit_tendency!(Yₜ_plus_ε, Y_plus_ε, p, t)
             ΔYₜ = Yₜ_plus_ε .- Yₜ
             ΔYₜ_var_column = get_var(Spaces.column(ΔYₜ, i, j, h), Yₜ_name)
