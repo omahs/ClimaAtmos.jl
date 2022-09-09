@@ -64,7 +64,7 @@ function get_edmf_cache(Y, namelist, param_set, parsed_args)
         error("Invalid precip_name $(precip_name)")
     end
     edmf = TC.EDMFModel(FT, namelist, precip_model, parsed_args)
-    @show "EDMFModel: \n$(summary(edmf))"
+    @info "EDMFModel: \n$(summary(edmf))"
     return (;
         edmf,
         case,
