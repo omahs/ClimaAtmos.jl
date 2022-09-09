@@ -326,13 +326,12 @@ function update_aux!(
     @inbounds for i in 1:N_up
         a_surf = area_surface_bc(surf, edmf, i)
         a_up_bcs = a_up_boundary_conditions(surf, edmf, i)
-        If = CCO.InterpolateC2F(; bottom = CCO.SetValue(1.15), top = CCO.SetValue(0))# a_up_bcs...)
+        If = CCO.InterpolateC2F(; a_up_bcs...)
         a_min = edmf.minimum_area
         a_up = aux_up[i].area
-        ρarea = prog_up[i].ρarea
         @. aux_up_f[i].w = ifelse(
             If(a_up) >= a_min,
-            max(prog_up_f[i].ρaw / If(ρarea), 0),
+            max(prog_up_f[i].ρaw / (ρ_f * If(a_up)), 0),
             FT(0),
         )
     end

@@ -11,8 +11,11 @@ make_dual(::Type, ::Type{DT}, val::Number) where {DT} = DT(val)
 make_dual(::Type{FT}, ::Type{DT}, val::Union{Tuple, NamedTuple}) where {FT, DT} =
     map(x -> make_dual(FT, DT, x), val)
 make_dual(::Type, ::Type{DT}, val::Fields.FieldVector) where {DT} = DT.(val)
-make_dual(::Type, ::Type{DT}, val::Fields.Field) where {DT} =
-    Fields._similar(val, DT)
+function make_dual(::Type, ::Type{DT}, val::Fields.Field) where {DT}
+    new_val = Fields._similar(val, DT)
+    parent(new_val) .= DT.(parent(val))
+    return new_val
+end
 make_dual(::Type{FT}, ::Type{DT}, val::T) where {FT, DT, T} =
     length(T.parameters) == fieldcount(T) == 0 ? val :
         DataLayouts.bypass_constructor(
@@ -32,7 +35,7 @@ function exact_column_jacobian_block(
     h,
     Yₜ_name,
     Y_name;
-    autodiff = false
+    autodiff = true,
 )
     if autodiff
         T = eltype(Y)
@@ -62,27 +65,20 @@ function exact_column_jacobian_block(
         Y_plus_ε = similar(Y)
         Yₜ_plus_ε = similar(Y)
         Y_var_column = get_var(Spaces.column(Y, i, j, h), Y_name)
-        ε_value = eps(FT) # might be too small
         cols = map(1:length(parent(Y_var_column))) do z_index
             Y_plus_ε .= Y
             Y_plus_ε_var_column =
                 get_var(Spaces.column(Y_plus_ε, i, j, h), Y_name)
-            parent(Y_plus_ε_var_column)[z_index] += ε_value
+            ε = 100 * eps(parent(Y_plus_ε_var_column)[z_index]) # arbitrary
+            parent(Y_plus_ε_var_column)[z_index] += ε
             implicit_tendency!(Yₜ_plus_ε, Y_plus_ε, p, t)
             ΔYₜ = Yₜ_plus_ε .- Yₜ
             ΔYₜ_var_column = get_var(Spaces.column(ΔYₜ, i, j, h), Yₜ_name)
-            return vec(parent(ΔYₜ_var_column ./ ε_value))
+            return vec(parent(ΔYₜ_var_column ./ ε))
         end
         return hcat(cols...)
     end
 end
-
-#=
-ε = [eps(FT), eps(FT), ..., eps(FT)] # maybe times some constant?
-∂Yₜ(Y)[i]/∂Y[j] = (Yₜ(Y + ε[j])[i] - Yₜ(Y)[i])/ε[j]
-j-th column of the Jacobian: ∂Yₜ(Y)/∂Y[j] = (Yₜ(Y + ε[j]) - Yₜ(Y))/ε[j]
-Jacobian: hcat(map(j -> ∂Yₜ(Y)/∂Y[j], length(Y))...)
-=#
 
 # Note: These only work for scalar stencils.
 vector_column(arg, i, j, h) = parent(Spaces.column(arg, i, j, h))

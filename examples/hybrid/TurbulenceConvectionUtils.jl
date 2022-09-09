@@ -274,7 +274,7 @@ function compute_up_tendencies_testing!(
         tends_ρaq_tot = tendencies_up[i].ρaq_tot
 
         @. tends_ρarea =
-            -∇c(wvec(LBF(Ic(w_up) * ρarea)))#  +
+            -∇c(wvec(LBF(Ic(w_up) * ρarea))) # +
             # (ρarea * Ic(w_up) * entr_turb_dyn) -
             # (ρarea * Ic(w_up) * detr_turb_dyn)
 

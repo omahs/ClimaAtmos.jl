@@ -1,20 +1,14 @@
-#=
-include("cli_options.jl")
-(s, parsed_args) = parse_commandline()
-parsed_args["config"] = "column"
-parsed_args["FLOAT_TYPE"] = "Float64"
-parsed_args["hyperdiff"] = false
-parsed_args["moist"] = "equil"
-parsed_args["turbconv"] = "edmf"
-parsed_args["turbconv_case"] = "GABLS"
-parsed_args["dt_save_to_sol"] = "5mins"
-parsed_args["z_elem"] = 60
-parsed_args["z_stretch"] = false
-parsed_args["z_max"] = 3e3
-parsed_args["dt"] = "1secs"
-parsed_args["t_end"] = "6hours"
-include("driver.jl")
-=#
+# TODO: Move to ClimaCore
+using ClimaCore: Operators
+for op in (:+, :-)
+    @eval begin
+        import Base: $op
+        ($op)(a::Operators.StencilCoefs, b) =
+            $op(a, Operators.StencilCoefs{0, 0}((b,)))
+        ($op)(a, b::Operators.StencilCoefs) =
+            $op(Operators.StencilCoefs{0, 0}((a,)), b)
+    end
+end
 
 if !(@isdefined parsed_args)
     include("cli_options.jl")
