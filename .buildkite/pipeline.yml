@@ -178,62 +178,62 @@ steps:
     steps:
 
       - label: ":computer: Rosenbrock23_1e15_150secs"
-        command: "julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo Rosenbrock23 --dt 150secs --job_id Rosenbrock23_1e15_150secs"
+        command: "julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 150secs --job_id Rosenbrock23_1e15_150secs"
         artifact_paths: "Rosenbrock23_1e15_150secs/*"
 
       - label: ":computer: Rosenbrock23_1e15_200secs"
-        command: "julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo Rosenbrock23 --dt 200secs --job_id Rosenbrock23_1e15_200secs"
+        command: "julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 200secs --job_id Rosenbrock23_1e15_200secs"
         artifact_paths: "Rosenbrock23_1e15_200secs/*"
 
       - label: ":computer: Rosenbrock23_1e15_250secs"
-        command: "julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo Rosenbrock23 --dt 250secs --job_id Rosenbrock23_1e15_250secs"
+        command: "julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 250secs --job_id Rosenbrock23_1e15_250secs"
         artifact_paths: "Rosenbrock23_1e15_250secs/*"
 
       - label: ":computer: Rosenbrock23_1e15_300secs"
-        command: "julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo Rosenbrock23 --dt 300secs --job_id Rosenbrock23_1e15_300secs"
+        command: "julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 300secs --job_id Rosenbrock23_1e15_300secs"
         artifact_paths: "Rosenbrock23_1e15_300secs/*"
 
       - label: ":computer: Rosenbrock23_1e15_350secs"
-        command: "julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo Rosenbrock23 --dt 350secs --job_id Rosenbrock23_1e15_350secs"
+        command: "julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 350secs --job_id Rosenbrock23_1e15_350secs"
         artifact_paths: "Rosenbrock23_1e15_350secs/*"
 
       - label: ":computer: Rosenbrock23_1e15_400secs"
-        command: "julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo Rosenbrock23 --dt 400secs --job_id Rosenbrock23_1e15_400secs"
+        command: "julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 400secs --job_id Rosenbrock23_1e15_400secs"
         artifact_paths: "Rosenbrock23_1e15_400secs/*"
 
       - label: ":computer: Rosenbrock23_1e15_450secs"
-        command: "julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo Rosenbrock23 --dt 450secs --job_id Rosenbrock23_1e15_450secs"
+        command: "julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 450secs --job_id Rosenbrock23_1e15_450secs"
         artifact_paths: "Rosenbrock23_1e15_450secs/*"
 
   - group: "High-Resolution Dry Baroclinic Wave (Rosenbrock23, kappa_4 = 1e16)"
     steps:
 
       - label: ":computer: Rosenbrock23_1e16_150secs"
-        command: "julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e16 --t_end 30days --dt_save_to_disk 1days --ode_algo Rosenbrock23 --dt 150secs --job_id Rosenbrock23_1e16_150secs"
+        command: "julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e16 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 150secs --job_id Rosenbrock23_1e16_150secs"
         artifact_paths: "Rosenbrock23_1e16_150secs/*"
 
       - label: ":computer: Rosenbrock23_1e16_200secs"
-        command: "julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e16 --t_end 30days --dt_save_to_disk 1days --ode_algo Rosenbrock23 --dt 200secs --job_id Rosenbrock23_1e16_200secs"
+        command: "julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e16 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 200secs --job_id Rosenbrock23_1e16_200secs"
         artifact_paths: "Rosenbrock23_1e16_200secs/*"
 
       - label: ":computer: Rosenbrock23_1e16_250secs"
-        command: "julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e16 --t_end 30days --dt_save_to_disk 1days --ode_algo Rosenbrock23 --dt 250secs --job_id Rosenbrock23_1e16_250secs"
+        command: "julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e16 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 250secs --job_id Rosenbrock23_1e16_250secs"
         artifact_paths: "Rosenbrock23_1e16_250secs/*"
 
       - label: ":computer: Rosenbrock23_1e16_300secs"
-        command: "julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e16 --t_end 30days --dt_save_to_disk 1days --ode_algo Rosenbrock23 --dt 300secs --job_id Rosenbrock23_1e16_300secs"
+        command: "julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e16 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 300secs --job_id Rosenbrock23_1e16_300secs"
         artifact_paths: "Rosenbrock23_1e16_300secs/*"
 
       - label: ":computer: Rosenbrock23_1e16_350secs"
-        command: "julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e16 --t_end 30days --dt_save_to_disk 1days --ode_algo Rosenbrock23 --dt 350secs --job_id Rosenbrock23_1e16_350secs"
+        command: "julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e16 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 350secs --job_id Rosenbrock23_1e16_350secs"
         artifact_paths: "Rosenbrock23_1e16_350secs/*"
 
       - label: ":computer: Rosenbrock23_1e16_400secs"
-        command: "julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e16 --t_end 30days --dt_save_to_disk 1days --ode_algo Rosenbrock23 --dt 400secs --job_id Rosenbrock23_1e16_400secs"
+        command: "julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e16 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 400secs --job_id Rosenbrock23_1e16_400secs"
         artifact_paths: "Rosenbrock23_1e16_400secs/*"
 
       - label: ":computer: Rosenbrock23_1e16_450secs"
-        command: "julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e16 --t_end 30days --dt_save_to_disk 1days --ode_algo Rosenbrock23 --dt 450secs --job_id Rosenbrock23_1e16_450secs"
+        command: "julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e16 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 450secs --job_id Rosenbrock23_1e16_450secs"
         artifact_paths: "Rosenbrock23_1e16_450secs/*"
 
   # - group: "ClimaAtmos src unit tests"
