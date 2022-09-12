@@ -77,6 +77,7 @@ function get_callbacks(parsed_args, simulation, model_spec, params)
                     (:c, :turbconv, :up, :1, :ρarea),
                     (:c, :turbconv, :up, :1, :ρarea),
                 )
+                @info exact_block[1:10, 1:10]
 
                 # ρareaₜ = -∇c(wvec(LBF(Ic(w) * ρarea)))
                 # ∂ρareaₜ/∂ρarea =
@@ -161,8 +162,6 @@ function get_callbacks(parsed_args, simulation, model_spec, params)
                         ) * ρarea + Ic(w),
                     ),
                 )
-                
-                @info exact_block[1:10, 1:10]
                 @info matrix_column(approx_block, axes(ρarea), 1, 1, 1)[1:10, 1:10]
                 if t >= 500
                     error("STOPPING")
