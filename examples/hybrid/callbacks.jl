@@ -62,6 +62,7 @@ function get_callbacks(parsed_args, simulation, model_spec, params)
         dss_cb,
         save_to_disk_callback,
         save_restart_callback,
+        call_every_n_steps(error_on_nan),
         additional_callbacks...,
     )
 end
@@ -327,11 +328,13 @@ function save_restart_func(integrator)
     return nothing
 end
 
+prop_chain_string(prop_chain) = join((:Y, prop_chain...), ".")
+
 function print_diagnostics_func(integrator)
     Y = integrator.u
     day = floor(Int, integrator.t / (60 * 60 * 24))
     prop_chains = Fields.property_chains(Y)
-    names = map(prop_chain -> join((:Y, prop_chain...), "."), prop_chains)
+    names = map(prop_chain_string, prop_chains)
     max_name_length = maximum(length, names)
     diagnostics = map(1:length(prop_chains)) do index
         var = Fields.single_field(Y, prop_chains[index])
@@ -347,4 +350,18 @@ function print_diagnostics_func(integrator)
         return Symbol(title) => values
     end
     @info "Diagnostics (sum, norm, mean, min, max) on day $day" diagnostics...
+end
+
+function error_on_nan(integrator)
+    Y = integrator.u
+    prop_chains = Fields.property_chains(Y)
+    if any(isnan, Y)
+        for prop_chain in prop_chains
+            var = Fields.single_field(Y, prop_chain)
+            if any(isnan, parent(var))
+                @info "NaN detected in $(prop_chain_string(prop_chain))"
+            end
+        end
+        error("Stopping due to NaN detection")
+    end
 end
