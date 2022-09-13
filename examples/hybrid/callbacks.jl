@@ -328,16 +328,16 @@ function save_restart_func(integrator)
     return nothing
 end
 
-prop_chain_string(prop_chain) = join((:Y, prop_chain...), ".")
+prop_string(prop) = join((:Y, prop...), ".")
 
 function print_diagnostics_func(integrator)
     Y = integrator.u
     day = floor(Int, integrator.t / (60 * 60 * 24))
-    prop_chains = Fields.property_chains(Y)
-    names = map(prop_chain_string, prop_chains)
+    props = Fields.property_chains(Y)
+    names = map(prop_string, props)
     max_name_length = maximum(length, names)
-    diagnostics = map(1:length(prop_chains)) do index
-        var = Fields.single_field(Y, prop_chains[index])
+    diagnostics = map(1:length(props)) do index
+        var = Fields.single_field(Y, props[index])
         title = "Diagnostics for $(rpad(names[index], max_name_length))"
         values = @sprintf(
             "% #17.9e, % #17.9e, % #17.9e, % #17.9e, % #17.9e",
@@ -354,14 +354,11 @@ end
 
 function error_on_nan(integrator)
     Y = integrator.u
-    prop_chains = Fields.property_chains(Y)
     if any(isnan, Y)
-        for prop_chain in prop_chains
-            var = Fields.single_field(Y, prop_chain)
-            if any(isnan, parent(var))
-                @info "NaN detected in $(prop_chain_string(prop_chain))"
-            end
-        end
-        error("Stopping due to NaN detection")
+        props_with_nan = filter(
+            prop -> any(isnan, parent(Fields.single_field(Y, prop))),
+            Fields.property_chains(Y),
+        )
+        error("NaN detected in $(join(map(prop_string, props_with_nan), ", "))")
     end
 end

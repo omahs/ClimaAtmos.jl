@@ -56,6 +56,38 @@ steps:
   - group: "High-Resolution Dry Baroclinic Wave (ARS343 with 3 Newton iters, kappa_4 = 1e14)"
     steps:
 
+      - label: ":computer: ARS343_3iters_1e14_80secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 3 --dt 80secs --job_id ARS343_3iters_1e14_80secs"
+        artifact_paths: "ARS343_3iters_1e14_80secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
+
+      - label: ":computer: ARS343_3iters_1e14_110secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 3 --dt 110secs --job_id ARS343_3iters_1e14_110secs"
+        artifact_paths: "ARS343_3iters_1e14_110secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
+
+      - label: ":computer: ARS343_3iters_1e14_140secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 3 --dt 140secs --job_id ARS343_3iters_1e14_140secs"
+        artifact_paths: "ARS343_3iters_1e14_140secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
+
+      - label: ":computer: ARS343_3iters_1e14_170secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 3 --dt 170secs --job_id ARS343_3iters_1e14_170secs"
+        artifact_paths: "ARS343_3iters_1e14_170secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
+
       - label: ":computer: ARS343_3iters_1e14_200secs"
         command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 3 --dt 200secs --job_id ARS343_3iters_1e14_200secs"
         artifact_paths: "ARS343_3iters_1e14_200secs/*"
@@ -64,40 +96,40 @@ steps:
         agents:
           slurm_ntasks: 100
 
-      - label: ":computer: ARS343_3iters_1e14_250secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 3 --dt 250secs --job_id ARS343_3iters_1e14_250secs"
-        artifact_paths: "ARS343_3iters_1e14_250secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
-      - label: ":computer: ARS343_3iters_1e14_300secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 3 --dt 300secs --job_id ARS343_3iters_1e14_300secs"
-        artifact_paths: "ARS343_3iters_1e14_300secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
-      - label: ":computer: ARS343_3iters_1e14_350secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 3 --dt 350secs --job_id ARS343_3iters_1e14_350secs"
-        artifact_paths: "ARS343_3iters_1e14_350secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
-      - label: ":computer: ARS343_3iters_1e14_400secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 3 --dt 400secs --job_id ARS343_3iters_1e14_400secs"
-        artifact_paths: "ARS343_3iters_1e14_400secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
   - group: "High-Resolution Dry Baroclinic Wave (ARS343 with 10 Newton iters, kappa_4 = 1e14)"
     steps:
+
+      - label: ":computer: ARS343_10iters_1e14_80secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 10 --dt 80secs --job_id ARS343_10iters_1e14_80secs"
+        artifact_paths: "ARS343_10iters_1e14_80secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
+
+      - label: ":computer: ARS343_10iters_1e14_110secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 10 --dt 110secs --job_id ARS343_10iters_1e14_110secs"
+        artifact_paths: "ARS343_10iters_1e14_110secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
+
+      - label: ":computer: ARS343_10iters_1e14_140secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 10 --dt 140secs --job_id ARS343_10iters_1e14_140secs"
+        artifact_paths: "ARS343_10iters_1e14_140secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
+
+      - label: ":computer: ARS343_10iters_1e14_170secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 10 --dt 170secs --job_id ARS343_10iters_1e14_170secs"
+        artifact_paths: "ARS343_10iters_1e14_170secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
 
       - label: ":computer: ARS343_10iters_1e14_200secs"
         command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 10 --dt 200secs --job_id ARS343_10iters_1e14_200secs"
@@ -107,33 +139,87 @@ steps:
         agents:
           slurm_ntasks: 100
 
-      - label: ":computer: ARS343_10iters_1e14_250secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 10 --dt 250secs --job_id ARS343_10iters_1e14_250secs"
-        artifact_paths: "ARS343_10iters_1e14_250secs/*"
+  - group: "High-Resolution Dry Baroclinic Wave (ARS343 with 3 Newton iters, kappa_4 = 5e14)"
+    steps:
+
+      - label: ":computer: ARS343_3iters_5e14_80secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 5e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 3 --dt 80secs --job_id ARS343_3iters_5e14_80secs"
+        artifact_paths: "ARS343_3iters_5e14_80secs/*"
         env:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
           slurm_ntasks: 100
 
-      - label: ":computer: ARS343_10iters_1e14_300secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 10 --dt 300secs --job_id ARS343_10iters_1e14_300secs"
-        artifact_paths: "ARS343_10iters_1e14_300secs/*"
+      - label: ":computer: ARS343_3iters_5e14_110secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 5e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 3 --dt 110secs --job_id ARS343_3iters_5e14_110secs"
+        artifact_paths: "ARS343_3iters_5e14_110secs/*"
         env:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
           slurm_ntasks: 100
 
-      - label: ":computer: ARS343_10iters_1e14_350secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 10 --dt 350secs --job_id ARS343_10iters_1e14_350secs"
-        artifact_paths: "ARS343_10iters_1e14_350secs/*"
+      - label: ":computer: ARS343_3iters_5e14_140secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 5e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 3 --dt 140secs --job_id ARS343_3iters_5e14_140secs"
+        artifact_paths: "ARS343_3iters_5e14_140secs/*"
         env:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
           slurm_ntasks: 100
 
-      - label: ":computer: ARS343_10iters_1e14_400secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 10 --dt 400secs --job_id ARS343_10iters_1e14_400secs"
-        artifact_paths: "ARS343_10iters_1e14_400secs/*"
+      - label: ":computer: ARS343_3iters_5e14_170secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 5e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 3 --dt 170secs --job_id ARS343_3iters_5e14_170secs"
+        artifact_paths: "ARS343_3iters_5e14_170secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
+
+      - label: ":computer: ARS343_3iters_5e14_200secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 5e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 3 --dt 200secs --job_id ARS343_3iters_5e14_200secs"
+        artifact_paths: "ARS343_3iters_5e14_200secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
+
+  - group: "High-Resolution Dry Baroclinic Wave (ARS343 with 10 Newton iters, kappa_4 = 5e14)"
+    steps:
+
+      - label: ":computer: ARS343_10iters_5e14_80secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 5e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 10 --dt 80secs --job_id ARS343_10iters_5e14_80secs"
+        artifact_paths: "ARS343_10iters_5e14_80secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
+
+      - label: ":computer: ARS343_10iters_5e14_110secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 5e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 10 --dt 110secs --job_id ARS343_10iters_5e14_110secs"
+        artifact_paths: "ARS343_10iters_5e14_110secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
+
+      - label: ":computer: ARS343_10iters_5e14_140secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 5e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 10 --dt 140secs --job_id ARS343_10iters_5e14_140secs"
+        artifact_paths: "ARS343_10iters_5e14_140secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
+
+      - label: ":computer: ARS343_10iters_5e14_170secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 5e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 10 --dt 170secs --job_id ARS343_10iters_5e14_170secs"
+        artifact_paths: "ARS343_10iters_5e14_170secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
+
+      - label: ":computer: ARS343_10iters_5e14_200secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 5e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 10 --dt 200secs --job_id ARS343_10iters_5e14_200secs"
+        artifact_paths: "ARS343_10iters_5e14_200secs/*"
         env:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
@@ -141,6 +227,38 @@ steps:
 
   - group: "High-Resolution Dry Baroclinic Wave (ARS343 with 3 Newton iters, kappa_4 = 1e15)"
     steps:
+
+      - label: ":computer: ARS343_3iters_1e15_80secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 3 --dt 80secs --job_id ARS343_3iters_1e15_80secs"
+        artifact_paths: "ARS343_3iters_1e15_80secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
+
+      - label: ":computer: ARS343_3iters_1e15_110secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 3 --dt 110secs --job_id ARS343_3iters_1e15_110secs"
+        artifact_paths: "ARS343_3iters_1e15_110secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
+
+      - label: ":computer: ARS343_3iters_1e15_140secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 3 --dt 140secs --job_id ARS343_3iters_1e15_140secs"
+        artifact_paths: "ARS343_3iters_1e15_140secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
+
+      - label: ":computer: ARS343_3iters_1e15_170secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 3 --dt 170secs --job_id ARS343_3iters_1e15_170secs"
+        artifact_paths: "ARS343_3iters_1e15_170secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
 
       - label: ":computer: ARS343_3iters_1e15_200secs"
         command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 3 --dt 200secs --job_id ARS343_3iters_1e15_200secs"
@@ -150,40 +268,40 @@ steps:
         agents:
           slurm_ntasks: 100
 
-      - label: ":computer: ARS343_3iters_1e15_250secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 3 --dt 250secs --job_id ARS343_3iters_1e15_250secs"
-        artifact_paths: "ARS343_3iters_1e15_250secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
-      - label: ":computer: ARS343_3iters_1e15_300secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 3 --dt 300secs --job_id ARS343_3iters_1e15_300secs"
-        artifact_paths: "ARS343_3iters_1e15_300secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
-      - label: ":computer: ARS343_3iters_1e15_350secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 3 --dt 350secs --job_id ARS343_3iters_1e15_350secs"
-        artifact_paths: "ARS343_3iters_1e15_350secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
-      - label: ":computer: ARS343_3iters_1e15_400secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 3 --dt 400secs --job_id ARS343_3iters_1e15_400secs"
-        artifact_paths: "ARS343_3iters_1e15_400secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
   - group: "High-Resolution Dry Baroclinic Wave (ARS343 with 10 Newton iters, kappa_4 = 1e15)"
     steps:
+
+      - label: ":computer: ARS343_10iters_1e15_80secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 10 --dt 80secs --job_id ARS343_10iters_1e15_80secs"
+        artifact_paths: "ARS343_10iters_1e15_80secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
+
+      - label: ":computer: ARS343_10iters_1e15_110secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 10 --dt 110secs --job_id ARS343_10iters_1e15_110secs"
+        artifact_paths: "ARS343_10iters_1e15_110secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
+
+      - label: ":computer: ARS343_10iters_1e15_140secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 10 --dt 140secs --job_id ARS343_10iters_1e15_140secs"
+        artifact_paths: "ARS343_10iters_1e15_140secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
+
+      - label: ":computer: ARS343_10iters_1e15_170secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 10 --dt 170secs --job_id ARS343_10iters_1e15_170secs"
+        artifact_paths: "ARS343_10iters_1e15_170secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
 
       - label: ":computer: ARS343_10iters_1e15_200secs"
         command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 10 --dt 200secs --job_id ARS343_10iters_1e15_200secs"
@@ -193,126 +311,40 @@ steps:
         agents:
           slurm_ntasks: 100
 
-      - label: ":computer: ARS343_10iters_1e15_250secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 10 --dt 250secs --job_id ARS343_10iters_1e15_250secs"
-        artifact_paths: "ARS343_10iters_1e15_250secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
-      - label: ":computer: ARS343_10iters_1e15_300secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 10 --dt 300secs --job_id ARS343_10iters_1e15_300secs"
-        artifact_paths: "ARS343_10iters_1e15_300secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
-      - label: ":computer: ARS343_10iters_1e15_350secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 10 --dt 350secs --job_id ARS343_10iters_1e15_350secs"
-        artifact_paths: "ARS343_10iters_1e15_350secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
-      - label: ":computer: ARS343_10iters_1e15_400secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 10 --dt 400secs --job_id ARS343_10iters_1e15_400secs"
-        artifact_paths: "ARS343_10iters_1e15_400secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
-  - group: "High-Resolution Dry Baroclinic Wave (ARS343 with 3 Newton iters, kappa_4 = 1e16)"
-    steps:
-
-      - label: ":computer: ARS343_3iters_1e16_200secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e16 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 3 --dt 200secs --job_id ARS343_3iters_1e16_200secs"
-        artifact_paths: "ARS343_3iters_1e16_200secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
-      - label: ":computer: ARS343_3iters_1e16_250secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e16 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 3 --dt 250secs --job_id ARS343_3iters_1e16_250secs"
-        artifact_paths: "ARS343_3iters_1e16_250secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
-      - label: ":computer: ARS343_3iters_1e16_300secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e16 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 3 --dt 300secs --job_id ARS343_3iters_1e16_300secs"
-        artifact_paths: "ARS343_3iters_1e16_300secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
-      - label: ":computer: ARS343_3iters_1e16_350secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e16 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 3 --dt 350secs --job_id ARS343_3iters_1e16_350secs"
-        artifact_paths: "ARS343_3iters_1e16_350secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
-      - label: ":computer: ARS343_3iters_1e16_400secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e16 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 3 --dt 400secs --job_id ARS343_3iters_1e16_400secs"
-        artifact_paths: "ARS343_3iters_1e16_400secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
-  - group: "High-Resolution Dry Baroclinic Wave (ARS343 with 10 Newton iters, kappa_4 = 1e16)"
-    steps:
-
-      - label: ":computer: ARS343_10iters_1e16_200secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e16 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 10 --dt 200secs --job_id ARS343_10iters_1e16_200secs"
-        artifact_paths: "ARS343_10iters_1e16_200secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
-      - label: ":computer: ARS343_10iters_1e16_250secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e16 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 10 --dt 250secs --job_id ARS343_10iters_1e16_250secs"
-        artifact_paths: "ARS343_10iters_1e16_250secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
-      - label: ":computer: ARS343_10iters_1e16_300secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e16 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 10 --dt 300secs --job_id ARS343_10iters_1e16_300secs"
-        artifact_paths: "ARS343_10iters_1e16_300secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
-      - label: ":computer: ARS343_10iters_1e16_350secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e16 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 10 --dt 350secs --job_id ARS343_10iters_1e16_350secs"
-        artifact_paths: "ARS343_10iters_1e16_350secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
-      - label: ":computer: ARS343_10iters_1e16_400secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e16 --t_end 30days --dt_save_to_disk 1days --ode_algo ARS343 --max_newton_iters 10 --dt 400secs --job_id ARS343_10iters_1e16_400secs"
-        artifact_paths: "ARS343_10iters_1e16_400secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
   - group: "High-Resolution Dry Baroclinic Wave (Rosenbrock23, kappa_4 = 1e14)"
     steps:
+
+      - label: ":computer: Rosenbrock23_1e14_80secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 80secs --job_id Rosenbrock23_1e14_80secs"
+        artifact_paths: "Rosenbrock23_1e14_80secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
+
+      - label: ":computer: Rosenbrock23_1e14_110secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 110secs --job_id Rosenbrock23_1e14_110secs"
+        artifact_paths: "Rosenbrock23_1e14_110secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
+
+      - label: ":computer: Rosenbrock23_1e14_140secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 140secs --job_id Rosenbrock23_1e14_140secs"
+        artifact_paths: "Rosenbrock23_1e14_140secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
+
+      - label: ":computer: Rosenbrock23_1e14_170secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 170secs --job_id Rosenbrock23_1e14_170secs"
+        artifact_paths: "Rosenbrock23_1e14_170secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
 
       - label: ":computer: Rosenbrock23_1e14_200secs"
         command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 200secs --job_id Rosenbrock23_1e14_200secs"
@@ -322,33 +354,44 @@ steps:
         agents:
           slurm_ntasks: 100
 
-      - label: ":computer: Rosenbrock23_1e14_250secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 250secs --job_id Rosenbrock23_1e14_250secs"
-        artifact_paths: "Rosenbrock23_1e14_250secs/*"
+  - group: "High-Resolution Dry Baroclinic Wave (Rosenbrock23, kappa_4 = 5e14)"
+    steps:
+
+      - label: ":computer: Rosenbrock23_5e14_80secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 5e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 80secs --job_id Rosenbrock23_5e14_80secs"
+        artifact_paths: "Rosenbrock23_5e14_80secs/*"
         env:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
           slurm_ntasks: 100
 
-      - label: ":computer: Rosenbrock23_1e14_300secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 300secs --job_id Rosenbrock23_1e14_300secs"
-        artifact_paths: "Rosenbrock23_1e14_300secs/*"
+      - label: ":computer: Rosenbrock23_5e14_110secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 5e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 110secs --job_id Rosenbrock23_5e14_110secs"
+        artifact_paths: "Rosenbrock23_5e14_110secs/*"
         env:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
           slurm_ntasks: 100
 
-      - label: ":computer: Rosenbrock23_1e14_350secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 350secs --job_id Rosenbrock23_1e14_350secs"
-        artifact_paths: "Rosenbrock23_1e14_350secs/*"
+      - label: ":computer: Rosenbrock23_5e14_140secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 5e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 140secs --job_id Rosenbrock23_5e14_140secs"
+        artifact_paths: "Rosenbrock23_5e14_140secs/*"
         env:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
           slurm_ntasks: 100
 
-      - label: ":computer: Rosenbrock23_1e14_400secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 400secs --job_id Rosenbrock23_1e14_400secs"
-        artifact_paths: "Rosenbrock23_1e14_400secs/*"
+      - label: ":computer: Rosenbrock23_5e14_170secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 5e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 170secs --job_id Rosenbrock23_5e14_170secs"
+        artifact_paths: "Rosenbrock23_5e14_170secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
+
+      - label: ":computer: Rosenbrock23_5e14_200secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 5e14 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 200secs --job_id Rosenbrock23_5e14_200secs"
+        artifact_paths: "Rosenbrock23_5e14_200secs/*"
         env:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
@@ -357,84 +400,41 @@ steps:
   - group: "High-Resolution Dry Baroclinic Wave (Rosenbrock23, kappa_4 = 1e15)"
     steps:
 
+      - label: ":computer: Rosenbrock23_1e15_80secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 80secs --job_id Rosenbrock23_1e15_80secs"
+        artifact_paths: "Rosenbrock23_1e15_80secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
+
+      - label: ":computer: Rosenbrock23_1e15_110secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 110secs --job_id Rosenbrock23_1e15_110secs"
+        artifact_paths: "Rosenbrock23_1e15_110secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
+
+      - label: ":computer: Rosenbrock23_1e15_140secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 140secs --job_id Rosenbrock23_1e15_140secs"
+        artifact_paths: "Rosenbrock23_1e15_140secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
+
+      - label: ":computer: Rosenbrock23_1e15_170secs"
+        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 170secs --job_id Rosenbrock23_1e15_170secs"
+        artifact_paths: "Rosenbrock23_1e15_170secs/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+        agents:
+          slurm_ntasks: 100
+
       - label: ":computer: Rosenbrock23_1e15_200secs"
         command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 200secs --job_id Rosenbrock23_1e15_200secs"
         artifact_paths: "Rosenbrock23_1e15_200secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
-      - label: ":computer: Rosenbrock23_1e15_250secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 250secs --job_id Rosenbrock23_1e15_250secs"
-        artifact_paths: "Rosenbrock23_1e15_250secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
-      - label: ":computer: Rosenbrock23_1e15_300secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 300secs --job_id Rosenbrock23_1e15_300secs"
-        artifact_paths: "Rosenbrock23_1e15_300secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
-      - label: ":computer: Rosenbrock23_1e15_350secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 350secs --job_id Rosenbrock23_1e15_350secs"
-        artifact_paths: "Rosenbrock23_1e15_350secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
-      - label: ":computer: Rosenbrock23_1e15_400secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e15 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 400secs --job_id Rosenbrock23_1e15_400secs"
-        artifact_paths: "Rosenbrock23_1e15_400secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
-  - group: "High-Resolution Dry Baroclinic Wave (Rosenbrock23, kappa_4 = 1e16)"
-    steps:
-
-      - label: ":computer: Rosenbrock23_1e16_200secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e16 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 200secs --job_id Rosenbrock23_1e16_200secs"
-        artifact_paths: "Rosenbrock23_1e16_200secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
-      - label: ":computer: Rosenbrock23_1e16_250secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e16 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 250secs --job_id Rosenbrock23_1e16_250secs"
-        artifact_paths: "Rosenbrock23_1e16_250secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
-      - label: ":computer: Rosenbrock23_1e16_300secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e16 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 300secs --job_id Rosenbrock23_1e16_300secs"
-        artifact_paths: "Rosenbrock23_1e16_300secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
-      - label: ":computer: Rosenbrock23_1e16_350secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e16 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 350secs --job_id Rosenbrock23_1e16_350secs"
-        artifact_paths: "Rosenbrock23_1e16_350secs/*"
-        env:
-          CLIMACORE_DISTRIBUTED: "MPI"
-        agents:
-          slurm_ntasks: 100
-
-      - label: ":computer: Rosenbrock23_1e16_400secs"
-        command: "mpiexec julia --color=yes --project=examples examples/hybrid/driver.jl --h_elem 20 --z_elem 30 --nh_poly 3 --dz_bottom 100 --dz_top 5000 --kappa_4 1e16 --t_end 30days --dt_save_to_disk 1days --ode_algo ODE.Rosenbrock23 --dt 400secs --job_id Rosenbrock23_1e16_400secs"
-        artifact_paths: "Rosenbrock23_1e16_400secs/*"
         env:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
