@@ -1,21 +1,24 @@
 using ForwardDiff: Dual, Partials, Tag
 using SparseArrays: spdiagm
 
-using ClimaCore: Meshes, Spaces, Fields, Operators
+using ClimaCore: DataLayouts, Meshes, Spaces, Fields, Operators
 
-make_dual(::Type, ::Type, val::Union{Bool, String, SubString}) = val
+make_dual(::Type, ::Type, val::Bool) = val
 make_dual(::Type, ::Type, val::Meshes.AbstractMesh) = val
 make_dual(::Type, ::Type, val::Spaces.AbstractSpace) = val
-make_dual(::Type{FT}, ::Type{DT}, ::Type{FT}) where {FT, DT} = DT
+make_dual(::Type{FT}, ::Type{DT}, ::Type{T}) where {FT, DT} =
+    DataLayouts.replace_basetype(FT, DT, T)
 make_dual(::Type, ::Type{DT}, val::Number) where {DT} = DT(val)
 make_dual(::Type{FT}, ::Type{DT}, val::Union{Tuple, NamedTuple}) where {FT, DT} =
     map(x -> make_dual(FT, DT, x), val)
-make_dual(::Type, ::Type{DT}, val::Fields.FieldVector) where {DT} = DT.(val)
+make_dual(::Type, ::Type{DT}, val::DataLayouts.AbstractData) where {DT} =
+    DataLayouts.replace_basetype(val, DT)
 function make_dual(::Type, ::Type{DT}, val::Fields.Field) where {DT}
     new_val = Fields._similar(val, DT)
     parent(new_val) .= DT.(parent(val))
     return new_val
 end
+make_dual(::Type, ::Type{DT}, val::Fields.FieldVector) where {DT} = DT.(val)
 make_dual(::Type{FT}, ::Type{DT}, val::T) where {FT, DT, T} =
     length(T.parameters) == fieldcount(T) == 0 ? val :
         DataLayouts.bypass_constructor(
