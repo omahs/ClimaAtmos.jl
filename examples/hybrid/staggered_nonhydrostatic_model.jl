@@ -357,6 +357,16 @@ function remaining_tendency_increment!(Y⁺, Y, p, t, dtγ)
             Spaces.weighted_dss_ghost!(Y⁺.c, p.ghost_buffer.c)
             Spaces.weighted_dss_ghost!(Y⁺.f, p.ghost_buffer.f)
         end
+        if p.tendency_knobs.has_turbconv
+            (; edmf, param_set, surf_params) = p.edmf_cache
+            tc_params = CAP.turbconv_params(param_set)
+            Fields.bycolumn(axes(Y⁺.c)) do colidx
+                state = TCU.tc_column_state(Y⁺, p, nothing, colidx)
+                grid = TC.Grid(state)
+                surf = TCU.get_surface(surf_params, grid, state, t, tc_params)
+                TC.affect_filter!(edmf, grid, state, tc_params, surf, t)
+            end
+        end
     end
     return Y⁺
 end
