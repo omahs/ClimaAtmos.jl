@@ -6,7 +6,7 @@ using ClimaCore: DataLayouts, Meshes, Spaces, Fields, Operators
 make_dual(::Type, ::Type, val::Bool) = val
 make_dual(::Type, ::Type, val::Meshes.AbstractMesh) = val
 make_dual(::Type, ::Type, val::Spaces.AbstractSpace) = val
-make_dual(::Type{FT}, ::Type{DT}, ::Type{T}) where {FT, DT} =
+make_dual(::Type{FT}, ::Type{DT}, ::Type{T}) where {FT, DT, T} =
     DataLayouts.replace_basetype(FT, DT, T)
 make_dual(::Type, ::Type{DT}, val::Number) where {DT} = DT(val)
 make_dual(::Type{FT}, ::Type{DT}, val::Union{Tuple, NamedTuple}) where {FT, DT} =

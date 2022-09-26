@@ -66,6 +66,87 @@ function get_callbacks(parsed_args, simulation, model_spec, params)
             (Y, t, integrator) -> begin
                 @info "t = $t:"
 
+                edmf_cache = integrator.p.edmf_cache
+                a_min = edmf_cache.edmf.minimum_area
+                ρarea = Spaces.column(Y.c.turbconv.up.:(1).ρarea, 1, 1, 1)
+                ρaw = Spaces.column(Y.f.turbconv.up.:(1).ρaw, 1, 1, 1)
+                ρ = Spaces.column(Y.c.ρ, 1, 1, 1)
+                w = Spaces.column(edmf_cache.aux.face.turbconv.up.:(1).w, 1, 1, 1)
+                ρ_f = Spaces.column(edmf_cache.aux.face.ρ, 1, 1, 1)
+
+                # The actual values of SetValue BCs don't matter because they
+                # don't appear in the Jacobian, so they can all be set to 0.
+                ∇c = Operators.DivergenceF2C()
+                ∇f = Operators.DivergenceC2F(;
+                    bottom = Operators.SetValue(Geometry.WVector(FT(0))),
+                    top = Operators.SetValue(Geometry.WVector(FT(0))),
+                )
+                LBC = Operators.LeftBiasedF2C(;
+                    bottom = Operators.SetValue(FT(0)),
+                )
+                LBF = Operators.LeftBiasedC2F(;
+                    bottom = Operators.SetValue(FT(0)),
+                )
+                Ic = Operators.InterpolateF2C()
+                If = Operators.InterpolateC2F(;
+                    bottom = Operators.SetValue(FT(0)),
+                    top = Operators.SetValue(FT(0)),
+                )
+
+                ∇c_stencil = Operators.Operator2Stencil(∇c)
+                ∇f_stencil = Operators.Operator2Stencil(∇f)
+                LBC_stencil = Operators.Operator2Stencil(LBC)
+                LBF_stencil = Operators.Operator2Stencil(LBF)
+                Ic_stencil = Operators.Operator2Stencil(Ic)
+                If_stencil = Operators.Operator2Stencil(If)
+                compose = Operators.ComposeStencils()
+
+                @. w = ifelse(
+                    If(ρarea / ρ) >= a_min,
+                    max(ρaw / (ρ_f * If(ρarea / ρ)), 0),
+                    0,
+                ) # update w
+
+                # w = ifelse(
+                #     If(ρarea / ρ_c) >= a_min,
+                #     max(ρaw / (ρ_f * If(ρarea / ρ_c)), 0),
+                #     0
+                # ) = ifelse(
+                #     If(ρarea / ρ_c) >= a_min,
+                #     ifelse(
+                #         ρaw / (ρ_f * If(ρarea / ρ_c)) > 0,
+                #         ρaw / (ρ_f * If(ρarea / ρ_c)),
+                #         0,
+                #     ),
+                #     0,
+                # )
+
+                # ∂w/∂ρarea = ifelse(
+                #     If(ρarea / ρ_c) >= a_min,
+                #     ifelse(
+                #         ρaw / (ρ_f * If(ρarea / ρ_c)) > 0,
+                #         ∂(ρaw / (ρ_f * If(ρarea / ρ_c)))/∂ρarea,
+                #         0,
+                #     ),
+                #     0,
+                # )
+                # ∂(ρaw / (ρ_f * If(ρarea / ρ_c)))/∂ρarea =
+                #     -ρaw / (ρ_f * If(ρarea / ρ_c))^2 * ρ_f *
+                #     ∂(If(ρarea / ρ_c))/∂ρarea
+                # ∂(If(ρarea / ρ_c))/∂ρarea = If_stencil(1 / ρ_c)
+
+                # ∂w/∂ρaw = ifelse(
+                #     If(ρarea / ρ_c) >= a_min,
+                #     ifelse(
+                #         ρaw / (ρ_f * If(ρarea / ρ_c)) > 0,
+                #         1 / (ρ_f * If(ρarea / ρ_c)),
+                #         0,
+                #     ),
+                #     0,
+                # )
+
+                @info "∂ρareaₜ/∂ρarea"
+
                 exact_block = exact_column_jacobian_block(
                     TCU.sgs_flux_tendency_testing!,
                     Y,
@@ -84,66 +165,6 @@ function get_callbacks(parsed_args, simulation, model_spec, params)
                 #     -∇c_stencil(wvec(1)) * LBF_stencil(1) * ∂(Ic(w) * ρarea)/∂ρarea
                 # ∂(Ic(w) * ρarea)/∂ρarea =
                 #     Ic_stencil(1) * ∂w/∂ρarea * ρarea + Ic(w)
-
-                # w = ifelse(
-                #     If(ρarea / ρ_c) >= a_min,
-                #     max(ρaw / (ρ_f * If(ρarea / ρ_c)), 0),
-                #     0
-                # ) = ifelse(
-                #     If(ρarea / ρ_c) >= a_min,
-                #     ifelse(
-                #         ρaw / (ρ_f * If(ρarea / ρ_c)) > 0,
-                #         ρaw / (ρ_f * If(ρarea / ρ_c)),
-                #         0,
-                #     ),
-                #     0,
-                # )
-                # ∂w/∂ρarea = ifelse(
-                #     If(ρarea / ρ_c) >= a_min,
-                #     ifelse(
-                #         ρaw / (ρ_f * If(ρarea / ρ_c)) > 0,
-                #         ∂(ρaw / (ρ_f * If(ρarea / ρ_c)))/∂ρarea,
-                #         0,
-                #     ),
-                #     0,
-                # )
-                # ∂(ρaw / (ρ_f * If(ρarea / ρ_c)))/∂ρarea =
-                #     -ρaw / (ρ_f * If(ρarea / ρ_c))^2 * ρ_f *
-                #     ∂(If(ρarea / ρ_c))/∂ρarea
-                # ∂(If(ρarea / ρ_c))/∂ρarea = If_stencil(1 / ρ_c)
-
-                edmf_cache = integrator.p.edmf_cache
-                a_min = edmf_cache.edmf.minimum_area
-                ρarea = Spaces.column(Y.c.turbconv.up.:(1).ρarea, 1, 1, 1)
-                ρaw = Spaces.column(Y.f.turbconv.up.:(1).ρaw, 1, 1, 1)
-                ρ = Spaces.column(Y.c.ρ, 1, 1, 1)
-                w = Spaces.column(edmf_cache.aux.face.turbconv.up.:(1).w, 1, 1, 1)
-                ρ_f = Spaces.column(edmf_cache.aux.face.ρ, 1, 1, 1)
-
-                # The actual values of SetValue BCs don't matter because they
-                # don't appear in the Jacobian, so they can all be set to 0.
-                ∇c = Operators.DivergenceF2C()
-                LBF = Operators.LeftBiasedC2F(;
-                    bottom = Operators.SetValue(FT(0)),
-                )
-                Ic = Operators.InterpolateF2C()
-                If = Operators.InterpolateC2F(;
-                    bottom = Operators.SetValue(FT(0)),
-                    top = Operators.SetValue(FT(0)),
-                )
-
-                ∇c_stencil = Operators.Operator2Stencil(∇c)
-                LBF_stencil = Operators.Operator2Stencil(LBF)
-                Ic_stencil = Operators.Operator2Stencil(Ic)
-                If_stencil = Operators.Operator2Stencil(If)
-                compose = Operators.ComposeStencils()
-
-                @. w = ifelse(
-                    If(ρarea / ρ) >= a_min,
-                    max(ρaw / (ρ_f * If(ρarea / ρ)), 0),
-                    0,
-                ) # update w
-
                 approx_block = @. compose(
                     -∇c_stencil(Geometry.WVector(one(ρaw))),
                     compose(
@@ -163,6 +184,78 @@ function get_callbacks(parsed_args, simulation, model_spec, params)
                     ),
                 )
                 @info matrix_column(approx_block, axes(ρarea), 1, 1, 1)[1:10, 1:10]
+
+                @info "∂ρaθ_liq_iceₜ/∂ρaθ_liq_ice and ∂ρaq_totₜ/∂ρaq_tot"
+
+                exact_block = exact_column_jacobian_block(
+                    TCU.sgs_flux_tendency_testing!,
+                    Y,
+                    integrator.p,
+                    t,
+                    1, # i
+                    1, # j
+                    1, # h
+                    (:c, :turbconv, :up, :1, :ρaθ_liq_ice),
+                    (:c, :turbconv, :up, :1, :ρaθ_liq_ice),
+                )
+                @info exact_block[1:10, 1:10]
+                exact_block = exact_column_jacobian_block(
+                    TCU.sgs_flux_tendency_testing!,
+                    Y,
+                    integrator.p,
+                    t,
+                    1, # i
+                    1, # j
+                    1, # h
+                    (:c, :turbconv, :up, :1, :ρaq_tot),
+                    (:c, :turbconv, :up, :1, :ρaq_tot),
+                )
+                @info exact_block[1:10, 1:10]
+
+                # ρaq_totₜ = -∇c(wvec(LBF(Ic(w) * ρaq_tot)))
+                # ∂ρaq_totₜ/∂ρaq_tot =
+                #     -∇c_stencil(wvec(1)) * LBF_stencil(Ic(w))
+                approx_block = @. compose(
+                    -∇c_stencil(Geometry.WVector(one(ρaw))),
+                    LBF_stencil(Ic(w)),
+                )
+                @info matrix_column(approx_block, axes(ρarea), 1, 1, 1)[1:10, 1:10]
+
+                @info "∂ρawₜ/∂ρaw"
+
+                exact_block = exact_column_jacobian_block(
+                    TCU.sgs_flux_tendency_testing!,
+                    Y,
+                    integrator.p,
+                    t,
+                    1, # i
+                    1, # j
+                    1, # h
+                    (:f, :turbconv, :up, :1, :ρaw),
+                    (:f, :turbconv, :up, :1, :ρaw),
+                )
+                @info exact_block[1:10, 1:10]
+
+                # ρawₜ = -(∇f(wvec(LBC(ρaw * w))))
+                # ∂ρawₜ/ρaw =
+                #     -∇f_stencil(wvec(1)) * LBC_stencil(∂(ρaw * w)/∂ρaw)
+                # ∂(ρaw * w)/∂ρaw = w + ρaw * ∂w/∂ρaw
+                approx_block = @. compose(
+                    -∇f_stencil(Geometry.WVector(one(ρarea))),
+                    LBC_stencil(
+                        w + ρaw * ifelse(
+                            If(ρarea / ρ) >= a_min,
+                            ifelse(
+                                ρaw / (ρ_f * If(ρarea / ρ)) > 0,
+                                1 / (ρ_f * If(ρarea / ρ)),
+                                0,
+                            ),
+                            0,
+                        ),
+                    ),
+                )
+                @info matrix_column(approx_block, axes(ρaw), 1, 1, 1)[1:10, 1:10]
+
                 if t >= 500
                     error("STOPPING")
                 end

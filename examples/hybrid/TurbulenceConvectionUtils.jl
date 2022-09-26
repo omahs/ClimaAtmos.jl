@@ -278,14 +278,14 @@ function compute_up_tendencies_testing!(
             # (ρarea * Ic(w_up) * entr_turb_dyn) -
             # (ρarea * Ic(w_up) * detr_turb_dyn)
 
-    #     @. tends_ρaθ_liq_ice =
-    #         -∇c(wvec(LBF(Ic(w_up) * ρaθ_liq_ice))) +
+        @. tends_ρaθ_liq_ice =
+            -∇c(wvec(LBF(Ic(w_up) * ρaθ_liq_ice))) # +
     #         (ρarea * Ic(w_up) * entr_turb_dyn * θ_liq_ice_en) -
     #         (ρaθ_liq_ice * Ic(w_up) * detr_turb_dyn) +
     #         (ρ_c * θ_liq_ice_tendency_precip_formation)
 
-    #     @. tends_ρaq_tot =
-    #         -∇c(wvec(LBF(Ic(w_up) * ρaq_tot))) +
+        @. tends_ρaq_tot =
+            -∇c(wvec(LBF(Ic(w_up) * ρaq_tot))) # +
     #         (ρarea * Ic(w_up) * entr_turb_dyn * q_tot_en) -
     #         (ρaq_tot * Ic(w_up) * detr_turb_dyn) +
     #         (ρ_c * qt_tendency_precip_formation)
@@ -322,7 +322,7 @@ function compute_up_tendencies_testing!(
 
     #         tends_ρaq_liq[kc_surf] = 0
     #         tends_ρaq_ice[kc_surf] = 0
-        end
+    #     end
 
     #     # prognostic entr/detr
     #     if edmf.entr_closure isa PrognosticNoisyRelaxationProcess
@@ -341,7 +341,7 @@ function compute_up_tendencies_testing!(
     #     tends_ρarea[kc_surf] = 0
     #     tends_ρaθ_liq_ice[kc_surf] = 0
     #     tends_ρaq_tot[kc_surf] = 0
-    # end
+    end
 
     # # Solve for updraft velocity
 
@@ -349,31 +349,31 @@ function compute_up_tendencies_testing!(
     # # and buoyancy should not matter in the end
     # zero_bcs = (; bottom = CCO.SetValue(FT(0)), top = CCO.SetValue(FT(0)))
     # I0f = CCO.InterpolateC2F(; zero_bcs...)
-    # adv_bcs =
-    #     (; bottom = CCO.SetValue(wvec(FT(0))), top = CCO.SetValue(wvec(FT(0))))
-    # LBC = CCO.LeftBiasedF2C(; bottom = CCO.SetValue(FT(0)))
-    # ∇f = CCO.DivergenceC2F(; adv_bcs...)
+    adv_bcs =
+        (; bottom = CCO.SetValue(wvec(FT(0))), top = CCO.SetValue(wvec(FT(0))))
+    LBC = CCO.LeftBiasedF2C(; bottom = CCO.SetValue(FT(0)))
+    ∇f = CCO.DivergenceC2F(; adv_bcs...)
 
-    # @inbounds for i in 1:N_up
+    @inbounds for i in 1:N_up
     #     a_up_bcs = a_up_boundary_conditions(surf, edmf, i)
     #     Iaf = CCO.InterpolateC2F(; a_up_bcs...)
-    #     ρaw = prog_up_f[i].ρaw
-    #     tends_ρaw = tendencies_up_f[i].ρaw
+        ρaw = prog_up_f[i].ρaw
+        tends_ρaw = tendencies_up_f[i].ρaw
     #     nh_pressure = aux_up_f[i].nh_pressure
     #     a_up = aux_up[i].area
-    #     w_up = aux_up_f[i].w
+        w_up = aux_up_f[i].w
     #     w_en = aux_en_f.w
     #     entr_w = aux_up[i].entr_turb_dyn
     #     detr_w = aux_up[i].detr_turb_dyn
     #     buoy = aux_up[i].buoy
 
-    #     @. tends_ρaw = -(∇f(wvec(LBC(ρaw * w_up))))
+        @. tends_ρaw = -(∇f(wvec(LBC(ρaw * w_up))))
     #     @. tends_ρaw +=
     #         (ρaw * (I0f(entr_w) * w_en - I0f(detr_w) * w_up)) +
     #         (ρ_f * Iaf(a_up) * I0f(buoy)) +
     #         nh_pressure
     #     tends_ρaw[kf_surf] = 0
-    # end
+    end
 
     return nothing
 end
