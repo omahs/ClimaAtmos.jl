@@ -30,8 +30,7 @@ function get_callbacks(parsed_args, simulation, model_spec, params)
         ()
     end
 
-    if startswith(parsed_args["ode_algo"], "ODE.") &&
-       !isnothing(model_spec.turbconv_model)
+    if !isnothing(model_spec.turbconv_model) # && startswith(parsed_args["ode_algo"], "ODE.")
         additional_callbacks = (additional_callbacks..., tc_callbacks)
     end
     if model_spec.moisture_model isa EquilMoistModel &&

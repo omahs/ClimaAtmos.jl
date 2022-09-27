@@ -162,7 +162,7 @@ function sgs_flux_tendency!(Yₜ, Y, p, t)
 
         surf = get_surface(surf_params, grid, state, t, tc_params)
 
-        # TC.affect_filter!(edmf, grid, state, tc_params, surf, t)
+        TC.affect_filter!(edmf, grid, state, tc_params, surf, t)
 
         # Update aux / pre-tendencies filters. TODO: combine these into a function that minimizes traversals
         # Some of these methods should probably live in `compute_tendencies`, when written, but we'll
