@@ -56,11 +56,11 @@ function update_aux!(
     #####
     C123 = CCG.Covariant123Vector
     @. aux_en.e_kin =
-        LA.norm_sqr(C123(prog_gm_uₕ) + C123(Ic(wvec(aux_en_f.w)))) / 2
+        LA.norm_sqr(C123(prog_gm_uₕ) + C123(Ic(aux_en_f.w))) / 2
 
     @inbounds for i in 1:N_up
         @. aux_up[i].e_kin =
-            LA.norm_sqr(C123(prog_gm_uₕ) + C123(Ic(wvec(aux_up_f[i].w)))) / 2
+            LA.norm_sqr(C123(prog_gm_uₕ) + C123(Ic(aux_up_f[i].w))) / 2
     end
 
     @inbounds for k in real_center_indices(grid)
@@ -330,17 +330,22 @@ function update_aux!(
         If = CCO.InterpolateC2F(; a_up_bcs...)
         a_min = edmf.minimum_area
         a_up = aux_up[i].area
-        @. aux_up_f[i].w = ifelse(
+        lg = CC.Fields.local_geometry_field(axes(aux_up_f[i].w))
+        @. aux_up_f[i].w = CCG.Covariant3Vector(CCG.WVector(ifelse(
             If(a_up) >= a_min,
             max(prog_up_f[i].ρaw / (ρ_f * If(a_up)), 0),
             FT(0),
-        )
+        )), lg)
     end
 
     @inbounds for i in 1:N_up
-        aux_up_f[i].w[kf_surf] = w_surface_bc(surf)
+        w_up_f = CC.Spaces.level(aux_up_f[i].w, CCO.PlusHalf(1))
+        lg = CC.Fields.local_geometry_field(axes(w_up_f))
+        w_up_f .= CCG.Covariant3Vector.(CCG.WVector.(w_surface_bc(surf)), lg)
+        # aux_up_f[i].w[kf_surf] = CCG.Covariant3Vector(CCG.WVector(w_surface_bc(surf)), lg)
     end
 
+    to_scalar(vector) = vector.u₃
     parent(aux_tc_f.bulk.w) .= 0
     a_bulk_bcs = a_bulk_boundary_conditions(surf, edmf)
     Ifb = CCO.InterpolateC2F(; a_bulk_bcs...)
@@ -348,14 +353,14 @@ function update_aux!(
         a_up = aux_up[i].area
         a_up_bcs = a_up_boundary_conditions(surf, edmf, i)
         Ifu = CCO.InterpolateC2F(; a_up_bcs...)
-        @. aux_tc_f.bulk.w += ifelse(
+        lg = CC.Fields.local_geometry_field(axes(aux_tc_f.bulk.w))
+        @. aux_tc_f.bulk.w += CCG.Covariant3Vector(CCG.WVector(ifelse(
             Ifb(aux_bulk.area) > 0,
-            Ifu(a_up) * aux_up_f[i].w / Ifb(aux_bulk.area),
+            Ifu(a_up) * to_scalar(aux_up_f[i].w) / Ifb(aux_bulk.area),
             FT(0),
-        )
+        )), lg)
     end
-    to_scalar(vector) = vector.u₃
-    @. aux_en_f.w = to_scalar(prog_gm_f.w) / (1 - Ifb(aux_bulk.area))
+    @. aux_en_f.w = prog_gm_f.w / (1 - Ifb(aux_bulk.area))
     @inbounds for i in 1:N_up
         @. aux_en_f.w -=
             Ifb(aux_up[i].area) * aux_up_f[i].w / (1 - Ifb(aux_bulk.area))

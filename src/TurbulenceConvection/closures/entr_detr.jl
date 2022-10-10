@@ -189,6 +189,7 @@ function compute_entr_detr!(
     Δt::Real,
     εδ_closure::AbstractEntrDetrModel,
 )
+    to_scalar(vector) = vector.u₃
     FT = float_type(state)
     N_up = n_updrafts(edmf)
     aux_up = center_aux_updrafts(state)
@@ -221,7 +222,7 @@ function compute_entr_detr!(
         w_up = aux_up_f[i].w
         w_en = aux_en_f.w
         w_gm = prog_gm_f.w
-        @. m_entr_detr = a_up * (Ic(w_up) - toscalar(Ic(w_gm)))
+        @. m_entr_detr = a_up * (toscalar(Ic(w_up)) - toscalar(Ic(w_gm)))
         @. ∇m_entr_detr = ∇c(wvec(LB(m_entr_detr)))
         @. w_up_c = Ic(w_up)
         @. w_en_c = Ic(w_en)
@@ -247,8 +248,8 @@ function compute_entr_detr!(
                 εδ_model_vars = (;
                     q_cond_up = q_cond_up, # updraft condensate (liquid water + ice)
                     q_cond_en = q_cond_en, # environment condensate (liquid water + ice)
-                    w_up = w_up_c[k], # updraft vertical velocity
-                    w_en = w_en_c[k], # environment vertical velocity
+                    w_up = to_scalar(w_up_c[k]), # updraft vertical velocity
+                    w_en = to_scalar(w_en_c[k]), # environment vertical velocity
                     b_up = aux_up[i].buoy[k], # updraft buoyancy
                     b_en = aux_en.buoy[k], # environment buoyancy
                     tke_gm = aux_gm.tke[k], # grid mean tke
@@ -327,6 +328,7 @@ function compute_entr_detr!(
     Δt::Real,
     εδ_model::AbstractNonLocalEntrDetrModel,
 )
+    to_scalar(vector) = vector.u₃
     FT = float_type(state)
     N_up = n_updrafts(edmf)
     aux_up = center_aux_updrafts(state)
@@ -360,7 +362,7 @@ function compute_entr_detr!(
         w_up = aux_up_f[i].w
         w_en = aux_en_f.w
         w_gm = prog_gm_f.w
-        @. m_entr_detr = a_up * (Ic(w_up) - Ic(toscalar(w_gm)))
+        @. m_entr_detr = a_up * (toscalar(Ic(w_up)) - Ic(toscalar(w_gm)))
         @. ∇m_entr_detr = ∇c(wvec(LB(m_entr_detr)))
         @. w_up_c = Ic(w_up)
         @. w_en_c = Ic(w_en)
@@ -387,8 +389,8 @@ function compute_entr_detr!(
                 εδ_model_vars = (;
                     q_cond_up = q_cond_up, # updraft condensate (liquid water + ice)
                     q_cond_en = q_cond_en, # environment condensate (liquid water + ice)
-                    w_up = w_up_c[k], # updraft vertical velocity
-                    w_en = w_en_c[k], # environment vertical velocity
+                    w_up = to_scalar(w_up_c[k]), # updraft vertical velocity
+                    w_en = to_scalar(w_en_c[k]), # environment vertical velocity
                     b_up = aux_up[i].buoy[k], # updraft buoyancy
                     b_en = aux_en.buoy[k], # environment buoyancy
                     tke_gm = aux_gm.tke[k], # grid mean tke
@@ -431,7 +433,7 @@ function compute_entr_detr!(
             ε_turb = compute_turbulent_entrainment(
                 FT(εδ_params(εδ_model).c_γ),
                 aux_up[i].area[k],
-                w_up_c[k],
+                to_scalar(w_up_c[k]),
                 aux_en.tke[k],
                 FT(plume_scale_height[i]),
             )
@@ -439,7 +441,7 @@ function compute_entr_detr!(
                 εδ_model,
                 aux_up[i].buoy[k],
                 aux_en.buoy[k],
-                w_up_c[k],
+                to_scalar(w_up_c[k]),
                 w_en_c[k],
                 aux_en.tke[k],
                 FT(grid.zc[k].z),
@@ -449,7 +451,7 @@ function compute_entr_detr!(
                 εδ_model,
                 aux_up[i].buoy[k],
                 aux_en.buoy[k],
-                w_up_c[k],
+                to_scalar(w_up_c[k]),
                 w_en_c[k],
                 aux_en.tke[k],
                 FT(grid.zc[k].z),

@@ -67,10 +67,9 @@ function initialize_updrafts(edmf, grid, state, surf)
     ρ_c = prog_gm.ρ
     a_min = edmf.minimum_area
     @inbounds for i in 1:N_up
-        @inbounds for k in TC.real_face_indices(grid)
-            aux_up_f[i].w[k] = 0
-            prog_up_f[i].ρaw[k] = 0
-        end
+        local_geometry = CC.Fields.local_geometry_field(axes(aux_up_f[i].w))
+        @. aux_up_f[i].w = CCG.Covariant3Vector(CCG.WVector(FT(0)), local_geometry)
+        @. prog_up_f[i].ρaw = 0
 
         @inbounds for k in TC.real_center_indices(grid)
             aux_up[i].buoy[k] = 0

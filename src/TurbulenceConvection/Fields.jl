@@ -159,3 +159,12 @@ function set_z!(field::CC.Fields.Field, u::Real, v::Real)
     vconst(coord) = v
     @. field = CCG.Covariant12Vector(CCG.UVVector(uconst(lg), vconst(lg)))
 end
+
+function set_cov3_z!(
+    field::CC.Fields.Field,
+    w::Function = z -> z,
+)
+    z = CC.Fields.coordinate_field(axes(field)).z
+    lg = CC.Fields.local_geometry_field(axes(field))
+    @. field = CCG.Covariant3Vector(CCG.WVector(w(z)), lg)
+end
