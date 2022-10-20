@@ -124,6 +124,9 @@ function default_cache(Y, params, model_spec, spaces, numerics, simulation)
     pnc = propertynames(Y.c)
     ᶜρh_kwargs =
         :ρe_tot in pnc || :ρe_int in pnc ? (; ᶜρh = similar(Y.c, FT)) : ()
+
+    curl_uh = @. curlₕ(Y.c.uₕ)
+    ᶜvort = @. Geometry.WVector(curl_uh)
     return (;
         simulation,
         spaces,
@@ -137,6 +140,9 @@ function default_cache(Y, params, model_spec, spaces, numerics, simulation)
         ᶜts = similar(Y.c, ts_type),
         ᶜp = similar(Y.c, FT),
         ᶜT = similar(Y.c, FT),
+        ᶜθ = similar(Y.c, FT),
+        curl_uh,
+        ᶜvort,
         ᶜω³ = similar(Y.c, Geometry.Contravariant3Vector{FT}),
         ᶠω¹² = similar(Y.f, Geometry.Contravariant12Vector{FT}),
         ᶠu¹² = similar(Y.f, Geometry.Contravariant12Vector{FT}),

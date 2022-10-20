@@ -179,6 +179,9 @@ function save_to_disk_func(integrator)
             ᶜ3d_snow,
             params,
             ᶜK,
+            curl_uh,
+            ᶜvort,
+            ᶜT,
             col_integrated_rain,
             col_integrated_snow,
         ) = p
@@ -197,12 +200,12 @@ function save_to_disk_func(integrator)
     # thermo state
     thermo_state!(ᶜts, Y, thermo_params, p.thermo_dispatcher, ᶜinterp, ᶜK)
     @. ᶜp = TD.air_pressure(thermo_params, ᶜts)
-    ᶜT = @. TD.air_temperature(thermo_params, ᶜts)
-    ᶜθ = @. TD.dry_pottemp(thermo_params, ᶜts)
+    @. ᶜT = TD.air_temperature(thermo_params, ᶜts)
+    @. ᶜθ = TD.dry_pottemp(thermo_params, ᶜts)
 
     # vorticity
-    curl_uh = @. curlₕ(Y.c.uₕ)
-    ᶜvort = Geometry.WVector.(curl_uh)
+    @. curl_uh = curlₕ(Y.c.uₕ)
+    @. ᶜvort = Geometry.WVector(curl_uh)
     Spaces.weighted_dss!(ᶜvort)
 
     dry_diagnostic = (;
