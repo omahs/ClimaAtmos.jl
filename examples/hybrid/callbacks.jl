@@ -79,6 +79,7 @@ function get_callbacks(parsed_args, simulation, atmos, params)
         save_restart_callback,
         gc_callback,
         additional_callbacks...,
+        call_every_n_steps(int -> println("‖Y($(int.t)‖ = $(norm(int.u))")),
     )
 end
 
