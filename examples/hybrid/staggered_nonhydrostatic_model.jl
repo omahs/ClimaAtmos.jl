@@ -252,8 +252,9 @@ function remaining_tendency_increment!(Y⁺, Y, p, t, dtγ)
             end
         end
         @nvtx "additional_tendency! increment" color = colorant"orange" begin
+            t < 100 && println("Explicit: ‖Yₜ_2_before($t)‖ = $(norm(Yₜ))")
             additional_tendency!(Yₜ, Y, p, t)
-            t < 100 && println("Explicit: ‖Yₜ_2($t)‖ = $(norm(Yₜ))")
+            t < 100 && println("Explicit: ‖Yₜ_2_after($t)‖ = $(norm(Yₜ))")
             @. Y⁺ += dtγ * Yₜ
         end
         @nvtx "dss_remaining_tendency increment" color = colorant"blue" begin

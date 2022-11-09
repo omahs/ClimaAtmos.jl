@@ -183,6 +183,8 @@ function sgs_flux_tendency!(Yₜ, Y, p, t, colidx, ::TC.EDMFModel)
 
     TC.update_aux!(edmf, grid, state, surf, tc_params, t, Δt)
 
+    t < 100 && println("SGS: ‖Yₜ_a($t)‖ = $(norm(Yₜ))")
+
     TC.compute_precipitation_sink_tendencies(
         precip_model,
         edmf.precip_fraction_model,
@@ -192,10 +194,17 @@ function sgs_flux_tendency!(Yₜ, Y, p, t, colidx, ::TC.EDMFModel)
         Δt,
     )
 
+    t < 100 && println("SGS: ‖Yₜ_b($t)‖ = $(norm(Yₜ))")
+
     TC.compute_turbconv_tendencies!(edmf, grid, state, tc_params, surf, Δt)
+
+    t < 100 && println("SGS: ‖Yₜ_c($t)‖ = $(norm(Yₜ))")
 
     # TODO: incrementally disable this and enable proper grid mean terms
     compute_gm_tendencies!(edmf, grid, state, surf, tc_params)
+
+    t < 100 && println("SGS: ‖Yₜ_d($t)‖ = $(norm(Yₜ))")
+
     return nothing
 end
 
