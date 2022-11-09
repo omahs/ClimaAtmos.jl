@@ -175,6 +175,7 @@ function default_cache(
 end
 
 function implicit_tendency!(Yₜ, Y, p, t)
+    t < 100 && println("Implicit: ‖Y($t)‖ = $(norm(Y))")
     @nvtx "implicit tendency" color = colorant"yellow" begin
         Fields.bycolumn(axes(Y.c)) do colidx
             CA.implicit_vertical_advection_tendency!(Yₜ, Y, p, t, colidx)
@@ -185,6 +186,8 @@ function implicit_tendency!(Yₜ, Y, p, t)
             end
         end
     end
+    t < 100 && println("Implicit: ‖Y($t)‖ = $(norm(Y))")
+    t < 100 && println("Implicit: ‖Yₜ($t)‖ = $(norm(Yₜ))")
 end
 
 function remaining_tendency!(Yₜ, Y, p, t)
@@ -218,6 +221,8 @@ function remaining_tendency!(Yₜ, Y, p, t)
 end
 
 function remaining_tendency_increment!(Y⁺, Y, p, t, dtγ)
+    t < 100 && println("Explicit: ‖Y($t)‖ = $(norm(Y))")
+    t < 100 && println("Explicit: ‖Y⁺($t)‖ = $(norm(Y⁺))")
     (; Yₜ, limiters) = p
     (; compressibility_model) = p
     @nvtx "remaining tendency increment" color = colorant"yellow" begin
@@ -239,6 +244,7 @@ function remaining_tendency_increment!(Y⁺, Y, p, t, dtγ)
                     Limiters.compute_bounds!(ρc_limiter, ᶜρc, Y.c.ρ)
                     Limiters.apply_limiter!(ᶜρc⁺, Y⁺.c.ρ, ρc_limiter)
                 end
+                t < 100 && println("Explicit: ‖Yₜ_1($t)‖ = $(norm(Yₜ))")
                 Yₜ .= zero(eltype(Yₜ))
             end
             @nvtx "vertical" color = colorant"orange" begin
@@ -247,6 +253,7 @@ function remaining_tendency_increment!(Y⁺, Y, p, t, dtγ)
         end
         @nvtx "additional_tendency! increment" color = colorant"orange" begin
             additional_tendency!(Yₜ, Y, p, t)
+            t < 100 && println("Explicit: ‖Yₜ_2($t)‖ = $(norm(Yₜ))")
             @. Y⁺ += dtγ * Yₜ
         end
         @nvtx "dss_remaining_tendency increment" color = colorant"blue" begin
@@ -257,6 +264,8 @@ function remaining_tendency_increment!(Y⁺, Y, p, t, dtγ)
             Spaces.weighted_dss_ghost!(Y⁺.c, p.ghost_buffer.c)
             Spaces.weighted_dss_ghost!(Y⁺.f, p.ghost_buffer.f)
         end
+        t < 100 && println("Explicit: ‖Y($t)‖ = $(norm(Y))")
+        t < 100 && println("Explicit: ‖Y⁺($t)‖ = $(norm(Y⁺))")
     end
     return Y⁺
 end
