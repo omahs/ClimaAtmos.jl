@@ -37,9 +37,12 @@ function large_scale_advection_tendency!(
 
     @. ᶜdTdt_hadv = prof_dTdt(thermo_params, ᶜts, t, z)
     @. ᶜdqtdt_hadv = prof_dqtdt(thermo_params, ᶜts, t, z)
+    println("‖ᶜdTdt_hadv($t)‖ = $(norm(ᶜdTdt_hadv))")
+    println("‖ᶜdqtdt_hadv($t)‖ = $(norm(ᶜdqtdt_hadv))")
 
     # TODO: unify dycore and edmf temperature
     ᶜT = p.ᶜT[colidx]
+    println("‖ᶜT($t)‖ = $(norm(ᶜT))")
     # ᶜT = p.edmf_cache.cent.ᶜT[colidx]
 
     T_0 = TD.Parameters.T_0(thermo_params)
@@ -50,6 +53,7 @@ function large_scale_advection_tendency!(
     @. Yₜ.c.ρq_tot[colidx] += Y.c.ρ[colidx] * ᶜdqtdt_hadv
     # TODO: should `hv` be a thermo function?
     #     (hv = cv_v * (ᶜT - T_0) + Lv_0 - R_v * T_0)
+    println("‖TD.cp_m(thermo_params, ᶜts)($t)‖ = $(norm(@. TD.cp_m(thermo_params, ᶜts)))")
     @. Yₜ.c.ρe_tot[colidx] +=
         Y.c.ρ[colidx] * (
             TD.cp_m(thermo_params, ᶜts) * ᶜdTdt_hadv +

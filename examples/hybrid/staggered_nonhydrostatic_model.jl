@@ -253,18 +253,8 @@ function remaining_tendency_increment!(Y⁺, Y, p, t, dtγ)
         end
         @nvtx "additional_tendency! increment" color = colorant"orange" begin
             t < 100 && println("Explicit: ‖Yₜ_2_before($t)‖ = $(norm(Yₜ))")
-            for prop_chain in Fields.property_chains(Yₜ)
-                field = Fields.single_field(Yₜ, prop_chain)
-                name = join(prop_chain, '.')
-                t < 100 && println("‖Yₜ.$name($t)‖ = $(norm(parent(field)))")
-            end
             additional_tendency!(Yₜ, Y, p, t)
             t < 100 && println("Explicit: ‖Yₜ_2_after($t)‖ = $(norm(Yₜ))")
-            for prop_chain in Fields.property_chains(Yₜ)
-                field = Fields.single_field(Yₜ, prop_chain)
-                name = join(prop_chain, '.')
-                t < 100 && println("‖Yₜ.$name($t)‖ = $(norm(parent(field)))")
-            end
             @. Y⁺ += dtγ * Yₜ
         end
         @nvtx "dss_remaining_tendency increment" color = colorant"blue" begin
