@@ -194,26 +194,36 @@ function additional_cache(
 end
 
 function additional_tendency!(Yₜ, Y, p, t)
+    t < 100 && println("addl 1: ‖Yₜ.c.ρe_tot($t)‖ = $(norm(Yₜ.c.ρe_tot))")
     (; viscous_sponge, hyperdiff) = p.tendency_knobs
     hyperdiff && CA.hyperdiffusion_tendency!(Yₜ, Y, p, t)
     viscous_sponge && CA.viscous_sponge_tendency!(Yₜ, Y, p, t)
+    t < 100 && println("addl 2: ‖Yₜ.c.ρe_tot($t)‖ = $(norm(Yₜ.c.ρe_tot))")
 
     # Vertical tendencies
     Fields.bycolumn(axes(Y.c)) do colidx
         (; vert_diff) = p.tendency_knobs
         (; rayleigh_sponge) = p.tendency_knobs
         rayleigh_sponge && CA.rayleigh_sponge_tendency!(Yₜ, Y, p, t, colidx)
+        t < 100 && println("addl 3: ‖Yₜ.c.ρe_tot($t)‖ = $(norm(Yₜ.c.ρe_tot))")
         CA.forcing_tendency!(Yₜ, Y, p, t, colidx, p.forcing_type)
+        t < 100 && println("addl 4: ‖Yₜ.c.ρe_tot($t)‖ = $(norm(Yₜ.c.ρe_tot))")
         CA.subsidence_tendency!(Yₜ, Y, p, t, colidx, p.subsidence)
+        t < 100 && println("addl 5: ‖Yₜ.c.ρe_tot($t)‖ = $(norm(Yₜ.c.ρe_tot))")
         CA.edmf_coriolis_tendency!(Yₜ, Y, p, t, colidx, p.edmf_coriolis)
+        t < 100 && println("addl 6: ‖Yₜ.c.ρe_tot($t)‖ = $(norm(Yₜ.c.ρe_tot))")
         CA.large_scale_advection_tendency!(Yₜ, Y, p, t, colidx, p.ls_adv)
+        t < 100 && println("addl 7: ‖Yₜ.c.ρe_tot($t)‖ = $(norm(Yₜ.c.ρe_tot))")
         if vert_diff
             (; coupled) = p
             !coupled && CA.get_surface_fluxes!(Y, p, colidx)
             CA.vertical_diffusion_boundary_layer_tendency!(Yₜ, Y, p, t, colidx)
         end
+        t < 100 && println("addl 8: ‖Yₜ.c.ρe_tot($t)‖ = $(norm(Yₜ.c.ρe_tot))")
         CA.precipitation_tendency!(Yₜ, Y, p, t, colidx, p.precip_model)
+        t < 100 && println("addl 9: ‖Yₜ.c.ρe_tot($t)‖ = $(norm(Yₜ.c.ρe_tot))")
         CA.radiation_tendency!(Yₜ, Y, p, t, colidx, p.radiation_model)
+        t < 100 && println("addl 10: ‖Yₜ.c.ρe_tot($t)‖ = $(norm(Yₜ.c.ρe_tot))")
         TCU.sgs_flux_tendency!(Yₜ, Y, p, t, colidx, p.turbconv_model)
     end
     # TODO: make bycolumn-able

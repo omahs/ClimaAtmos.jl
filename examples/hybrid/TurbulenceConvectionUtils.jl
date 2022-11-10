@@ -151,6 +151,13 @@ end
 
 
 function sgs_flux_tendency!(Yₜ, Y, p, t, colidx, ::TC.EDMFModel)
+    t < 100 && println("SGS: ‖Yₜ_aa($t)‖ = $(norm(Yₜ))")
+    for prop_chain in CC.Fields.property_chains(Yₜ)
+        field = CC.Fields.single_field(Yₜ, prop_chain)
+        name = join(prop_chain, '.')
+        t < 100 && println("‖Yₜ.$name($t)‖ = $(norm(parent(field)))")
+    end
+
     (; edmf_cache, Δt, compressibility_model) = p
     (; edmf, param_set, surf_params, surf_thermo_state) = edmf_cache
     (; precip_model, test_consistency, ᶠp₀, ᶜp₀) = edmf_cache
