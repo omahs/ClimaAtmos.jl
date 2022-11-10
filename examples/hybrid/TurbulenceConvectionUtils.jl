@@ -184,6 +184,11 @@ function sgs_flux_tendency!(Yₜ, Y, p, t, colidx, ::TC.EDMFModel)
     TC.update_aux!(edmf, grid, state, surf, tc_params, t, Δt)
 
     t < 100 && println("SGS: ‖Yₜ_a($t)‖ = $(norm(Yₜ))")
+    for prop_chain in CC.Fields.property_chains(Yₜ)
+        field = CC.Fields.single_field(Yₜ, prop_chain)
+        name = join(prop_chain, '.')
+        t < 100 && println("‖Yₜ.$name($t)‖ = $(norm(parent(field)))")
+    end
 
     TC.compute_precipitation_sink_tendencies(
         precip_model,
@@ -195,15 +200,30 @@ function sgs_flux_tendency!(Yₜ, Y, p, t, colidx, ::TC.EDMFModel)
     )
 
     t < 100 && println("SGS: ‖Yₜ_b($t)‖ = $(norm(Yₜ))")
+    for prop_chain in CC.Fields.property_chains(Yₜ)
+        field = CC.Fields.single_field(Yₜ, prop_chain)
+        name = join(prop_chain, '.')
+        t < 100 && println("‖Yₜ.$name($t)‖ = $(norm(parent(field)))")
+    end
 
     TC.compute_turbconv_tendencies!(edmf, grid, state, tc_params, surf, Δt)
 
     t < 100 && println("SGS: ‖Yₜ_c($t)‖ = $(norm(Yₜ))")
+    for prop_chain in CC.Fields.property_chains(Yₜ)
+        field = CC.Fields.single_field(Yₜ, prop_chain)
+        name = join(prop_chain, '.')
+        t < 100 && println("‖Yₜ.$name($t)‖ = $(norm(parent(field)))")
+    end
 
     # TODO: incrementally disable this and enable proper grid mean terms
     compute_gm_tendencies!(edmf, grid, state, surf, tc_params)
 
     t < 100 && println("SGS: ‖Yₜ_d($t)‖ = $(norm(Yₜ))")
+    for prop_chain in CC.Fields.property_chains(Yₜ)
+        field = CC.Fields.single_field(Yₜ, prop_chain)
+        name = join(prop_chain, '.')
+        t < 100 && println("‖Yₜ.$name($t)‖ = $(norm(parent(field)))")
+    end
 
     return nothing
 end
