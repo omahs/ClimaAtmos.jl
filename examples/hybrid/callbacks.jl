@@ -129,18 +129,13 @@ function dss_callback(integrator)
 end
 
 function turb_conv_affect_filter!(integrator)
-    p = integrator.p
-    (; edmf_cache, Δt) = p
-    (; edmf, param_set, aux, case, surf_params) = edmf_cache
-    t = integrator.t
-    Y = integrator.u
-    tc_params = CAP.turbconv_params(param_set)
-
-    Fields.bycolumn(axes(Y.c)) do colidx
-        state = TC.tc_column_state(Y, p, nothing, colidx)
-        grid = TC.Grid(state)
-        surf = TCU.get_surface(surf_params, grid, state, t, tc_params)
-        TC.affect_filter!(edmf, grid, state, tc_params, surf, t)
+    Fields.bycolumn(axes(integrator.u.c)) do colidx
+        turb_conv_affect_filter!(
+            integrator.u,
+            integrator.p,
+            integrator.t,
+            colidx,
+        )
     end
 
     # We're lying to OrdinaryDiffEq.jl, in order to avoid
@@ -148,6 +143,16 @@ function turb_conv_affect_filter!(integrator)
     # to support supplying a continuous representation of the
     # solution.
     ODE.u_modified!(integrator, false)
+end
+
+function turb_conv_affect_filter!(Y, p, t, colidx)
+    (; edmf_cache, Δt) = p
+    (; edmf, param_set, aux, case, surf_params) = edmf_cache
+    tc_params = CAP.turbconv_params(param_set)
+    state = TC.tc_column_state(Y, p, nothing, colidx)
+    grid = TC.Grid(state)
+    surf = TCU.get_surface(surf_params, grid, state, t, tc_params)
+    TC.affect_filter!(edmf, grid, state, tc_params, surf, t)
 end
 
 function rrtmgp_model_callback!(integrator)
