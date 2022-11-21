@@ -427,6 +427,12 @@ steps:
         agents:
           slurm_mem: 20GB
 
+      - label: ":rocket: flame graph: init"
+        command: "julia --color=yes --project=perf perf/flame_init.jl --job_id flame_init"
+        artifact_paths: "flame_init/*"
+        agents:
+          slurm_mem: 20GB
+
       - label: ":mag::rocket: Invalidations"
         command: "julia --color=yes --project=perf perf/invalidations.jl --job_id invalidations"
         artifact_paths: "invalidations/*"
