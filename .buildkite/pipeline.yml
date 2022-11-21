@@ -277,6 +277,13 @@ steps:
         agents:
           slurm_mem: 20GB
 
+      - label: ":computer: aquaplanet (ρe_tot) equilmoist with EDMF"
+        command: "julia --color=yes --project=examples examples/hybrid/driver.jl --moist equil --anelastic_dycore false --job_id sphere_baroclinic_wave_rhoe_equilmoist_mo_edmf --regression_test true --dt 1secs --t_end 5mins --FLOAT_TYPE Float64 --turbconv edmf --turbconv_case Bomex --config sphere --precip_model 0M --z_stretch false --dt_save_to_sol 1mins --dt_save_to_disk 1mins"
+        artifact_paths: "sphere_baroclinic_wave_rhoe_equilmoist_mo_edmf/*"
+        soft_fail: true
+        agents:
+          slurm_mem: 20GB
+
       - label: ":computer: aquaplanet (ρe_tot) equilmoist allsky radiation monin_obukhov varying insolation"
         command: "julia --color=yes --project=examples examples/hybrid/driver.jl --idealized_insolation false --vert_diff true --surface_scheme monin_obukhov --moist equil --rad allskywithclear --precip_model 0M --job_id sphere_aquaplanet_rhoe_equilmoist_allsky --dt 400secs --t_end 5days --regression_test true"
         artifact_paths: "sphere_aquaplanet_rhoe_equilmoist_allsky/*"

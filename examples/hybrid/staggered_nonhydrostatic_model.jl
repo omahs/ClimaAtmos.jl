@@ -219,6 +219,7 @@ function dss!(Y, p, t)
 end
 
 function remaining_tendency!(Yₜ, Y, p, t)
+    @show t
     p.test_dycore_consistency && CA.fill_with_nans!(p)
     (; compressibility_model) = p
     @nvtx "remaining tendency" color = colorant"yellow" begin

@@ -82,7 +82,7 @@ function turbconv_cache(
         Ri_bulk_crit,
     )
     edmf = turbconv_model
-    anelastic_column_kwargs = if true # CA.is_anelastic_column(atmos) # TODO: make conditional
+    anelastic_column_kwargs = if CA.is_anelastic_column(atmos)
         ᶠspace_1 = axes(Y.f[CC.Fields.ColumnIndex((1, 1), 1)])
         ᶜspace_1 = axes(Y.c[CC.Fields.ColumnIndex((1, 1), 1)])
         logpressure_fun = CA.log_pressure_profile(
@@ -145,14 +145,19 @@ function init_tc!(Y, p, params, colidx)
             surf_ref_thermo_state,
         )
     else
-        @. p.ᶜp[colidx] = p.edmf_cache.ᶜp₀
-
-        CA.compute_ref_density!(
-            Y.c.ρ[colidx],
-            p.ᶜp[colidx],
-            thermo_params,
-            surf_ref_thermo_state,
-        )
+        ᶜinterp = CCO.InterpolateF2C()
+        ᶜuₕ = Y.c.uₕ
+        ᶠw = Y.f.w
+        # kinetic
+        @. p.ᶜK[colidx] =
+            norm_sqr(C123(ᶜuₕ[colidx]) + C123(ᶜinterp(ᶠw[colidx]))) / 2
+        # thermo state
+        CA.thermo_state!(Y, p, ᶜinterp, colidx)
+        @. p.ᶜp[colidx] = TD.air_pressure(thermo_params, p.ᶜts[colidx])
+        @. p.edmf_cache.aux.cent.θ_liq_ice[colidx] =
+            TD.liquid_ice_pottemp(thermo_params, p.ᶜts[colidx])
+        @. p.edmf_cache.aux.cent.q_tot[colidx] =
+            TD.total_specific_humidity(thermo_params, p.ᶜts[colidx])
     end
     # TODO: can we simply remove this?
     If = CCO.InterpolateC2F(bottom = CCO.Extrapolate(), top = CCO.Extrapolate())

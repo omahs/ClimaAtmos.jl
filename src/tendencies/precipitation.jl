@@ -50,6 +50,14 @@ function compute_precipitation_cache!(
         )
 end
 
+compute_precipitation_cache!(
+    Y,
+    p,
+    colidx,
+    ::Microphysics0Moment,
+    ::TC.EDMFModel,
+) = nothing
+
 function precipitation_tendency!(
     Yₜ,
     Y,
