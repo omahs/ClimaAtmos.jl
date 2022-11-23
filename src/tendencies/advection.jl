@@ -52,10 +52,12 @@ function horizontal_advection_tendency!(Yₜ, Y, p, t)
 
     # Tracer conservation
     for ᶜρc_name in filter(is_tracer_var, propertynames(Y.c))
+        @show ᶜρc_name
         ᶜρc = getproperty(Y.c, ᶜρc_name)
         ᶜρcₜ = getproperty(Yₜ.c, ᶜρc_name)
         @. ᶜρcₜ -= divₕ(ᶜρc * ᶜuvw)
     end
+    error("oops!")
     return nothing
 end
 
