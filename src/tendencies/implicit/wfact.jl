@@ -369,7 +369,8 @@ function Wfact!(W, Y, p, dtγ, t, colidx)
         @. ∂ᶠ𝕄ₜ∂ᶠ𝕄[colidx].coefs.:2 -= p.ᶠβ_rayleigh_w[colidx]
     end
 
-    for ᶜρc_name in filter(is_tracer_var, propertynames(Y.c))
+    map(propertynames(Y.c)) do ᶜρc_name
+        is_tracer_var(ᶜρc_name) || return nothing # filter non-tracers
         ∂ᶜρcₜ∂ᶠ𝕄 = getproperty(∂ᶜ𝕋ₜ∂ᶠ𝕄_field, ᶜρc_name)
         ᶜρc = getproperty(Y.c, ᶜρc_name)
         # vertical_transport!(ᶜρcₜ, ᶠw, ᶜρ, ᶜρc, dt, tracer_upwinding)
