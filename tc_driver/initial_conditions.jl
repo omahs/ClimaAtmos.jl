@@ -27,6 +27,19 @@ function initialize_edmf(
     )
     initialize_updrafts(edmf, grid, state, surf)
     TC.set_edmf_surface_bc(edmf, grid, state, surf, param_set)
+
+    N_up = TC.n_updrafts(edmf)
+    prog_up = TC.center_prog_updrafts(state)
+    aux_up = TC.center_aux_updrafts(state)
+    prog_gm = TC.center_prog_grid_mean(state)
+    ρ_c = prog_gm.ρ
+    println("---- initialize_edmf")
+    @inbounds for i in 1:N_up
+        @show parent(prog_up[i].ρarea)
+        @show parent(aux_up[i].q_tot)
+    end
+    @show parent(ρ_c)
+
     return
 end
 
@@ -63,7 +76,6 @@ function initialize_updrafts(edmf, grid, state, surf)
     FT = TC.float_type(state)
     N_up = TC.n_updrafts(edmf)
     kc_surf = TC.kc_surface(grid)
-    aux_up = TC.center_aux_updrafts(state)
     prog_gm = TC.center_prog_grid_mean(state)
     aux_up = TC.center_aux_updrafts(state)
     aux_up_f = TC.face_aux_updrafts(state)
@@ -72,6 +84,7 @@ function initialize_updrafts(edmf, grid, state, surf)
     prog_up_f = TC.face_prog_updrafts(state)
     ρ_c = prog_gm.ρ
     a_min = edmf.minimum_area
+    println("---- initialize_updrafts")
     @inbounds for i in 1:N_up
         lg = CC.Fields.local_geometry_field(axes(prog_up_f[i].w))
         @. prog_up_f[i].w =
@@ -93,6 +106,10 @@ function initialize_updrafts(edmf, grid, state, surf)
         a_surf = TC.area_surface_bc(surf, edmf, i)
         aux_up[i].area[kc_surf] = a_surf
         prog_up[i].ρarea[kc_surf] = ρ_c[kc_surf] * a_surf
+        @show parent(prog_up[i].ρaq_tot)
+        @show parent(prog_up[i].ρarea)
+        @show parent(aux_up[i].q_tot)
     end
+    @show parent(ρ_c)
     return
 end
