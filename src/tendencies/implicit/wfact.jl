@@ -370,6 +370,7 @@ function Wfact!(W, Y, p, dtγ, t, colidx)
     end
 
     map(propertynames(Y.c)) do ᶜρc_name
+        Base.@_inline_meta
         is_tracer_var(ᶜρc_name) || return nothing # filter non-tracers
         ∂ᶜρcₜ∂ᶠ𝕄 = getproperty(∂ᶜ𝕋ₜ∂ᶠ𝕄_field, ᶜρc_name)
         ᶜρc = getproperty(Y.c, ᶜρc_name)
