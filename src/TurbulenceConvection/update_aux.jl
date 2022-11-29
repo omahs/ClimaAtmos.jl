@@ -83,12 +83,29 @@ function update_aux!(
                 aux_up[i].area[k] = 0
                 aux_up[i].e_kin[k] = e_kin[k]
             end
-            ts_up_i = thermo_state_pθq(
-                param_set,
-                p_c[k],
-                aux_up[i].θ_liq_ice[k],
-                aux_up[i].q_tot[k],
-            )
+            local ts_up_i
+            try
+                ts_up_i = thermo_state_pθq(
+                    param_set,
+                    p_c[k],
+                    aux_up[i].θ_liq_ice[k],
+                    aux_up[i].q_tot[k],
+                )
+            catch
+                println("---------- Erroring in SA updraft")
+                @show k
+                @show prog_up[i].ρarea[k] / ρ_c[k] >= edmf.minimum_area
+                @show aux_up[i].q_tot[k]
+                @show prog_up[i].ρaq_tot[k]
+                @show prog_up[i].ρarea[k]
+                @show aux_gm.q_tot[k]
+                ts_up_i = thermo_state_pθq(
+                    param_set,
+                    p_c[k],
+                    aux_up[i].θ_liq_ice[k],
+                    aux_up[i].q_tot[k],
+                )
+            end
             aux_up[i].e_tot[k] = TD.total_energy(
                 thermo_params,
                 ts_up_i,
