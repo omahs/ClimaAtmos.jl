@@ -254,29 +254,38 @@ function get_state_fresh_start(parsed_args, spaces, params, atmos)
     return (Y, t_start)
 end
 
-ode_algorithm_type(ode_algorithm) =
-    ode_algorithm isa Function ? typeof(ode_algorithm()) : ode_algorithm
+is_implicit(::Type{T<:ODE.OrdinaryDiffEqImplicitAlgorithm}) where {T} = true
+is_implicit(::Type{T<:ODE.OrdinaryDiffEqAdaptiveImplicitAlgorithm}) where {T} = true
+is_implicit(::Type{T<:Any}) where {T} = is_imex_CTS_algo(T)
+is_implicit(x::Function) = is_implicit(typeof(x()))
+is_implicit(x) = is_implicit(typeof(x))
 
-is_imex_CTS_algo(ode_algorithm) =
-    ode_algorithm_type(ode_algorithm) <: ClimaTimeSteppers.IMEXARKAlgorithm
+is_imex_CTS_algo(::Type{<:Any}) = false
+is_imex_CTS_algo(::Type{<:CTS.IMEXARKAlgorithm}) = true
+is_imex_CTS_algo(x) = is_imex_CTS_algo(typeof(x))
+is_imex_CTS_algo(x::Function) = is_imex_CTS_algo(typeof(x()))
+is_rosenbrock(::Type{<:ODE.Rosenbrock23}) = true
+is_rosenbrock(::Type{<:ODE.Rosenbrock32}) = false
+is_rosenbrock(::Type{<:Any}) = false
+is_rosenbrock(x::Function) = is_rosenbrock(typeof(x()))
+is_rosenbrock(x) = is_rosenbrock(typeof(x))
 
-is_implicit(ode_algorithm) =
-    ode_algorithm_type(ode_algorithm) <: Union{
-        ODE.OrdinaryDiffEqImplicitAlgorithm,
-        ODE.OrdinaryDiffEqAdaptiveImplicitAlgorithm,
-    } || is_imex_CTS_algo(ode_algorithm)
-
-
-use_transform(ode_algorithm) = !(
-    is_imex_CTS_algo(ode_algorithm) || ode_algorithm_type(ode_algorithm) in
-    (ODE.Rosenbrock23, ODE.Rosenbrock32)
-)
-
-is_ordinary_diffeq_newton(ode_algorithm) =
-    ode_algorithm_type(ode_algorithm) <: Union{
+is_ordinary_diffeq_newton(x::Function) = is_ordinary_diffeq_newton(typeof(x()))
+is_ordinary_diffeq_newton(x) = is_ordinary_diffeq_newton(typeof(x))
+is_ordinary_diffeq_newton(::Type{T}) where {T} =
+    T <: Union{
         ODE.OrdinaryDiffEqNewtonAlgorithm,
         ODE.OrdinaryDiffEqNewtonAdaptiveAlgorithm,
     }
+
+is_CTS_algo(::Type{<:CTS.DistributedODEAlgorithm}) = true
+is_CTS_algo(::Type{<:Any}) = false
+is_CTS_algo(x::Function) = is_CTS_algo(typeof(x()))
+is_CTS_algo(x) = is_CTS_algo(typeof(x))
+is_ordinary_diffeq_algo(x) = !is_CTS_algo(x)
+
+use_transform(ode_algo_type) =
+    !(is_imex_CTS_algo(ode_algo_type) || is_rosenbrock(ode_algo_type))
 
 function jac_kwargs(ode_algorithm, Y, energy_form)
     if is_implicit(ode_algorithm)
@@ -298,20 +307,22 @@ end
 import OrdinaryDiffEq as ODE
 import ClimaTimeSteppers as CTS
 #=
-(; ode_algorithm, alg_kwargs) =
+(; ode_algo_type, alg_kwargs) =
     ode_config(Y, parsed_args, atmos)
 =#
 function ode_configuration(Y, parsed_args, atmos)
-    ode_algorithm = if startswith(parsed_args["ode_algo"], "ODE.")
+    _is_ordinary_diffeq_algo = startswith(parsed_args["ode_algo"], "ODE.")
+    ode_algo_type = if _is_ordinary_diffeq_algo
         @warn "apply_limiter flag is ignored for OrdinaryDiffEq algorithms"
         getproperty(ODE, Symbol(split(parsed_args["ode_algo"], ".")[2]))
     else
         getproperty(CTS, Symbol(parsed_args["ode_algo"]))
     end
+    @assert is_CTS_algo(ode_algo_type) ≠ _is_ordinary_diffeq_algo
 
-    if !is_implicit(ode_algorithm)
-        return (; ode_algorithm, alg_kwargs = NamedTuple())
-    elseif is_ordinary_diffeq_newton(ode_algorithm)
+    if !is_implicit(ode_algo_type)
+        return ode_algo_type()
+    elseif is_ordinary_diffeq_newton(ode_algo_type)
         if parsed_args["max_newton_iters"] == 1
             error("OridinaryDiffEq requires at least 2 Newton iterations")
         end
@@ -320,11 +331,8 @@ function ode_configuration(Y, parsed_args, atmos)
             κ = parsed_args["max_newton_iters"] == 2 ? Inf : 0.01,
             max_iter = parsed_args["max_newton_iters"],
         )
-        return (;
-            ode_algorithm,
-            alg_kwargs = (; linsolve = CA.linsolve!, nlsolve),
-        )
-    elseif is_imex_CTS_algo(ode_algorithm)
+        return ode_algo_type(;linsolve = CA.linsolve!, nlsolve)
+    elseif is_imex_CTS_algo(ode_algo_type)
         newtons_method = NewtonsMethod(;
             max_iters = parsed_args["max_newton_iters"],
             krylov_method = if parsed_args["use_krylov_method"]
@@ -352,14 +360,14 @@ function ode_configuration(Y, parsed_args, atmos)
                 nothing
             end,
         )
-        return (; ode_algorithm, alg_kwargs = (; newtons_method))
+        return ode_algo_type(;newtons_method)
     else
-        return (; ode_algorithm, alg_kwargs = (; linsolve = CA.linsolve!))
+        return ode_algo_type(;linsolve = CA.linsolve!)
     end
 end
 
 function args_integrator(parsed_args, Y, p, tspan, ode_config, callback)
-    (; alg_kwargs, ode_algorithm) = ode_config
+    (; alg_kwargs, ode_algo) = ode_config
     (; dt) = p.simulation
     FT = eltype(tspan)
     dt_save_to_sol = time_to_seconds(parsed_args["dt_save_to_sol"])
@@ -367,13 +375,12 @@ function args_integrator(parsed_args, Y, p, tspan, ode_config, callback)
 
     @time "Define problem" problem = if parsed_args["split_ode"]
         remaining_func =
-            startswith(parsed_args["ode_algo"], "ODE.") ?
-            remaining_tendency! :
-            ForwardEulerODEFunction(remaining_tendency_increment!)
+            is_ordinary_diffeq_algo(ode_algo) ? ForwardEulerODEFunction(remaining_tendency_increment!) :
+            remaining_tendency!
         ODE.SplitODEProblem(
             ODE.ODEFunction(
                 implicit_tendency!;
-                jac_kwargs(ode_algorithm, Y, atmos.energy_form)...,
+                jac_kwargs(ode_algo, Y, atmos.energy_form)...,
                 tgrad = (∂Y∂t, Y, p, t) -> (∂Y∂t .= FT(0)),
             ),
             remaining_func,
@@ -385,14 +392,14 @@ function args_integrator(parsed_args, Y, p, tspan, ode_config, callback)
         ODE.ODEProblem(remaining_tendency!, Y, tspan, p)
     end
     if startswith(parsed_args["ode_algo"], "ODE.")
-        ode_algo = ode_algorithm(; alg_kwargs...)
+        ode_algo = ode_algo_type(; alg_kwargs...)
         integrator_kwargs = (;
             adaptive = false,
             progress = show_progress_bar,
             progress_steps = isinteractive() ? 1 : 1000,
         )
     else
-        ode_algo = ode_algorithm(alg_kwargs...)
+        ode_algo = ode_algo_type(alg_kwargs...)
         integrator_kwargs = (;
             kwargshandle = KeywordArgSilent, # allow custom kwargs
             adjustfinal = true,
