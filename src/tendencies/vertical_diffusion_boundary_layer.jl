@@ -187,17 +187,16 @@ function set_surface_inputs!(
 
     # wrap state values
     @. sfc_inputs = SF.Coefficients(
-        SF.InteriorValues(z_int, uₕ_int_phys_vec, ts_int), # state_in
-        SF.SurfaceValues(                                  # state_sfc
+        state_in = SF.InteriorValues(z_int, uₕ_int_phys_vec, ts_int), # state_in
+        state_sfc = SF.SurfaceValues(                                 # state_sfc
             z_sfc,
             StaticArrays.SVector(FT(0), FT(0)),
             ts_sfc,
         ),
-        sfc_inputs.Cd,                                     # Cd
-        sfc_inputs.Ch,                                     # Ch
-        FT(0),                                             # z0m
-        FT(0),                                             # z0b
-        FT(1),                                             # gustiness
+        Cd = sfc_inputs.Cd,                                     # Cd
+        Ch = sfc_inputs.Ch,                                     # Ch
+        z0m = FT(0),                                            # z0m
+        z0b = FT(0),                                            # z0b
     )
     return nothing
 end
@@ -215,16 +214,14 @@ function set_surface_inputs!(
 
     # wrap state values
     @. sfc_inputs = SF.ValuesOnly(
-        SF.InteriorValues(z_int, uₕ_int_phys_vec, ts_int), # state_in
-        SF.SurfaceValues(                                  # state_sfc
+        state_in = SF.InteriorValues(z_int, uₕ_int_phys_vec, ts_int), # state_in
+        state_sfc = SF.SurfaceValues(                                 # state_sfc
             z_sfc,
             StaticArrays.SVector(FT(0), FT(0)),
             ts_sfc,
         ),
-        sfc_inputs.z0m,                                    # z0m
-        sfc_inputs.z0b,                                    # z0b
-        FT(-1),                                            # L_MO_init
-        FT(1),                                             # gustiness
+        z0m = sfc_inputs.z0m,                                    # z0m
+        z0b = sfc_inputs.z0b,                                    # z0b
     )
 
 end
