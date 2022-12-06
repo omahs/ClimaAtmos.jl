@@ -186,7 +186,7 @@ function set_surface_inputs!(
     FT = Spaces.undertype(axes(z_sfc))
 
     # wrap state values
-    @. sfc_inputs = SF.Coefficients(
+    @. sfc_inputs = SF.Coefficients{FT}(
         state_in = SF.InteriorValues(z_int, uₕ_int_phys_vec, ts_int), # state_in
         state_sfc = SF.SurfaceValues(                                 # state_sfc
             z_sfc,
@@ -213,7 +213,7 @@ function set_surface_inputs!(
     FT = Spaces.undertype(axes(z_sfc))
 
     # wrap state values
-    @. sfc_inputs = SF.ValuesOnly(
+    @. sfc_inputs = SF.ValuesOnly{FT}(
         state_in = SF.InteriorValues(z_int, uₕ_int_phys_vec, ts_int), # state_in
         state_sfc = SF.SurfaceValues(                                 # state_sfc
             z_sfc,
