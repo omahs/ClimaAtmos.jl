@@ -335,8 +335,10 @@ function ode_configuration(Y, parsed_args, atmos)
     @info "Using ODE algo: `$ode_algorithm`"
 
     if !is_implicit_type(ode_algorithm)
+        println("!is_implicit_type(ode_algorithm) = true")
         return ode_algorithm()
     elseif is_ordinary_diffeq_newton(ode_algorithm)
+        println("is_ordinary_diffeq_newton(ode_algorithm) = true")
         if parsed_args["max_newton_iters"] == 1
             error("OridinaryDiffEq requires at least 2 Newton iterations")
         end
@@ -347,6 +349,7 @@ function ode_configuration(Y, parsed_args, atmos)
         )
         return ode_algorithm(; linsolve = CA.linsolve!, nlsolve)
     elseif is_imex_CTS_algo_type(ode_algorithm)
+        println("is_imex_CTS_algo_type(ode_algorithm) = true")
         newtons_method = NewtonsMethod(;
             max_iters = parsed_args["max_newton_iters"],
             krylov_method = if parsed_args["use_krylov_method"]
@@ -376,6 +379,7 @@ function ode_configuration(Y, parsed_args, atmos)
         )
         return ode_algorithm(newtons_method)
     else
+        println("else case")
         return ode_algorithm(; linsolve = CA.linsolve!)
     end
 end
