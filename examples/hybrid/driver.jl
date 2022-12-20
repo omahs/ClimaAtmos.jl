@@ -16,6 +16,10 @@ parse_arg(pa, key, default) = isnothing(pa[key]) ? default : pa[key]
 
 const FT = parsed_args["FLOAT_TYPE"] == "Float64" ? Float64 : Float32
 
+import Thermodynamics
+# Saturation adjustment failures are not always catastrophic:
+Thermodynamics.error_on_non_convergence() = false
+
 fps = parsed_args["fps"]
 idealized_insolation = parsed_args["idealized_insolation"]
 idealized_clouds = parsed_args["idealized_clouds"]
