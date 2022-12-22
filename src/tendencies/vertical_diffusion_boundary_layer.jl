@@ -298,8 +298,11 @@ function get_surface_fluxes!(Y, p, t, colidx, ::Decoupled)
 
         # calculate all fluxes (saturated surface conditions)
         sf_params = CAP.surface_fluxes_params(params)
-        @. sfc_conditions[colidx] =
-            SF.surface_conditions(sf_params, p.sfc_inputs[colidx])
+        @. sfc_conditions[colidx] = SF.surface_conditions(
+            sf_params,
+            p.sfc_inputs[colidx];
+            noniterative_stable_sol = true,
+        )
     end
 
     if diffuse_momentum
