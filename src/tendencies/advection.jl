@@ -62,19 +62,13 @@ end
 
 function explicit_vertical_advection_tendency!(Yₜ, Y, p, t)
     Fields.bycolumn(axes(Y.c)) do colidx
-        explicit_vertical_advection_tendency!(Yₜ, Y, p, t, colidx, Y.c.ρ)
+        explicit_vertical_advection_tendency!(Yₜ, Y, p, t, colidx)
     end
     return nothing
 end
 
-function explicit_vertical_advection_tendency!(
-    Yₜ,
-    Y,
-    p,
-    t,
-    colidx,
-    ᶜρ::Tρ,
-) where {Tρ}
+function explicit_vertical_advection_tendency!(Yₜ, Y, p, t, colidx)
+    ᶜρ = Y.c.ρ
     ᶜuₕ = Y.c.uₕ
     ᶠw = Y.f.w
     C123 = Geometry.Covariant123Vector
@@ -110,8 +104,8 @@ function explicit_vertical_advection_tendency!(
 
     # Tracer conservation
     for ᶜρc_name in filter(is_tracer_var, propertynames(Y.c))
-        ᶜρc = getproperty(Y.c, ᶜρc_name)::Tρ
-        ᶜρcₜ = getproperty(Yₜ.c, ᶜρc_name)::Tρ
+        ᶜρc = getproperty(Y.c, ᶜρc_name)::typeof(Y.c.ρ)
+        ᶜρcₜ = getproperty(Yₜ.c, ᶜρc_name)::typeof(Y.c.ρ)
         @. ᶜρcₜ[colidx] -= ᶜdivᵥ(ᶠinterp(ᶜρc[colidx] * ᶜuₕ[colidx]))
         nothing
     end
