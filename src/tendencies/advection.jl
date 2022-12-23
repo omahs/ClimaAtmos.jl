@@ -103,10 +103,13 @@ function explicit_vertical_advection_tendency!(Yₜ, Y, p, t, colidx)
     @. Yₜ.f.w[colidx] -= ᶠω¹²[colidx] × ᶠu¹²[colidx] + ᶠgradᵥ(ᶜK[colidx])
 
     # Tracer conservation
-    for ᶜρc_name in filter(is_tracer_var, propertynames(Y.c))
+    map(propertynames(Y.c)) do ᶜρc_name
+        Base.@_inline_meta
         ᶜρc = getproperty(Y.c, ᶜρc_name)
         ᶜρcₜ = getproperty(Yₜ.c, ᶜρc_name)
+        is_tracer_var(ᶜρc_name) || return nothing
         @. ᶜρcₜ[colidx] -= ᶜdivᵥ(ᶠinterp(ᶜρc[colidx] * ᶜuₕ[colidx]))
+        nothing
     end
 
     return nothing

@@ -12,6 +12,22 @@ is_tracer_var(symbol) = !(
     is_turbconv_var(symbol)
 )
 
+# is_density(symbol) = symbol === :ρ
+# is_energy_var(symbol) = symbol === :ρθ ||
+#     symbol === :ρe_tot ||
+#     symbol === :ρe_int
+# is_momentum_var(symbol) = symbol === :uₕ ||
+#     symbol === :ρuₕ ||
+#     symbol === :w ||
+#     symbol === :ρw
+# is_turbconv_var(symbol) = symbol === :turbconv
+# is_tracer_var(symbol) = !(
+#     is_density(symbol) ||
+#     is_energy_var(symbol) ||
+#     is_momentum_var(symbol) ||
+#     is_turbconv_var(symbol)
+# )
+
 # we may be hitting a slow path:
 # https://stackoverflow.com/questions/14687665/very-slow-stdpow-for-bases-very-close-to-1
 fast_pow(x::FT, y::FT) where {FT <: AbstractFloat} = exp(y * log(x))
