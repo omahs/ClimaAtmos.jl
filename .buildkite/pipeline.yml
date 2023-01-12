@@ -463,6 +463,13 @@ steps:
           slurm_ntasks_per_node: 8
           slurm_mem: 20GB
 
+      - label: ":rocket: flame graph: Jet test"
+        command: "julia --color=yes --project=perf perf/jet.jl --job_id jet_perf_target --enable_threading false"
+        artifact_paths: "jet_perf_target/*"
+        soft_fail: true
+        agents:
+          slurm_mem: 20GB
+
       - label: ":rocket: flame graph: perf target callbacks"
         command: "julia --color=yes --project=perf perf/flame.jl --job_id flame_perf_target_rhoe_callbacks --dt_save_to_sol 1secs --dt_save_restart 1secs --dt_rad 1secs"
         artifact_paths: "flame_perf_target_rhoe_callbacks/*"
