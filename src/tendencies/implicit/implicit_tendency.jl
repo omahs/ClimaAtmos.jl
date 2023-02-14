@@ -141,8 +141,8 @@ end
 @inline advect!(Yₜ, Y, p, t, colidx, ᶜρc_name::Tuple{}) = nothing
 
 @inline function advect!(Yₜ, Y, p, t, colidx, ᶜρc_name::Tuple)
-    ᶜρcₜ = getproperty(Yₜ.c, ᶜρc_name[1])
-    ᶜρc = getproperty(Y.c, ᶜρc_name[1])
+    ᶜρcₜ = getproperty(Yₜ.c, ᶜρc_name[1])::typeof(Y.c.ρ)
+    ᶜρc = getproperty(Y.c, ᶜρc_name[1])::typeof(Y.c.ρ)
     vertical_transport!(
         ᶜρcₜ[colidx],
         p.ᶠu³[colidx],
