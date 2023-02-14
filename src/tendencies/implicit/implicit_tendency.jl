@@ -134,17 +134,23 @@ function implicit_vertical_advection_tendency!(Yₜ, Y, p, t, colidx)
         @. Yₜ.f.w[colidx] -= p.ᶠβ_rayleigh_w[colidx] * Y.f.w[colidx]
     end
 
-    for ᶜρc_name in filter(is_tracer_var, propertynames(Y.c))
-        ᶜρcₜ = getproperty(Yₜ.c, ᶜρc_name)
-        ᶜρc = getproperty(Y.c, ᶜρc_name)
-        vertical_transport!(
-            ᶜρcₜ[colidx],
-            ᶠu³[colidx],
-            ᶜρ[colidx],
-            ᶜρc[colidx],
-            p,
-            tracer_upwinding,
-        )
-    end
+    advect!(Yₜ, Y, p, t, colidx, filter(is_tracer_var, propertynames(Y.c)))
+    return nothing
+end
+
+@inline advect!(Yₜ, Y, p, t, colidx, ᶜρc_name::Tuple{}) = nothing
+
+@inline function advect!(Yₜ, Y, p, t, colidx, ᶜρc_name::Tuple)
+    ᶜρcₜ = getproperty(Yₜ.c, ᶜρc_name[1])
+    ᶜρc = getproperty(Y.c, ᶜρc_name[1])
+    vertical_transport!(
+        ᶜρcₜ[colidx],
+        p.ᶠu³[colidx],
+        Y.c.ρ[colidx],
+        ᶜρc[colidx],
+        p,
+        p.tracer_upwinding,
+    )
+    advect!(Yₜ, Y, p, t, colidx, Base.tail(ᶜρc_name))
     return nothing
 end
