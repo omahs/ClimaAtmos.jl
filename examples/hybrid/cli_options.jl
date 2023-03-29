@@ -117,6 +117,10 @@ function parse_commandline()
         help = "Set the initial state to discrete hydrostatic balance"
         arg_type = Bool
         default = false
+        "--geopotential"
+        help = "For specific test cases, toggle gravity term [`true`(default), `false`]"
+        arg_type = Bool
+        default = true
         "--energy_upwinding"
         help = "Energy upwinding mode [`none` (default), `first_order` , `third_order`, `boris_book`, `zalesak`]"
         arg_type = Symbol

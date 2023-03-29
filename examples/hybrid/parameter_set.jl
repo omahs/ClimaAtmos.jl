@@ -20,6 +20,9 @@ function create_parameter_set(::Type{FT}, parsed_args, default_args) where {FT}
     elseif CA.is_column_without_edmf(parsed_args)
         overrides = (; τ_precip = dt)
         create_climaatmos_parameter_set(toml_dict, parsed_args, overrides)
+    elseif !parsed_args["geopotential"]
+        overrides = (; grav = 0.0)
+        create_climaatmos_parameter_set(toml_dict, parsed_args, overrides)
     else
         overrides = (;
             R_d = 287.0,
