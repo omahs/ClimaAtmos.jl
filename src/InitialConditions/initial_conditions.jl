@@ -57,12 +57,13 @@ function (initial_condition::IsothermalZPGProfile)(params)
         R_d = CAP.R_d(params)
         MSLP = CAP.MSLP(params)
         grav = CAP.grav(params)
-        T₀ = CAP.T_0(params)
+        #T₀ = CAP.T_0(params)
+        T₀ = FT(300)
         thermo_params = CAP.thermodynamics_params(params)
 
         (;x,z) = local_geometry.coordinates
         p = MSLP * exp(-z * grav / (R_d * T₀))
-        u = FT(1)
+        u = sinpi(x/12500)^2
         velocity = Geometry.UVector(FT(u))
         return LocalState(;
             params,
