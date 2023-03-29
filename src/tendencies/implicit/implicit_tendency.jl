@@ -119,7 +119,7 @@ function implicit_vertical_advection_tendency!(Yₜ, Y, p, t, colidx)
         )
     elseif :ρe_tot in propertynames(Y.c)
         (; ᶜρh) = p
-        @. ᶜρh[colidx] = Y.c.ρe_tot[colidx] + ᶜp[colidx]
+        @. ᶜρh[colidx] = Y.c.ρe_tot[colidx] #+ ᶜp[colidx]
         vertical_transport!(
             Yₜ.c.ρe_tot[colidx],
             ᶠu³[colidx],
@@ -138,10 +138,11 @@ function implicit_vertical_advection_tendency!(Yₜ, Y, p, t, colidx)
     #    (ᶠinterp(ᶜρ[colidx] - ᶜρ_ref[colidx])) / ᶠinterp(ᶜρ[colidx]) *
     #    ᶠgradᵥ_ᶜΦ[colidx]
     #)
-    @. Yₜ.f.w[colidx] = -(
-        ᶠgradᵥ(ᶜp[colidx] - ᶜp_ref[colidx]) / ᶠinterp(ᶜρ[colidx])
-    )
-    @. Yₜ.f.w[colidx] -= (
+    ## New (Test Ekin conservation)
+    #@. Yₜ.f.w[colidx] = -(
+    #    ᶠgradᵥ(ᶜp[colidx] - ᶜp_ref[colidx]) / ᶠinterp(ᶜρ[colidx])
+    #)
+    @. Yₜ.f.w[colidx]  = -(
         (ᶠinterp(ᶜρ[colidx] - ᶜρ_ref[colidx])) / ᶠinterp(ᶜρ[colidx]) *
         ᶠgradᵥ_ᶜΦ[colidx]
     )

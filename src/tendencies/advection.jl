@@ -29,7 +29,7 @@ function horizontal_advection_tendency!(Yₜ, Y, p, t)
         ### Original
         #@. Yₜ.c.ρe_tot -= divₕ((Y.c.ρe_tot + ᶜp) * ᶜu_bar)
         ### New
-        @. Yₜ.c.ρe_tot -= divₕ(ᶜp * ᶜu_bar)
+        #@. Yₜ.c.ρe_tot -= divₕ(ᶜp * ᶜu_bar)
         @. Yₜ.c.ρe_tot -= divₕ(Y.c.ρe_tot * ᶜu_bar)
         ### 
     end
@@ -53,8 +53,8 @@ function horizontal_advection_tendency!(Yₜ, Y, p, t)
         ### New
         @. Yₜ.c.uₕ -=
             Geometry.Covariant12Vector(gradₕ(ᶜK + ᶜΦ))
-        @. Yₜ.c.uₕ -=
-            Geometry.Covariant12Vector(gradₕ(ᶜp - ᶜp_ref) / ᶜρ)
+        #@. Yₜ.c.uₕ -=
+        #    Geometry.Covariant12Vector(gradₕ(ᶜp - ᶜp_ref) / ᶜρ)
         ### 
     end
 
