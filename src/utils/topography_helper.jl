@@ -51,7 +51,7 @@ function topography_agnesi(coords)
     FT = eltype(x)
     h_c = FT(1)
     a_c = FT(10000)
-    x_c = FT(120000)
+    x_c = FT(12500)
     zₛ = @. h_c / (1 + ((x - x_c) / a_c)^2)
     return zₛ
 end
