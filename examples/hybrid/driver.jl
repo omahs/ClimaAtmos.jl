@@ -426,9 +426,11 @@ end
 
 if parsed_args["check_conservation"]
     @test sum(sol.u[1].c.ρ) ≈ sum(sol.u[end].c.ρ) rtol = 25 * eps(FT)
-   # Keng = similar(Y.c,FT)
-   # CA.compute_kinetic!(Keng, sol.u[1])
-   # CA.compute_kinetic!(Keng, sol.u[end])
+    Keng0 = similar(Y.c,FT)
+    Keng1 = similar(Y.c,FT)
+    ΣK0 = sum(CA.compute_kinetic!(Keng0, sol.u[1]))
+    ΣK1 = sum(CA.compute_kinetic!(Keng1, sol.u[end])) 
+    @test ΣK1 ≈ ΣK0 rtol = 30 * eps(FT)
     @test sum(sol.u[1].c.ρe_tot) +
           (p.net_energy_flux_sfc[][] - p.net_energy_flux_toa[][]) ≈
           sum(sol.u[end].c.ρe_tot) rtol = 30 * eps(FT)

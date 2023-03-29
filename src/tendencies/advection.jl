@@ -42,7 +42,7 @@ function horizontal_advection_tendency!(Yₜ, Y, p, t)
         #@. Yₜ.c.uₕ -= gradₕ(ᶜp - ᶜp_ref) / ᶜρ + gradₕ(ᶜK + ᶜΦ)
         ### New
         @. Yₜ.c.uₕ -= gradₕ(ᶜK + ᶜΦ)
-        @. Yₜ.c.uₕ -= gradₕ(ᶜp - ᶜp_ref) / ᶜρ
+        #@. Yₜ.c.uₕ -= gradₕ(ᶜp - ᶜp_ref) / ᶜρ
         ### 
     elseif point_type <: Geometry.Abstract2DPoint
         ᶜω³ .= tuple(zero(eltype(ᶜω³)))
