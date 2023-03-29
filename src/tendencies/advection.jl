@@ -26,19 +26,36 @@ function horizontal_advection_tendency!(Yₜ, Y, p, t)
     if :ρθ in propertynames(Y.c)
         @. Yₜ.c.ρθ -= divₕ(Y.c.ρθ * ᶜu_bar)
     elseif :ρe_tot in propertynames(Y.c)
-        @. Yₜ.c.ρe_tot -= divₕ((Y.c.ρe_tot + ᶜp) * ᶜu_bar)
+        ### Original
+        #@. Yₜ.c.ρe_tot -= divₕ((Y.c.ρe_tot + ᶜp) * ᶜu_bar)
+        ### New
+        @. Yₜ.c.ρe_tot -= divₕ(ᶜp * ᶜu_bar)
+        @. Yₜ.c.ρe_tot -= divₕ(Y.c.ρe_tot * ᶜu_bar)
+        ### 
     end
 
     # Momentum conservation
     if point_type <: Geometry.Abstract3DPoint
         @. ᶜω³ = curlₕ(ᶜuₕ)
         @. ᶠω¹² = curlₕ(ᶠw)
-        @. Yₜ.c.uₕ -= gradₕ(ᶜp - ᶜp_ref) / ᶜρ + gradₕ(ᶜK + ᶜΦ)
+        ### Original
+        #@. Yₜ.c.uₕ -= gradₕ(ᶜp - ᶜp_ref) / ᶜρ + gradₕ(ᶜK + ᶜΦ)
+        ### New
+        @. Yₜ.c.uₕ -= gradₕ(ᶜK + ᶜΦ)
+        @. Yₜ.c.uₕ -= gradₕ(ᶜp - ᶜp_ref) / ᶜρ
+        ### 
     elseif point_type <: Geometry.Abstract2DPoint
         ᶜω³ .= tuple(zero(eltype(ᶜω³)))
         @. ᶠω¹² = Geometry.Contravariant12Vector(curlₕ(ᶠw))
+        ### Original
+        #@. Yₜ.c.uₕ -=
+        #    Geometry.Covariant12Vector(gradₕ(ᶜp - ᶜp_ref) / ᶜρ + gradₕ(ᶜK + ᶜΦ))
+        ### New
         @. Yₜ.c.uₕ -=
-            Geometry.Covariant12Vector(gradₕ(ᶜp - ᶜp_ref) / ᶜρ + gradₕ(ᶜK + ᶜΦ))
+            Geometry.Covariant12Vector(gradₕ(ᶜK + ᶜΦ))
+        @. Yₜ.c.uₕ -=
+            Geometry.Covariant12Vector(gradₕ(ᶜp - ᶜp_ref) / ᶜρ)
+        ### 
     end
 
     return nothing

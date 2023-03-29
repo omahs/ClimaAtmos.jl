@@ -43,6 +43,38 @@ function (initial_condition::IsothermalProfile)(params)
 end
 
 """
+    IsothermalZPGProfile()
+
+An `InitialCondition` with a uniform temperature profile T₀.
+T₀ is the triple point temperature. 
+"""
+Base.@kwdef struct IsothermalZPGProfile <: InitialCondition
+end
+
+function (initial_condition::IsothermalZPGProfile)(params)
+    function local_state(local_geometry)
+        FT = eltype(params)
+        R_d = CAP.R_d(params)
+        MSLP = CAP.MSLP(params)
+        grav = CAP.grav(params)
+        T₀ = CAP.T_0(params)
+        thermo_params = CAP.thermodynamics_params(params)
+
+        (;x,z) = local_geometry.coordinates
+        p = MSLP * exp(-z * grav / (R_d * T₀))
+        u = FT(1)
+        velocity = Geometry.UVector(FT(u))
+        return LocalState(;
+            params,
+            geometry = local_geometry,
+            thermo_state = TD.PhaseDry_pT(thermo_params, p, T₀),
+            velocity = velocity
+        )
+    end
+    return local_state
+end
+
+"""
     DecayingProfile(; perturb = true)
 
 An `InitialCondition` with a decaying temperature profile, and with an optional

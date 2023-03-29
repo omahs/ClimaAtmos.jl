@@ -132,8 +132,16 @@ function implicit_vertical_advection_tendency!(Yₜ, Y, p, t, colidx)
 
     Yₜ.c.uₕ[colidx] .= tuple(zero(eltype(Yₜ.c.uₕ[colidx])))
 
+    ### Original
+    #@. Yₜ.f.w[colidx] = -(
+    #    ᶠgradᵥ(ᶜp[colidx] - ᶜp_ref[colidx]) / ᶠinterp(ᶜρ[colidx]) +
+    #    (ᶠinterp(ᶜρ[colidx] - ᶜρ_ref[colidx])) / ᶠinterp(ᶜρ[colidx]) *
+    #    ᶠgradᵥ_ᶜΦ[colidx]
+    #)
     @. Yₜ.f.w[colidx] = -(
-        ᶠgradᵥ(ᶜp[colidx] - ᶜp_ref[colidx]) / ᶠinterp(ᶜρ[colidx]) +
+        ᶠgradᵥ(ᶜp[colidx] - ᶜp_ref[colidx]) / ᶠinterp(ᶜρ[colidx])
+    )
+    @. Yₜ.f.w[colidx] -= (
         (ᶠinterp(ᶜρ[colidx] - ᶜρ_ref[colidx])) / ᶠinterp(ᶜρ[colidx]) *
         ᶠgradᵥ_ᶜΦ[colidx]
     )

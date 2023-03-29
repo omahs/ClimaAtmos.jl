@@ -261,6 +261,7 @@ function get_initial_condition(parsed_args)
             "Bomex",
             "AgnesiHProfile",
             "DryDensityCurrentProfile",
+            "IsothermalZPGProfile"
         ]
             return getproperty(ICs, Symbol(parsed_args["initial_condition"]))()
         else
