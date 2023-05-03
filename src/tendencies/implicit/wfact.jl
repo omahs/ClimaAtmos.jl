@@ -29,7 +29,7 @@ import ClimaCore.Fields as Fields
 function vertical_transport_jac!(∂ᶜρcₜ∂ᶠw, ᶠw, ᶜρ, ᶜρc, ::Val{:none})
     ᶜJ = Fields.local_geometry_field(axes(ᶜρ)).J
     @. ∂ᶜρcₜ∂ᶠw =
-        -(ᶜadvdivᵥ_stencil(ᶠwinterp(ᶜJ, ᶜρ) * one(ᶠw) * ᶠinterp(ᶜρc / ᶜρ)))
+        -(ᶜdivᵥ_stencil(ᶠwinterp(ᶜJ, ᶜρ) * one(ᶠw) * ᶠinterp(ᶜρc / ᶜρ)))
     return nothing
 end
 function vertical_transport_jac!(∂ᶜρcₜ∂ᶠw, ᶠw, ᶜρ, ᶜρc, ::Val{:first_order})
