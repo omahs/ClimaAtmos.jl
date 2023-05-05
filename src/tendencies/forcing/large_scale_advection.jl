@@ -28,7 +28,7 @@ function large_scale_advection_tendency!(
     FT = Spaces.undertype(axes(Y.c))
     (; prof_dTdt, prof_dqtdt) = ls_adv
 
-    thermo_params = CAP.thermodynamics_params(p.params)
+    thermo_params = CAP.thermodynamics_params(p.ca_phys_params)
     ᶜts = p.ᶜts[colidx]
     ᶜdqtdt_hadv = p.ᶜdqtdt_hadv[colidx]
     ᶜdTdt_hadv = p.ᶜdTdt_hadv[colidx]

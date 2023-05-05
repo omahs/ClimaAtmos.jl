@@ -28,15 +28,15 @@ function forcing_cache(Y, forcing_type::HeldSuarezForcing)
 end
 
 function forcing_tendency!(Yₜ, Y, p, t, colidx, ::HeldSuarezForcing)
-    (; T_sfc, z_sfc, ᶜp, ᶜσ, ᶜheight_factor, ᶜΔρT, ᶜφ, params) = p # assume ᶜp has been updated
+    (; T_sfc, z_sfc, ᶜp, ᶜσ, ᶜheight_factor, ᶜΔρT, ᶜφ, ca_phys_params) = p # assume ᶜp has been updated
 
     FT = Spaces.undertype(axes(Y.c))
-    R_d = FT(CAP.R_d(params))
-    κ_d = FT(CAP.kappa_d(params))
-    cv_d = FT(CAP.cv_d(params))
-    day = FT(CAP.day(params))
-    MSLP = FT(CAP.MSLP(params))
-    grav = FT(CAP.grav(params))
+    R_d = FT(CAP.R_d(ca_phys_params))
+    κ_d = FT(CAP.kappa_d(ca_phys_params))
+    cv_d = FT(CAP.cv_d(ca_phys_params))
+    day = FT(CAP.day(ca_phys_params))
+    MSLP = FT(CAP.MSLP(ca_phys_params))
+    grav = FT(CAP.grav(ca_phys_params))
 
     z_bottom = Spaces.level(Fields.coordinate_field(Y.c).z[colidx], 1)
     z_surface = Fields.Field(Fields.field_values(z_sfc[colidx]), axes(z_bottom))

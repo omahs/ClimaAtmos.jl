@@ -223,7 +223,7 @@ difficult to ensure that the duplicated computations are consistent.
 """
 function set_precomputed_quantities!(Y, p, t)
     (; energy_form, moisture_model, turbconv_model) = p.atmos
-    thermo_params = CAP.thermodynamics_params(p.params)
+    thermo_params = CAP.thermodynamics_params(p.ca_phys_params)
     n = n_mass_flux_subdomains(turbconv_model)
     thermo_args = (thermo_params, energy_form, moisture_model)
     (; ᶜspecific, ᶜu, ᶠu³, ᶜK, ᶜts, ᶜp, ᶜΦ) = p
@@ -302,7 +302,7 @@ called.
 """
 function diagnostic_sgs_quantities(Y, p, t)
     (; energy_form, moisture_model, turbconv_model) = p.atmos
-    thermo_params = CAP.thermodynamics_params(p.params)
+    thermo_params = CAP.thermodynamics_params(p.ca_phys_params)
     thermo_args = (thermo_params, energy_form, moisture_model)
     (; ᶜp, ᶜρa⁰, ᶜρ⁰, ᶜΦ) = p
     ᶠuₕ³ = p.ᶠtemp_CT3

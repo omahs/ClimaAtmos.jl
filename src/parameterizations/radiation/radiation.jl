@@ -20,7 +20,7 @@ using StatsBase: mean
 ##### No Radiation
 #####
 
-radiation_model_cache(Y, params, radiation_mode::Nothing; kwargs...) =
+radiation_model_cache(Y, ca_phys_params, radiation_mode::Nothing; kwargs...) =
     (; radiation_model = radiation_mode)
 radiation_tendency!(Yₜ, Y, p, t, colidx, ::Nothing) = nothing
 
@@ -31,7 +31,7 @@ radiation_tendency!(Yₜ, Y, p, t, colidx, ::Nothing) = nothing
 function radiation_model_cache(
     Y,
     default_cache,
-    params,
+    ca_phys_params,
     radiation_mode::RRTMGPI.AbstractRRTMGPMode = RRTMGPI.ClearSkyRadiation();
     interpolation = RRTMGPI.BestFit(),
     bottom_extrapolation = RRTMGPI.SameAsInterpolation(),
@@ -41,7 +41,7 @@ function radiation_model_cache(
 )
     (; idealized_h2o) = radiation_mode
     FT = Spaces.undertype(axes(Y.c))
-    rrtmgp_params = CAP.rrtmgp_params(params)
+    rrtmgp_params = CAP.rrtmgp_params(ca_phys_params)
     if idealized_h2o && radiation_mode isa RRTMGPI.GrayRadiation
         error("idealized_h2o can't be used with $radiation_mode")
     end
@@ -229,7 +229,11 @@ end
 ##### DYCOMS_RF01 radiation
 #####
 
-function radiation_model_cache(Y, params, radiation_mode::RadiationDYCOMS_RF01;)
+function radiation_model_cache(
+    Y,
+    ca_phys_params,
+    radiation_mode::RadiationDYCOMS_RF01;
+)
     FT = Spaces.undertype(axes(Y.c))
     # TODO: should we distinguish between radiation mode vs model?
     return (;
@@ -249,10 +253,10 @@ end
 see eq. 3 in Stevens et. al. 2005 DYCOMS paper
 """
 function radiation_tendency!(Yₜ, Y, p, t, colidx, self::RadiationDYCOMS_RF01)
-    (; params) = p
+    (; ca_phys_params) = p
     FT = Spaces.undertype(axes(Y.c))
-    thermo_params = CAP.thermodynamics_params(params)
-    cp_d = CAP.cp_d(params)
+    thermo_params = CAP.thermodynamics_params(ca_phys_params)
+    cp_d = CAP.cp_d(ca_phys_params)
     # Unpack
     ᶜρ = Y.c.ρ[colidx]
     ᶜdTdt_rad = p.ᶜdTdt_rad[colidx]
@@ -296,20 +300,20 @@ function radiation_tendency!(Yₜ, Y, p, t, colidx, self::RadiationDYCOMS_RF01)
     ρ_z = Spline1D(vec(zc), vec(ᶜρ); k = 1)
     q_liq_z = Spline1D(vec(zc), vec(ᶜq_liq); k = 1)
 
-    integrand(ρq_l, params, z) = params.κ * ρ_z(z) * q_liq_z(z)
-    rintegrand(ρq_l, params, z) = -integrand(ρq_l, params, z)
+    integrand(ρq_l, ca_phys_params, z) = ca_phys_params.κ * ρ_z(z) * q_liq_z(z)
+    rintegrand(ρq_l, ca_phys_params, z) = -integrand(ρq_l, ca_phys_params, z)
 
     z_span = (minimum(zf), maximum(zf))
     rz_span = (z_span[2], z_span[1])
-    params = (; κ = self.kappa)
+    ca_phys_params = (; κ = self.kappa)
 
     # TODO: replace this with ClimaCore indefinite integral
     Δz = parent(Fields.dz_field(axes(ᶜρ)))[1]
-    rprob = ODE.ODEProblem(rintegrand, 0.0, rz_span, params; dt = Δz)
+    rprob = ODE.ODEProblem(rintegrand, 0.0, rz_span, ca_phys_params; dt = Δz)
     rsol = ODE.solve(rprob, ODE.Tsit5(), reltol = 1e-12, abstol = 1e-12)
     q_0 = rsol.(vec(zf))
 
-    prob = ODE.ODEProblem(integrand, 0.0, z_span, params; dt = Δz)
+    prob = ODE.ODEProblem(integrand, 0.0, z_span, ca_phys_params; dt = Δz)
     sol = ODE.solve(prob, ODE.Tsit5(), reltol = 1e-12, abstol = 1e-12)
     q_1 = sol.(vec(zf))
     parent(ᶠf_rad) .= self.F0 .* exp.(-q_0)
@@ -344,7 +348,11 @@ end
 ##### TRMM_LBA radiation
 #####
 
-function radiation_model_cache(Y, params, radiation_mode::RadiationTRMM_LBA;)
+function radiation_model_cache(
+    Y,
+    ca_phys_params,
+    radiation_mode::RadiationTRMM_LBA;
+)
     FT = Spaces.undertype(axes(Y.c))
     # TODO: should we distinguish between radiation mode vs model?
     return (; ᶜdTdt_rad = similar(Y.c, FT), radiation_model = radiation_mode)
@@ -357,10 +365,10 @@ function radiation_tendency!(
     colidx,
     radiation_mode::RadiationTRMM_LBA,
 )
-    (; params) = p
+    (; ca_phys_params) = p
     # TODO: get working (need to add cache / function)
     rad = radiation_mode.rad_profile
-    thermo_params = CAP.thermodynamics_params(params)
+    thermo_params = CAP.thermodynamics_params(ca_phys_params)
     ᶜdTdt_rad = p.ᶜdTdt_rad[colidx]
     ᶜρ = Y.c.ρ[colidx]
     ᶜts_gm = p.ᶜts[colidx]

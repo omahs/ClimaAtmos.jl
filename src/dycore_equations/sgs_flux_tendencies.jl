@@ -55,7 +55,7 @@ function compute_implicit_gm_tendencies!(
     grid::TC.Grid,
     state::TC.State,
     surf,
-    param_set::APS,
+    ca_phys_params::APS,
 )
     tendencies_gm = TC.center_tendencies_grid_mean(state)
     prog_gm = TC.center_prog_grid_mean(state)
@@ -63,7 +63,7 @@ function compute_implicit_gm_tendencies!(
     ρ_c = prog_gm.ρ
     tendencies_gm_uₕ = TC.tendencies_grid_mean_uₕ(state)
 
-    TC.compute_sgs_flux!(edmf, grid, state, surf, param_set)
+    TC.compute_sgs_flux!(edmf, grid, state, surf, ca_phys_params)
 
     ∇sgs = Operators.DivergenceF2C()
     @. tendencies_gm.ρe_tot += -∇sgs(aux_gm_f.sgs_flux_h_tot)
@@ -83,7 +83,7 @@ turbconv_cache(
     Y,
     turbconv_model,
     atmos,
-    param_set,
+    ca_phys_params,
     parsed_args,
     initial_condition,
 ) = (; turbconv_model)
@@ -132,7 +132,7 @@ function turbconv_cache(
     Y,
     turbconv_model::TC.EDMFModel,
     atmos,
-    param_set,
+    ca_phys_params,
     parsed_args,
     initial_condition,
 )
@@ -140,7 +140,7 @@ function turbconv_cache(
     imex_edmf_turbconv = parsed_args["imex_edmf_turbconv"]
     imex_edmf_gm = parsed_args["imex_edmf_gm"]
     test_consistency = parsed_args["test_edmf_consistency"]
-    thermo_params = CAP.thermodynamics_params(param_set)
+    thermo_params = CAP.thermodynamics_params(ca_phys_params)
     surf_params = ICs.surface_params(initial_condition, thermo_params)
     edmf = turbconv_model
     @info "EDMFModel: \n$(summary(edmf))"
@@ -151,7 +151,7 @@ function turbconv_cache(
         imex_edmf_gm,
         test_consistency,
         surf_params,
-        param_set,
+        ca_phys_params,
         aux = turbconv_aux(atmos, edmf, Y, FT),
         Y_filtered = similar(Y),
     )
@@ -162,10 +162,10 @@ end
 
 function implicit_sgs_flux_tendency!(Yₜ, Y, p, t, colidx, ::TC.EDMFModel)
     (; edmf_cache, Δt) = p
-    (; edmf, param_set, surf_params, Y_filtered) = edmf_cache
+    (; edmf, ca_phys_params, surf_params, Y_filtered) = edmf_cache
     (; imex_edmf_turbconv, imex_edmf_gm, test_consistency) = edmf_cache
-    thermo_params = CAP.thermodynamics_params(param_set)
-    tc_params = CAP.turbconv_params(param_set)
+    thermo_params = CAP.thermodynamics_params(ca_phys_params)
+    tc_params = CAP.turbconv_params(ca_phys_params)
 
     imex_edmf_turbconv || imex_edmf_gm || return nothing
 
@@ -219,10 +219,10 @@ end
 
 function explicit_sgs_flux_tendency!(Yₜ, Y, p, t, colidx, ::TC.EDMFModel)
     (; edmf_cache, Δt) = p
-    (; edmf, param_set, surf_params, Y_filtered) = edmf_cache
+    (; edmf, ca_phys_params, surf_params, Y_filtered) = edmf_cache
     (; imex_edmf_turbconv, imex_edmf_gm, test_consistency) = edmf_cache
-    thermo_params = CAP.thermodynamics_params(param_set)
-    tc_params = CAP.turbconv_params(param_set)
+    thermo_params = CAP.thermodynamics_params(ca_phys_params)
+    tc_params = CAP.turbconv_params(ca_phys_params)
 
     # Note: We could also do Y_filtered .= Y further upstream if needed.
     Y_filtered.c[colidx] .= Y.c[colidx]

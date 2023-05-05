@@ -14,9 +14,9 @@ get_physical_w(u, local_geometry) = Geometry.WVector(u, local_geometry)[1]
 """
     Return buoyancy on cell centers.
 """
-function ᶜbuoyancy(params, ᶜρ_ref::FT, ᶜρ::FT) where {FT}
+function ᶜbuoyancy(ca_phys_params, ᶜρ_ref::FT, ᶜρ::FT) where {FT}
     # TODO - replace by grad(Φ) when we move to deep atmosphere
-    g = CAP.grav(params)
+    g = CAP.grav(ca_phys_params)
     return g * (ᶜρ_ref - ᶜρ) / ᶜρ
 end
 
@@ -29,7 +29,7 @@ end
     - detr = const * w
 
    Inputs (everything defined on cell centers):
-   - params set with model parameters
+   - ca_phys_params set with model parameters
    - entr_detr_flag - bool flag for if we want/don't want to compute
                       entrainment and detrainment
    - ᶜz, ᶜp, ᶜρ, - grid mean height, pressure and density
@@ -41,7 +41,7 @@ end
 )
 """
 function pi_groups_entr_detr(
-    params,
+    ca_phys_params,
     entr_detr_flag::Bool,
     ᶜz::FT,
     ᶜp::FT,
@@ -59,9 +59,9 @@ function pi_groups_entr_detr(
     if ᶜaʲ <= FT(0) || !entr_detr_flag
         return (; entr = FT(0), detr = FT(0))
     else
-        g = CAP.grav(params)
+        g = CAP.grav(ca_phys_params)
 
-        turbconv_params = CAP.turbconv_params(params)
+        turbconv_params = CAP.turbconv_params(ca_phys_params)
         ᶜaʲ_max = TCP.max_area(turbconv_params)
         max_area_limiter = 0.1 * exp(-10 * (ᶜaʲ_max - ᶜaʲ))
 
@@ -119,17 +119,17 @@ function edmfx_entr_detr_tendency!(Yₜ, Y, p, t, colidx, turbconv_model::EDMFX)
     n = n_mass_flux_subdomains(turbconv_model)
     ᶜlg = Fields.local_geometry_field(Y.c)
 
-    (; params, ᶜp, ᶜρ_ref, sfc_conditions) = p
+    (; ca_phys_params, ᶜp, ᶜρ_ref, sfc_conditions) = p
     (; ᶜρʲs, ᶜtsʲs, ᶜuʲs, ᶜspecificʲs, ᶜentr_detrʲs) = p
     (; ᶜρ⁰, ᶜts⁰, ᶜu⁰, ᶜspecific⁰) = p
 
-    thermo_params = CAP.thermodynamics_params(params)
+    thermo_params = CAP.thermodynamics_params(ca_phys_params)
 
     ᶜz = Fields.coordinate_field(Y.c).z
 
     for j in 1:n
         @. ᶜentr_detrʲs.:($$j)[colidx] = pi_groups_entr_detr(
-            params,
+            ca_phys_params,
             p.atmos.edmfx_entr_detr,
             ᶜz[colidx],
             ᶜp[colidx],
@@ -138,10 +138,10 @@ function edmfx_entr_detr_tendency!(Yₜ, Y, p, t, colidx, turbconv_model::EDMFX)
             Y.c.sgsʲs.:($$j).ρa[colidx] / ᶜρʲs.:($$j)[colidx],
             get_physical_w(ᶜuʲs.:($$j)[colidx], ᶜlg[colidx]),
             TD.relative_humidity(thermo_params, ᶜtsʲs.:($$j)[colidx]),
-            ᶜbuoyancy(params, ᶜρ_ref[colidx], ᶜρʲs.:($$j)[colidx]),
+            ᶜbuoyancy(ca_phys_params, ᶜρ_ref[colidx], ᶜρʲs.:($$j)[colidx]),
             get_physical_w(ᶜu⁰[colidx], ᶜlg[colidx]),
             TD.relative_humidity(thermo_params, ᶜts⁰[colidx]),
-            ᶜbuoyancy(params, ᶜρ_ref[colidx], ᶜρ⁰[colidx]),
+            ᶜbuoyancy(ca_phys_params, ᶜρ_ref[colidx], ᶜρ⁰[colidx]),
         )
 
         @. Yₜ.c.sgsʲs.:($$j).ρa[colidx] +=

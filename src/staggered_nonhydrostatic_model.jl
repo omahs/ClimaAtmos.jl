@@ -12,16 +12,16 @@ using ClimaCore.Utilities: half
 import ClimaCore.Fields: ColumnField
 
 # Functions on which the model depends:
-# CAP.R_d(params)         # dry specific gas constant
-# CAP.kappa_d(params)     # dry adiabatic exponent
-# CAP.T_triple(params)    # triple point temperature of water
-# CAP.MSLP(params)        # reference pressure
-# CAP.grav(params)        # gravitational acceleration
-# CAP.Omega(params)       # rotation rate (only used if space is spherical)
-# CAP.cv_d(params)        # dry isochoric specific heat capacity
+# CAP.R_d(ca_phys_params)         # dry specific gas constant
+# CAP.kappa_d(ca_phys_params)     # dry adiabatic exponent
+# CAP.T_triple(ca_phys_params)    # triple point temperature of water
+# CAP.MSLP(ca_phys_params)        # reference pressure
+# CAP.grav(ca_phys_params)        # gravitational acceleration
+# CAP.Omega(ca_phys_params)       # rotation rate (only used if space is spherical)
+# CAP.cv_d(ca_phys_params)        # dry isochoric specific heat capacity
 # The value of cv_d is implied by the values of R_d and kappa_d
 
-# The model also depends on f_plane_coriolis_frequency(params)
+# The model also depends on f_plane_coriolis_frequency(ca_phys_params)
 # This is a constant Coriolis frequency that is only used if space is flat
 
 # Fields used to store variables that only need to be used in a single function
@@ -43,23 +43,23 @@ end
 function default_cache(
     Y,
     parsed_args,
-    params,
+    ca_phys_params,
     atmos,
     spaces,
     numerics,
     simulation,
 )
-    FT = eltype(params)
+    FT = eltype(ca_phys_params)
     (; energy_upwinding, tracer_upwinding, density_upwinding, edmfx_upwinding) =
         numerics
     (; apply_limiter) = numerics
     ᶜcoord = Fields.local_geometry_field(Y.c).coordinates
     ᶠcoord = Fields.local_geometry_field(Y.f).coordinates
-    R_d = FT(CAP.R_d(params))
-    MSLP = FT(CAP.MSLP(params))
-    grav = FT(CAP.grav(params))
+    R_d = FT(CAP.R_d(ca_phys_params))
+    MSLP = FT(CAP.MSLP(ca_phys_params))
+    grav = FT(CAP.grav(ca_phys_params))
     T_ref = FT(255)
-    ᶜΦ = CAP.grav(params) .* ᶜcoord.z
+    ᶜΦ = CAP.grav(ca_phys_params) .* ᶜcoord.z
     ᶜρ_ref = @. MSLP * exp(-grav * ᶜcoord.z / (R_d * T_ref)) / (R_d * T_ref)
     ᶜp_ref = @. ᶜρ_ref * R_d * T_ref
     if !parsed_args["use_reference_state"]
@@ -68,13 +68,13 @@ function default_cache(
     end
     z_sfc = Fields.level(ᶠcoord.z, half)
     if eltype(ᶜcoord) <: Geometry.LatLongZPoint
-        Ω = CAP.Omega(params)
+        Ω = CAP.Omega(ca_phys_params)
         ᶜf = @. 2 * Ω * sind(ᶜcoord.lat)
         lat_sfc = Fields.level(ᶜcoord.lat, 1)
     else
-        f = CAP.f_plane_coriolis_frequency(params)
+        f = CAP.f_plane_coriolis_frequency(ca_phys_params)
         ᶜf = map(_ -> f, ᶜcoord)
-        lat_sfc = map(_ -> eltype(params)(0), Fields.level(ᶜcoord, 1))
+        lat_sfc = map(_ -> eltype(ca_phys_params)(0), Fields.level(ᶜcoord, 1))
     end
     ᶜf = @. CT3(Geometry.WVector(ᶜf))
     T_sfc = @. 29 * exp(-lat_sfc^2 / (2 * 26^2)) + 271
@@ -124,7 +124,7 @@ function default_cache(
             Y.c,
             Operators.StencilCoefs{-half, half, NTuple{2, FT}},
         ),
-        params,
+        ca_phys_params,
         energy_upwinding,
         tracer_upwinding,
         density_upwinding,
@@ -147,7 +147,7 @@ function additional_cache(
     Y,
     default_cache,
     parsed_args,
-    params,
+    ca_phys_params,
     atmos,
     dt,
     initial_condition,
@@ -163,14 +163,14 @@ function additional_cache(
         radiation_model_cache(
             Y,
             default_cache,
-            params,
+            ca_phys_params,
             radiation_mode;
             idealized_insolation,
             idealized_clouds,
             data_loader = rrtmgp_data_loader,
         )
     else
-        radiation_model_cache(Y, params, radiation_mode)
+        radiation_model_cache(Y, ca_phys_params, radiation_mode)
     end
 
     return merge(
@@ -191,7 +191,7 @@ function additional_cache(
         orographic_gravity_wave_cache(
             atmos.orographic_gravity_wave,
             Y,
-            CAP.planet_radius(params),
+            CAP.planet_radius(ca_phys_params),
         ),
         edmfx_entr_detr_cache(Y, atmos.turbconv_model),
         (; Δt = dt),
@@ -199,7 +199,7 @@ function additional_cache(
             Y,
             turbconv_model,
             atmos,
-            params,
+            ca_phys_params,
             parsed_args,
             initial_condition,
         ),

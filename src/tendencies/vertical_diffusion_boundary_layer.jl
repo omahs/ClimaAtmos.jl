@@ -261,13 +261,13 @@ function get_surface_fluxes!(Y, p, t, colidx, ::VerticalDiffusion)
         ts_sfc,
         uₕ_int_phys_vec,
         uₕ_int_phys,
-        params,
+        ca_phys_params,
         coupling,
     ) = p
-    FT = eltype(params)
+    FT = eltype(ca_phys_params)
 
     # parameters
-    thermo_params = CAP.thermodynamics_params(params)
+    thermo_params = CAP.thermodynamics_params(ca_phys_params)
 
     if !(p.surface_scheme isa Nothing)
         uₕ_int = Spaces.level(Y.c.uₕ[colidx], 1)
@@ -302,7 +302,7 @@ function get_surface_fluxes!(Y, p, t, colidx, ::VerticalDiffusion)
         )
 
         # calculate all fluxes (saturated surface conditions)
-        sf_params = CAP.surface_fluxes_params(params)
+        sf_params = CAP.surface_fluxes_params(ca_phys_params)
         @. sfc_conditions[colidx] =
             SF.surface_conditions(sf_params, p.sfc_inputs[colidx])
     end

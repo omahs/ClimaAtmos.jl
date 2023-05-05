@@ -36,7 +36,7 @@ end
 
 function subsidence_tendency!(Yₜ, Y, p, t, colidx, ::Subsidence)
     (; moisture_model) = p
-    thermo_params = CAP.thermodynamics_params(p.params)
+    thermo_params = CAP.thermodynamics_params(p.ca_phys_params)
     subsidence_profile = p.subsidence.prof
     FT = Spaces.undertype(axes(Y.c))
 

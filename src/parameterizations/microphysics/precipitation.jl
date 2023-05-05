@@ -34,9 +34,9 @@ function precipitation_cache(Y, precip_model::Microphysics0Moment)
 end
 
 function compute_precipitation_cache!(Y, p, colidx, ::Microphysics0Moment, _)
-    (; ᶜts, ᶜS_ρq_tot, params) = p
-    cm_params = CAP.microphysics_params(params)
-    thermo_params = CAP.thermodynamics_params(params)
+    (; ᶜts, ᶜS_ρq_tot, ca_phys_params) = p
+    cm_params = CAP.microphysics_params(ca_phys_params)
+    thermo_params = CAP.thermodynamics_params(ca_phys_params)
     #TODO missing limiting by q_tot/Δt
     @. ᶜS_ρq_tot[colidx] =
         Y.c.ρ[colidx] * CM.Microphysics0M.remove_precipitation(
@@ -82,11 +82,11 @@ function precipitation_tendency!(
         ᶜλ,
         col_integrated_rain,
         col_integrated_snow,
-        params,
+        ca_phys_params,
         turbconv_model,
     ) = p # assume ᶜts has been updated
-    thermo_params = CAP.thermodynamics_params(params)
-    cm_params = CAP.microphysics_params(params)
+    thermo_params = CAP.thermodynamics_params(ca_phys_params)
+    cm_params = CAP.microphysics_params(ca_phys_params)
     compute_precipitation_cache!(Y, p, colidx, precip_model, turbconv_model)
     @. Yₜ.c.ρq_tot[colidx] += ᶜS_ρq_tot[colidx]
     @. Yₜ.c.ρ[colidx] += ᶜS_ρq_tot[colidx]
@@ -108,9 +108,9 @@ function precipitation_tendency!(
     )
 
     @. col_integrated_rain[colidx] =
-        col_integrated_rain[colidx] / CAP.ρ_cloud_liq(params)
+        col_integrated_rain[colidx] / CAP.ρ_cloud_liq(ca_phys_params)
     @. col_integrated_snow[colidx] =
-        col_integrated_snow[colidx] / CAP.ρ_cloud_liq(params)
+        col_integrated_snow[colidx] / CAP.ρ_cloud_liq(ca_phys_params)
 
     # liquid fraction
     @. ᶜλ[colidx] = TD.liquid_fraction(thermo_params, ᶜts[colidx])
@@ -160,7 +160,7 @@ function compute_precipitation_cache!(
     (; ᶜq_rai, ᶜq_sno) = p
     (; ᶜS_ρe_tot, ᶜS_ρq_tot, ᶜS_ρq_rai, ᶜS_ρq_sno) = p
     (; ᶜS_q_rai_evap, ᶜS_q_sno_melt, ᶜS_q_sno_sub_dep) = p
-    (; ᶜts, ᶜΦ, ᶜT, params) = p
+    (; ᶜts, ᶜΦ, ᶜT, ca_phys_params) = p
     (; dt) = p.simulation
 
     FT = Spaces.undertype(axes(Y.c))
@@ -183,8 +183,8 @@ function compute_precipitation_cache!(
     qs_tendency_precip_formation_bulk =
         p.edmf_cache.aux.cent.turbconv.bulk.qs_tendency_precip_formation[colidx]
 
-    thermo_params = CAP.thermodynamics_params(params)
-    cm_params = CAP.microphysics_params(params)
+    thermo_params = CAP.thermodynamics_params(ca_phys_params)
+    cm_params = CAP.microphysics_params(ca_phys_params)
     rain_type = CM.CommonTypes.RainType()
     snow_type = CM.CommonTypes.SnowType()
     @. ᶜT[colidx] = TD.air_temperature(thermo_params, ᶜts[colidx])
@@ -273,7 +273,7 @@ function precipitation_advection_tendency!(
     ::Microphysics1Moment,
 )
     FT = Spaces.undertype(axes(Y.c))
-    (; params) = p
+    (; ca_phys_params) = p
 
     ρ_c = Y.c.ρ[colidx]
 
@@ -287,7 +287,7 @@ function precipitation_advection_tendency!(
     RB = Operators.RightBiasedC2F(; top = Operators.SetValue(FT(0)))
     ᶜdivᵥ = Operators.DivergenceF2C(; bottom = Operators.Extrapolate())
     wvec = Geometry.WVector
-    microphys_params = CAP.microphysics_params(params)
+    microphys_params = CAP.microphysics_params(ca_phys_params)
     rain_type = CM.CommonTypes.RainType()
     snow_type = CM.CommonTypes.SnowType()
 

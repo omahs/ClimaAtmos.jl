@@ -91,18 +91,18 @@ function Wfact!(W, Y, p, dtγ, t, colidx)
     (; ∂ᶜρₜ∂ᶠ𝕄, ∂ᶜ𝔼ₜ∂ᶠ𝕄, ∂ᶠ𝕄ₜ∂ᶜ𝔼, ∂ᶠ𝕄ₜ∂ᶜρ, ∂ᶠ𝕄ₜ∂ᶠ𝕄, ∂ᶜ𝕋ₜ∂ᶠ𝕄_field) = W
     ᶜρ = Y.c.ρ
     ᶠu₃ = Y.f.u₃
-    (; ᶜK, ᶜΦ, ᶠgradᵥ_ᶜΦ, ᶜp, ᶜρ_ref, ᶜp_ref, ∂ᶜK∂ᶠw_data, params) = p
+    (; ᶜK, ᶜΦ, ᶠgradᵥ_ᶜΦ, ᶜp, ᶜρ_ref, ᶜp_ref, ∂ᶜK∂ᶠw_data, ca_phys_params) = p
     (; energy_upwinding, tracer_upwinding) = p
 
     validate_flags!(Y, flags, energy_upwinding)
     FT = Spaces.undertype(axes(Y.c))
     compose = Operators.ComposeStencils()
 
-    R_d = FT(CAP.R_d(params))
-    κ_d = FT(CAP.kappa_d(params))
-    cv_d = FT(CAP.cv_d(params))
-    T_tri = FT(CAP.T_triple(params))
-    MSLP = FT(CAP.MSLP(params))
+    R_d = FT(CAP.R_d(ca_phys_params))
+    κ_d = FT(CAP.kappa_d(ca_phys_params))
+    cv_d = FT(CAP.cv_d(ca_phys_params))
+    T_tri = FT(CAP.T_triple(ca_phys_params))
+    MSLP = FT(CAP.MSLP(ca_phys_params))
 
     dtγ_ref[] = dtγ
 

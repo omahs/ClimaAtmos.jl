@@ -113,7 +113,7 @@ function non_orographic_gravity_wave_tendency!(
     ::NonOrographyGravityWave,
 )
     #unpack
-    (; ᶜts, ᶜT, ᶜdTdz, ᶜbuoyancy_frequency, params, model_config) = p
+    (; ᶜts, ᶜT, ᶜdTdz, ᶜbuoyancy_frequency, ca_phys_params, model_config) = p
     (;
         gw_source_ampl,
         gw_Bw,
@@ -135,8 +135,8 @@ function non_orographic_gravity_wave_tendency!(
     ᶜz = Fields.coordinate_field(Y.c).z
     FT = Spaces.undertype(axes(Y.c))
     # parameters
-    thermo_params = CAP.thermodynamics_params(params)
-    grav = CAP.grav(params)
+    thermo_params = CAP.thermodynamics_params(ca_phys_params)
+    grav = CAP.grav(ca_phys_params)
 
     # compute buoyancy frequency
     @. ᶜT = TD.air_temperature(thermo_params, ᶜts)

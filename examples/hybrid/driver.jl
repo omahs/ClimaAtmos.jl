@@ -13,11 +13,12 @@ end
 const FT = parsed_args["FLOAT_TYPE"] == "Float64" ? Float64 : Float32
 
 include("parameter_set.jl")
-params, parsed_args = create_parameter_set(FT, parsed_args, CA.cli_defaults(s))
+ca_phys_params, parsed_args =
+    create_parameter_set(FT, parsed_args, CA.cli_defaults(s))
 
 import ClimaAtmos.InitialConditions as ICs
 
-atmos = CA.get_atmos(FT, parsed_args, params.turbconv_params)
+atmos = CA.get_atmos(FT, parsed_args, ca_phys_params.turbconv_params)
 numerics = CA.get_numerics(parsed_args)
 simulation = CA.get_simulation(FT, parsed_args, comms_ctx)
 initial_condition = CA.get_initial_condition(parsed_args)
@@ -49,9 +50,9 @@ enable_threading() = enable_clima_core_threading
     (Y, t_start) = CA.get_state_restart(comms_ctx)
     spaces = CA.get_spaces_restart(Y)
 else
-    spaces = CA.get_spaces(parsed_args, params, comms_ctx)
+    spaces = CA.get_spaces(parsed_args, ca_phys_params, comms_ctx)
     Y = ICs.atmos_state(
-        initial_condition(params),
+        initial_condition(ca_phys_params),
         atmos,
         spaces.center_space,
         spaces.face_space,
@@ -63,7 +64,7 @@ end
     p = CA.get_cache(
         Y,
         parsed_args,
-        params,
+        ca_phys_params,
         spaces,
         atmos,
         numerics,
@@ -79,7 +80,7 @@ end
 @time "ode_configuration" ode_algo = CA.ode_configuration(Y, parsed_args, atmos)
 
 @time "get_callbacks" callback =
-    CA.get_callbacks(parsed_args, simulation, atmos, params)
+    CA.get_callbacks(parsed_args, simulation, atmos, ca_phys_params)
 tspan = (t_start, simulation.t_end)
 @time "args_integrator" integrator_args, integrator_kwargs =
     CA.args_integrator(parsed_args, Y, p, tspan, ode_algo, callback)

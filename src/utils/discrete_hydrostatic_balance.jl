@@ -18,11 +18,11 @@ function set_discrete_hydrostatic_balanced_state!(Y, p)
             ᶠgradᵥ_ᶜp,
             Y.c.ρ,
             p.ᶠgradᵥ_ᶜΦ,
-            FT(CAP.MSLP(p.params)),
+            FT(CAP.MSLP(p.ca_phys_params)),
             colidx,
         )
     end
-    thermo_params = CAP.thermodynamics_params(p.params)
+    thermo_params = CAP.thermodynamics_params(p.ca_phys_params)
     if p.atmos.moisture_model isa DryModel
         @. p.ᶜts = TD.PhaseDry_ρp(thermo_params, Y.c.ρ, p.ᶜp)
     elseif p.atmos.moisture_model isa EquilMoistModel
@@ -32,13 +32,13 @@ function set_discrete_hydrostatic_balanced_state!(Y, p)
         error("Unsupported moisture model")
     end
     ᶜlocal_geometry = Fields.local_geometry_field(Y.c)
-    ls(params, thermo_state, geometry, velocity) =
-        ICs.LocalState(; params, thermo_state, geometry, velocity)
+    ls(ca_phys_params, thermo_state, geometry, velocity) =
+        ICs.LocalState(; ca_phys_params, thermo_state, geometry, velocity)
     @. Y.c = merge(
         Y.c,
         ICs.energy_variables(
             ls(
-                p.params,
+                p.ca_phys_params,
                 p.ᶜts,
                 ᶜlocal_geometry,
                 Geometry.UVWVector(Y.c.uₕ) +

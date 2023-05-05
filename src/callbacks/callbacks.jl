@@ -129,13 +129,13 @@ function rrtmgp_model_callback!(integrator)
     p = integrator.p
     t = integrator.t
 
-    (; ᶜts, T_sfc, params) = p
+    (; ᶜts, T_sfc, ca_phys_params) = p
     (; idealized_insolation, idealized_h2o, idealized_clouds) = p
     (; insolation_tuple, ᶠradiation_flux, radiation_model) = p
 
-    FT = eltype(params)
-    thermo_params = CAP.thermodynamics_params(params)
-    insolation_params = CAP.insolation_params(params)
+    FT = eltype(ca_phys_params)
+    thermo_params = CAP.thermodynamics_params(ca_phys_params)
+    insolation_params = CAP.insolation_params(ca_phys_params)
 
     radiation_model.surface_temperature .= RRTMGPI.field2array(T_sfc)
 
@@ -184,8 +184,8 @@ function rrtmgp_model_callback!(integrator)
     if !idealized_insolation
         current_datetime = p.simulation.start_date + Dates.Second(round(Int, t)) # current time
         max_zenith_angle = FT(π) / 2 - eps(FT)
-        irradiance = FT(CAP.tot_solar_irrad(params))
-        au = FT(CAP.astro_unit(params))
+        irradiance = FT(CAP.tot_solar_irrad(ca_phys_params))
+        au = FT(CAP.astro_unit(ca_phys_params))
 
         bottom_coords = Fields.coordinate_field(Spaces.level(Y.c, 1))
         if eltype(bottom_coords) <: Geometry.LatLongZPoint
@@ -256,10 +256,10 @@ end
 function save_to_disk_func(integrator)
     (; t, u, p) = integrator
     Y = u
-    (; params) = p
+    (; ca_phys_params) = p
     (; output_dir) = p.simulation
-    FT = eltype(params)
-    thermo_params = CAP.thermodynamics_params(params)
+    FT = eltype(ca_phys_params)
+    thermo_params = CAP.thermodynamics_params(ca_phys_params)
 
     function common_diagnostics(ᶜu, ᶜts)
         ᶜρ = TD.air_density.(thermo_params, ᶜts)
@@ -269,7 +269,7 @@ function save_to_disk_func(integrator)
             w_velocity = Geometry.WVector.(ᶜu),
             temperature = TD.air_temperature.(thermo_params, ᶜts),
             potential_temperature = TD.dry_pottemp.(thermo_params, ᶜts),
-            buoyancy = CAP.grav(params) .* (p.ᶜρ_ref .- ᶜρ) ./ ᶜρ,
+            buoyancy = CAP.grav(ca_phys_params) .* (p.ᶜρ_ref .- ᶜρ) ./ ᶜρ,
         )
         if !(p.atmos.moisture_model isa DryModel)
             diagnostics = (;

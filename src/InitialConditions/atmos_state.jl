@@ -65,7 +65,7 @@ energy_variables(ls, ::TotalEnergy) = (;
     ρe_tot = ls.ρ * (
         TD.internal_energy(ls.thermo_params, ls.thermo_state) +
         norm_sqr(ls.velocity) / 2 +
-        CAP.grav(ls.params) * ls.geometry.coordinates.z
+        CAP.grav(ls.ca_phys_params) * ls.geometry.coordinates.z
     )
 )
 
@@ -108,7 +108,7 @@ function turbconv_center_variables(ls, turbconv_model::TC.EDMFModel, gs_vars)
         ρa * (
             TD.internal_energy(ls.thermo_params, ls.thermo_state) +
             norm_sqr(ls.velocity) / 2 +
-            CAP.grav(ls.params) * ls.geometry.coordinates.z
+            CAP.grav(ls.ca_phys_params) * ls.geometry.coordinates.z
         )
     ρaq_tot = ρa * TD.total_specific_humidity(ls.thermo_params, ls.thermo_state)
     en = (; ρatke = (ls.ρ - n * ρa) * ls.turbconv_state.tke)

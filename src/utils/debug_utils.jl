@@ -109,11 +109,11 @@ feature with `ClimaCore.enable_threading() = false`.
 function precomputed_quantities!(Y, p, t, colidx)
     ᶜuₕ = Y.c.uₕ
     ᶠu₃ = Y.f.u₃
-    (; ᶜu_bar, ᶜK, ᶜts, ᶜp, params, thermo_dispatcher) = p
+    (; ᶜu_bar, ᶜK, ᶜts, ᶜp, ca_phys_params, thermo_dispatcher) = p
 
     @. ᶜu_bar[colidx] = C123(ᶜuₕ[colidx]) + C123(ᶜinterp(ᶠu₃[colidx]))
     @. ᶜK[colidx] = norm_sqr(ᶜu_bar[colidx]) / 2
-    thermo_params = CAP.thermodynamics_params(params)
+    thermo_params = CAP.thermodynamics_params(ca_phys_params)
 
     CA.debug_state(t, colidx; Y, p) # Debug Y and p state here!
 

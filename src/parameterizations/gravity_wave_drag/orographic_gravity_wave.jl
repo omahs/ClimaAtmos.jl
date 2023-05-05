@@ -66,7 +66,7 @@ function orographic_gravity_wave_cache(ogw::OrographicGravityWave, Y, radius)
 end
 
 function orographic_gravity_wave_tendency!(Yₜ, Y, p, t, ::OrographicGravityWave)
-    (; params, ᶜts, ᶜT, ᶜdTdz, ᶜp) = p
+    (; ca_phys_params, ᶜts, ᶜT, ᶜdTdz, ᶜp) = p
     (;
         topo_k_pbl,
         topo_τ_x,
@@ -82,9 +82,9 @@ function orographic_gravity_wave_tendency!(Yₜ, Y, p, t, ::OrographicGravityWav
     FT = Spaces.undertype(axes(Y.c))
 
     # parameters
-    thermo_params = CAP.thermodynamics_params(params)
-    grav = FT(CAP.grav(params))
-    cp_d = FT(CAP.cp_d(params))
+    thermo_params = CAP.thermodynamics_params(ca_phys_params)
+    grav = FT(CAP.grav(ca_phys_params))
+    cp_d = FT(CAP.cp_d(ca_phys_params))
 
     # z 
     ᶜz = Fields.coordinate_field(Y.c).z

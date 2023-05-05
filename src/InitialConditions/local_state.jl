@@ -7,7 +7,7 @@ an `AtmosModel`.
 abstract type TurbconvState{FT} end
 
 """
-    LocalState(; params, geometry, thermo_state, velocity, turbconv_state)
+    LocalState(; ca_phys_params, geometry, thermo_state, velocity, turbconv_state)
 
 A generic representation of all the data required to initialize an `AtmosModel`
 at some point in the domain. If `velocity` or `turbconv_state` are omitted, they
@@ -22,7 +22,7 @@ struct LocalState{
     TC <: TurbconvState{FT},
     TP,
 }
-    params::P
+    ca_phys_params::P
     geometry::G
     thermo_state::TS
     velocity::V
@@ -34,21 +34,21 @@ struct LocalState{
 end
 
 function LocalState(;
-    params,
+    ca_phys_params,
     geometry,
     thermo_state,
     velocity = nothing,
     turbconv_state = nothing,
 )
-    FT = eltype(params)
+    FT = eltype(ca_phys_params)
     return LocalState(
-        params,
+        ca_phys_params,
         geometry,
         thermo_state,
         isnothing(velocity) ? Geometry.UVVector(FT(0), FT(0)) : velocity,
         isnothing(turbconv_state) ? NoTurbconvState{FT}() : turbconv_state,
-        CAP.thermodynamics_params(params),
-        TD.air_density(CAP.thermodynamics_params(params), thermo_state),
+        CAP.thermodynamics_params(ca_phys_params),
+        TD.air_density(CAP.thermodynamics_params(ca_phys_params), thermo_state),
     )
 end
 

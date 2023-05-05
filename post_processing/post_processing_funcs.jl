@@ -214,7 +214,7 @@ function postprocessing_edmf(sol, output_dir, fps)
 end
 
 function custom_postprocessing(sol, output_dir, p)
-    thermo_params = CAP.thermodynamics_params(params)
+    thermo_params = CAP.thermodynamics_params(p.ca_phys_params)
     get_var(i, var) = Fields.single_field(sol.u[i], var)
     n = length(sol.u)
     #! format: off
@@ -261,7 +261,7 @@ function custom_postprocessing(sol, output_dir, p)
 end
 
 function postprocessing_plane(sol, output_dir, p)
-    thermo_params = CAP.thermodynamics_params(p.params)
+    thermo_params = CAP.thermodynamics_params(p.ca_phys_params)
     get_var(i, var) = Fields.single_field(sol.u[i], var)
     n = length(sol.u)
     #! format: off

@@ -90,9 +90,9 @@ function get_numerics(parsed_args)
     return numerics
 end
 
-function get_spaces(parsed_args, params, comms_ctx)
+function get_spaces(parsed_args, ca_phys_params, comms_ctx)
 
-    FT = eltype(params)
+    FT = eltype(ca_phys_params)
     z_elem = Int(parsed_args["z_elem"])
     z_max = FT(parsed_args["z_max"])
     dz_bottom = FT(parsed_args["dz_bottom"])
@@ -131,7 +131,7 @@ function get_spaces(parsed_args, params, comms_ctx)
 
 
     h_elem = parsed_args["h_elem"]
-    radius = CAP.planet_radius(params)
+    radius = CAP.planet_radius(ca_phys_params)
     center_space, face_space = if parsed_args["config"] == "sphere"
         nh_poly = parsed_args["nh_poly"]
         quad = Spaces.Quadratures.GLL{nh_poly + 1}()
@@ -156,7 +156,7 @@ function get_spaces(parsed_args, params, comms_ctx)
         end
     elseif parsed_args["config"] == "column" # single column
         @warn "perturb_initstate flag is ignored for single column configuration"
-        FT = eltype(params)
+        FT = eltype(ca_phys_params)
         Δx = FT(1) # Note: This value shouldn't matter, since we only have 1 column.
         quad = Spaces.Quadratures.GL{1}()
         horizontal_mesh = periodic_rectangle_mesh(;
@@ -178,7 +178,7 @@ function get_spaces(parsed_args, params, comms_ctx)
         end
         make_hybrid_spaces(h_space, z_max, z_elem, z_stretch)
     elseif parsed_args["config"] == "box"
-        FT = eltype(params)
+        FT = eltype(ca_phys_params)
         nh_poly = parsed_args["nh_poly"]
         quad = Spaces.Quadratures.GLL{nh_poly + 1}()
         x_elem = Int(parsed_args["x_elem"])
@@ -206,7 +206,7 @@ function get_spaces(parsed_args, params, comms_ctx)
             surface_warp = warp_function,
         )
     elseif parsed_args["config"] == "plane"
-        FT = eltype(params)
+        FT = eltype(ca_phys_params)
         nh_poly = parsed_args["nh_poly"]
         quad = Spaces.Quadratures.GLL{nh_poly + 1}()
         x_elem = Int(parsed_args["x_elem"])
@@ -239,7 +239,7 @@ function get_spaces(parsed_args, params, comms_ctx)
     )
 end
 
-# get_state(simulation, parsed_args, spaces, params, atmos)
+# get_state(simulation, parsed_args, spaces, ca_phys_params, atmos)
 function get_state(simulation, args...)
     if simulation.restart
         return get_state_restart(comms_ctx)
@@ -446,8 +446,8 @@ thermo_state_type(::NonEquilMoistModel, ::Type{FT}) where {FT} =
     TD.PhaseNonEquil{FT}
 
 
-function get_callbacks(parsed_args, simulation, atmos, params)
-    FT = eltype(params)
+function get_callbacks(parsed_args, simulation, atmos, ca_phys_params)
+    FT = eltype(ca_phys_params)
     (; dt) = simulation
 
     tc_callbacks =
@@ -525,7 +525,7 @@ end
 function get_cache(
     Y,
     parsed_args,
-    params,
+    ca_phys_params,
     spaces,
     atmos,
     numerics,
@@ -535,7 +535,7 @@ function get_cache(
     _default_cache = default_cache(
         Y,
         parsed_args,
-        params,
+        ca_phys_params,
         atmos,
         spaces,
         numerics,
@@ -547,7 +547,7 @@ function get_cache(
             Y,
             _default_cache,
             parsed_args,
-            params,
+            ca_phys_params,
             atmos,
             simulation.dt,
             initial_condition,
