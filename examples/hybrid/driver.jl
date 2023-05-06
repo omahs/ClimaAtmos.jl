@@ -12,16 +12,23 @@ end
 
 const FT = parsed_args["FLOAT_TYPE"] == "Float64" ? Float64 : Float32
 
-include("parameter_set.jl")
-ca_phys_params, parsed_args =
-    create_parameter_set(FT, parsed_args, CA.cli_defaults(s))
+toml_dict = CP.create_toml_dict(
+    FT;
+    override_file = parsed_args["toml"],
+    dict_type = "alias",
+)
+
+params = merge(CA.values_dict(toml_dict), parsed_args)
+toml_dict = nothing # remove from namespace
+parsed_args = nothing # remove from namespace
+ca_phys_params = CA.Parameters.create_climaatmos_parameter_set(toml_dict)
 
 import ClimaAtmos.InitialConditions as ICs
 
-atmos = CA.get_atmos(FT, parsed_args, ca_phys_params.turbconv_params)
-numerics = CA.get_numerics(parsed_args)
-simulation = CA.get_simulation(FT, parsed_args, comms_ctx)
-initial_condition = CA.get_initial_condition(parsed_args)
+atmos = CA.get_atmos(FT, params, ca_phys_params.turbconv_params)
+numerics = CA.get_numerics(params)
+simulation = CA.get_simulation(FT, params, comms_ctx)
+initial_condition = CA.get_initial_condition(params)
 
 # TODO: use import instead of using
 using OrdinaryDiffEq
@@ -37,20 +44,20 @@ using Statistics: mean
 Random.seed!(1234)
 
 
-if parsed_args["trunc_stack_traces"]
+if params["trunc_stack_traces"]
     ClimaCore.Fields.truncate_printing_field_types() = true
 end
 
 
 import ClimaCore: enable_threading
-const enable_clima_core_threading = parsed_args["enable_threading"]
+const enable_clima_core_threading = params["enable_threading"]
 enable_threading() = enable_clima_core_threading
 
 @time "Allocating Y" if simulation.restart
     (Y, t_start) = CA.get_state_restart(comms_ctx)
     spaces = CA.get_spaces_restart(Y)
 else
-    spaces = CA.get_spaces(parsed_args, ca_phys_params, comms_ctx)
+    spaces = CA.get_spaces(params, ca_phys_params, comms_ctx)
     Y = ICs.atmos_state(
         initial_condition(ca_phys_params),
         atmos,
@@ -63,7 +70,7 @@ end
 @time "Allocating cache (p)" begin
     p = CA.get_cache(
         Y,
-        parsed_args,
+        params,
         ca_phys_params,
         spaces,
         atmos,
@@ -73,17 +80,17 @@ end
     )
 end
 
-if parsed_args["discrete_hydrostatic_balance"]
+if params["discrete_hydrostatic_balance"]
     CA.set_discrete_hydrostatic_balanced_state!(Y, p)
 end
 
-@time "ode_configuration" ode_algo = CA.ode_configuration(Y, parsed_args, atmos)
+@time "ode_configuration" ode_algo = CA.ode_configuration(Y, params, atmos)
 
 @time "get_callbacks" callback =
-    CA.get_callbacks(parsed_args, simulation, atmos, ca_phys_params)
+    CA.get_callbacks(params, simulation, atmos, ca_phys_params)
 tspan = (t_start, simulation.t_end)
 @time "args_integrator" integrator_args, integrator_kwargs =
-    CA.args_integrator(parsed_args, Y, p, tspan, ode_algo, callback)
+    CA.args_integrator(params, Y, p, tspan, ode_algo, callback)
 
 if haskey(ENV, "CI_PERF_SKIP_INIT") # for performance analysis
     throw(:exit_profile_init)
@@ -112,16 +119,16 @@ include(
     joinpath(pkgdir(CA), "post_processing", "define_tc_quicklook_profiles.jl"),
 )
 
-ref_job_id = parsed_args["reference_job_id"]
+ref_job_id = params["reference_job_id"]
 reference_job_id = isnothing(ref_job_id) ? simulation.job_id : ref_job_id
 
 is_edmfx = atmos.turbconv_model isa CA.EDMFX
-if is_edmfx && parsed_args["post_process"]
+if is_edmfx && params["post_process"]
     contours_and_profiles(simulation.output_dir, reference_job_id)
     zip_and_cleanup_output(simulation.output_dir, "hdf5files.zip")
 end
 
-if parsed_args["debugging_tc"] && !is_edmfx
+if params["debugging_tc"] && !is_edmfx
     include(
         joinpath(
             @__DIR__,
@@ -187,16 +194,16 @@ if CA.is_distributed(comms_ctx)
 end
 
 if !CA.is_distributed(comms_ctx) &&
-   parsed_args["post_process"] &&
+   params["post_process"] &&
    !is_edmfx &&
    !(atmos.model_config isa CA.SphericalModel)
     ENV["GKSwstype"] = "nul" # avoid displaying plots
-    if CA.is_column_without_edmf(parsed_args)
+    if CA.is_column_without_edmf(params)
         custom_postprocessing(sol, simulation.output_dir, p)
-    elseif CA.is_column_edmf(parsed_args)
-        postprocessing_edmf(sol, simulation.output_dir, parsed_args["fps"])
-    elseif CA.is_solid_body(parsed_args)
-        postprocessing(sol, simulation.output_dir, parsed_args["fps"])
+    elseif CA.is_column_edmf(params)
+        postprocessing_edmf(sol, simulation.output_dir, params["fps"])
+    elseif CA.is_solid_body(params)
+        postprocessing(sol, simulation.output_dir, params["fps"])
     elseif atmos.model_config isa CA.BoxModel
         postprocessing_box(sol, simulation.output_dir)
     elseif atmos.model_config isa CA.PlaneModel
@@ -207,7 +214,7 @@ if !CA.is_distributed(comms_ctx) &&
 end
 
 include(joinpath(@__DIR__, "..", "..", "regression_tests", "mse_tables.jl"))
-if parsed_args["regression_test"]
+if params["regression_test"]
     # Test results against main branch
     include(
         joinpath(
@@ -235,7 +242,7 @@ end
 
 
 
-if parsed_args["check_conservation"]
+if params["check_conservation"]
     @test sum(sol.u[1].c.ρ) ≈ sum(sol.u[end].c.ρ) rtol = 25 * eps(FT)
     @test sum(sol.u[1].c.ρe_tot) +
           (p.net_energy_flux_sfc[][] - p.net_energy_flux_toa[][]) ≈

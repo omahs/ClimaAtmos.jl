@@ -23,7 +23,6 @@ end
 
 function create_climaatmos_parameter_set(
     toml_dict::CP.AbstractTOMLDict,
-    parsed_args,
     overrides::NamedTuple = NamedTuple(),
 )
     FT = CP.float_type(toml_dict)
@@ -123,5 +122,5 @@ function create_climaatmos_parameter_set(
     )
     # logfilepath = joinpath(@__DIR__, "logfilepath_$FT.toml")
     # CP.log_parameter_information(toml_dict, logfilepath)
-    return param_set, parsed_args
+    return param_set
 end

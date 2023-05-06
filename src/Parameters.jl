@@ -66,4 +66,13 @@ uh_g(ps::ACAP) = CC.Geometry.UVVector(ps.ug, ps.vg)
 day(ps::ACAP) = IP.day(insolation_params(ps))
 tot_solar_irrad(ps::ACAP) = IP.tot_solar_irrad(insolation_params(ps))
 
+include("create_parameters.jl")
+import CLIMAParameters as CP
+values_dict(d::CP.AliasParamDict) = Dict(
+    map(
+        k -> Pair(d.data[k]["alias"], d.data[k]["value"]),
+        collect(keys(d.data)),
+    )...,
+)
+
 end

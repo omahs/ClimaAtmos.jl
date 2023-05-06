@@ -84,7 +84,7 @@ turbconv_cache(
     turbconv_model,
     atmos,
     ca_phys_params,
-    parsed_args,
+    params,
     initial_condition,
 ) = (; turbconv_model)
 
@@ -133,13 +133,13 @@ function turbconv_cache(
     turbconv_model::TC.EDMFModel,
     atmos,
     ca_phys_params,
-    parsed_args,
+    params,
     initial_condition,
 )
     FT = Spaces.undertype(axes(Y.c))
-    imex_edmf_turbconv = parsed_args["imex_edmf_turbconv"]
-    imex_edmf_gm = parsed_args["imex_edmf_gm"]
-    test_consistency = parsed_args["test_edmf_consistency"]
+    imex_edmf_turbconv = params["imex_edmf_turbconv"]
+    imex_edmf_gm = params["imex_edmf_gm"]
+    test_consistency = params["test_edmf_consistency"]
     thermo_params = CAP.thermodynamics_params(ca_phys_params)
     surf_params = ICs.surface_params(initial_condition, thermo_params)
     edmf = turbconv_model

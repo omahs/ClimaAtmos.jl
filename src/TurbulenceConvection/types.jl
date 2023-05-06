@@ -180,11 +180,11 @@ function EDMFModel(
     ::Type{FT},
     moisture_model,
     precip_model,
-    parsed_args,
+    params,
     turbconv_params,
 ) where {FT}
 
-    tc_case = parsed_args["turbconv_case"]
+    tc_case = params["turbconv_case"]
     zero_uv_fluxes = any(tcc -> tcc == tc_case, ["TRMM_LBA", "ARM_SGP"])
     # Set the number of updrafts (1)
     n_updrafts = turbconv_params.updraft_number

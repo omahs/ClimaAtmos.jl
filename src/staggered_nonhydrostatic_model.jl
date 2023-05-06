@@ -42,7 +42,7 @@ end
 
 function default_cache(
     Y,
-    parsed_args,
+    params,
     ca_phys_params,
     atmos,
     spaces,
@@ -62,7 +62,7 @@ function default_cache(
     ᶜΦ = CAP.grav(ca_phys_params) .* ᶜcoord.z
     ᶜρ_ref = @. MSLP * exp(-grav * ᶜcoord.z / (R_d * T_ref)) / (R_d * T_ref)
     ᶜp_ref = @. ᶜρ_ref * R_d * T_ref
-    if !parsed_args["use_reference_state"]
+    if !params["use_reference_state"]
         ᶜρ_ref .*= 0
         ᶜp_ref .*= 0
     end
@@ -102,7 +102,7 @@ function default_cache(
         spaces,
         atmos,
         comms_ctx = Fields.comm_context(axes(Y.c)),
-        test_dycore_consistency = parsed_args["test_dycore_consistency"],
+        test_dycore_consistency = params["test_dycore_consistency"],
         moisture_model = atmos.moisture_model,
         model_config = atmos.model_config,
         Yₜ = similar(Y), # only needed when using increment formulation
@@ -146,7 +146,7 @@ end
 function additional_cache(
     Y,
     default_cache,
-    parsed_args,
+    params,
     ca_phys_params,
     atmos,
     dt,
@@ -154,9 +154,9 @@ function additional_cache(
 )
     (; precip_model, forcing_type, radiation_mode, turbconv_model) = atmos
 
-    idealized_insolation = parsed_args["idealized_insolation"]
+    idealized_insolation = params["idealized_insolation"]
     @assert idealized_insolation in (true, false)
-    idealized_clouds = parsed_args["idealized_clouds"]
+    idealized_clouds = params["idealized_clouds"]
     @assert idealized_clouds in (true, false)
 
     radiation_cache = if radiation_mode isa RRTMGPI.AbstractRRTMGPMode
@@ -200,7 +200,7 @@ function additional_cache(
             turbconv_model,
             atmos,
             ca_phys_params,
-            parsed_args,
+            params,
             initial_condition,
         ),
     )

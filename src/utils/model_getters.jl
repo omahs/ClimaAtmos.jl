@@ -1,5 +1,5 @@
-function get_moisture_model(parsed_args)
-    moisture_name = parsed_args["moist"]
+function get_moisture_model(params)
+    moisture_name = params["moist"]
     @assert moisture_name in ("dry", "equil", "nonequil")
     return if moisture_name == "dry"
         DryModel()
@@ -10,8 +10,8 @@ function get_moisture_model(parsed_args)
     end
 end
 
-function get_model_config(parsed_args)
-    config = parsed_args["config"]
+function get_model_config(params)
+    config = params["config"]
     @assert config in ("sphere", "column", "box", "plane")
     return if config == "sphere"
         SphericalModel()
@@ -24,8 +24,8 @@ function get_model_config(parsed_args)
     end
 end
 
-function get_coupling_type(parsed_args)
-    coupled = parsed_args["coupled"]
+function get_coupling_type(params)
+    coupled = params["coupled"]
     return if coupled == true
         Coupled()
     elseif coupled == false
@@ -35,10 +35,10 @@ function get_coupling_type(parsed_args)
     end
 end
 
-function get_hyperdiffusion_model(parsed_args, ::Type{FT}) where {FT}
-    hyperdiff_name = parsed_args["hyperdiff"]
-    κ₄ = FT(parsed_args["kappa_4"])
-    divergence_damping_factor = FT(parsed_args["divergence_damping_factor"])
+function get_hyperdiffusion_model(params, ::Type{FT}) where {FT}
+    hyperdiff_name = params["hyperdiff"]
+    κ₄ = FT(params["kappa_4"])
+    divergence_damping_factor = FT(params["divergence_damping_factor"])
     return if hyperdiff_name in ("ClimaHyperdiffusion", "true", true)
         ClimaHyperdiffusion(; κ₄, divergence_damping_factor)
     elseif hyperdiff_name in ("none", "false", false)
@@ -50,41 +50,41 @@ end
 
 function get_vertical_diffusion_model(
     diffuse_momentum,
-    parsed_args,
+    params,
     ::Type{FT},
 ) where {FT}
-    vert_diff_name = parsed_args["vert_diff"]
+    vert_diff_name = params["vert_diff"]
     return if vert_diff_name in ("false", false, "none")
         nothing
     elseif vert_diff_name in ("true", true, "VerticalDiffusion")
-        C_E = FT(parsed_args["C_E"])
+        C_E = FT(params["C_E"])
         VerticalDiffusion{diffuse_momentum, FT}(; C_E)
     else
         error("Uncaught diffusion model `$vert_diff_name`.")
     end
 end
 
-function get_viscous_sponge_model(parsed_args, ::Type{FT}) where {FT}
-    vs_name = parsed_args["viscous_sponge"]
+function get_viscous_sponge_model(params, ::Type{FT}) where {FT}
+    vs_name = params["viscous_sponge"]
     return if vs_name in ("false", false, "none")
         nothing
     elseif vs_name in ("true", true, "ViscousSponge")
-        zd = parsed_args["zd_viscous"]
-        κ₂ = parsed_args["kappa_2_sponge"]
+        zd = params["zd_viscous"]
+        κ₂ = params["kappa_2_sponge"]
         ViscousSponge{FT}(; zd, κ₂)
     else
         error("Uncaught viscous sponge model `$vs_name`.")
     end
 end
 
-function get_rayleigh_sponge_model(parsed_args, ::Type{FT}) where {FT}
-    rs_name = parsed_args["rayleigh_sponge"]
+function get_rayleigh_sponge_model(params, ::Type{FT}) where {FT}
+    rs_name = params["rayleigh_sponge"]
     return if rs_name in ("false", false)
         nothing
     elseif rs_name in ("true", true, "RayleighSponge")
-        zd = parsed_args["zd_rayleigh"]
-        α_uₕ = parsed_args["alpha_rayleigh_uh"]
-        α_w = parsed_args["alpha_rayleigh_w"]
+        zd = params["zd_rayleigh"]
+        α_uₕ = params["alpha_rayleigh_uh"]
+        α_w = params["alpha_rayleigh_w"]
         isnothing(zd) && (zd = FT(15e3))
         isnothing(α_uₕ) && (α_uₕ = FT(1e-4))
         isnothing(α_w) && (α_w = FT(1))
@@ -95,11 +95,11 @@ function get_rayleigh_sponge_model(parsed_args, ::Type{FT}) where {FT}
 end
 
 function get_non_orographic_gravity_wave_model(
-    parsed_args,
+    params,
     model_config,
     ::Type{FT},
 ) where {FT}
-    nogw_name = parsed_args["non_orographic_gravity_wave"]
+    nogw_name = params["non_orographic_gravity_wave"]
     @assert nogw_name in (true, false)
     return if nogw_name == true
         if model_config isa SingleColumnModel
@@ -128,8 +128,8 @@ function get_non_orographic_gravity_wave_model(
     end
 end
 
-function get_orographic_gravity_wave_model(parsed_args, ::Type{FT}) where {FT}
-    ogw_name = parsed_args["orographic_gravity_wave"]
+function get_orographic_gravity_wave_model(params, ::Type{FT}) where {FT}
+    ogw_name = params["orographic_gravity_wave"]
     @assert ogw_name in (nothing, "gfdl_restart", "raw_topo")
     return if ogw_name == "gfdl_restart"
         OrographicGravityWave{FT, String}()
@@ -140,16 +140,16 @@ function get_orographic_gravity_wave_model(parsed_args, ::Type{FT}) where {FT}
     end
 end
 
-function get_perf_mode(parsed_args)
-    return if parsed_args["perf_mode"] == "PerfExperimental"
+function get_perf_mode(params)
+    return if params["perf_mode"] == "PerfExperimental"
         PerfExperimental()
     else
         PerfStandard()
     end
 end
 
-function get_energy_form(parsed_args, vert_diff)
-    energy_name = parsed_args["energy_name"]
+function get_energy_form(params, vert_diff)
+    energy_name = params["energy_name"]
     @assert energy_name in ("rhoe", "rhotheta")
     if !isnothing(vert_diff)
         @assert energy_name == "rhoe"
@@ -161,10 +161,10 @@ function get_energy_form(parsed_args, vert_diff)
     end
 end
 
-function get_radiation_mode(parsed_args, ::Type{FT}) where {FT}
-    idealized_h2o = parsed_args["idealized_h2o"]
+function get_radiation_mode(params, ::Type{FT}) where {FT}
+    idealized_h2o = params["idealized_h2o"]
     @assert idealized_h2o in (true, false)
-    radiation_name = parsed_args["rad"]
+    radiation_name = params["rad"]
     @assert radiation_name in (
         nothing,
         "nothing",
@@ -192,8 +192,8 @@ function get_radiation_mode(parsed_args, ::Type{FT}) where {FT}
     end
 end
 
-function get_precipitation_model(parsed_args)
-    precip_model = parsed_args["precip_model"]
+function get_precipitation_model(params)
+    precip_model = params["precip_model"]
     return if precip_model == nothing || precip_model == "nothing"
         NoPrecipitation()
     elseif precip_model == "0M"
@@ -205,8 +205,8 @@ function get_precipitation_model(parsed_args)
     end
 end
 
-function get_forcing_type(parsed_args)
-    forcing = parsed_args["forcing"]
+function get_forcing_type(params)
+    forcing = params["forcing"]
     @assert forcing in (nothing, "held_suarez")
     return if forcing == nothing
         nothing
@@ -215,8 +215,8 @@ function get_forcing_type(parsed_args)
     end
 end
 
-function get_subsidence_model(parsed_args, radiation_mode, FT)
-    subsidence = parsed_args["subsidence"]
+function get_subsidence_model(params, radiation_mode, FT)
+    subsidence = params["subsidence"]
     subsidence == nothing && return nothing
 
     prof = if subsidence == "Bomex"
@@ -234,8 +234,8 @@ function get_subsidence_model(parsed_args, radiation_mode, FT)
     return Subsidence(prof)
 end
 
-function get_large_scale_advection_model(parsed_args, ::Type{FT}) where {FT}
-    ls_adv = parsed_args["ls_adv"]
+function get_large_scale_advection_model(params, ::Type{FT}) where {FT}
+    ls_adv = params["ls_adv"]
     ls_adv == nothing && return nothing
 
     (prof_dTdt₀, prof_dqtdt₀) = if ls_adv == "Bomex"
@@ -271,8 +271,8 @@ function get_large_scale_advection_model(parsed_args, ::Type{FT}) where {FT}
     return LargeScaleAdvection(prof_dTdt, prof_dqtdt)
 end
 
-function get_edmf_coriolis(parsed_args, ::Type{FT}) where {FT}
-    edmf_coriolis = parsed_args["edmf_coriolis"]
+function get_edmf_coriolis(params, ::Type{FT}) where {FT}
+    edmf_coriolis = params["edmf_coriolis"]
     edmf_coriolis == nothing && return nothing
     (prof_u, prof_v) = if edmf_coriolis == "Bomex"
         (APL.Bomex_geostrophic_u(FT), z -> FT(0))
@@ -308,20 +308,14 @@ function get_turbconv_model(
     FT,
     moisture_model,
     precip_model,
-    parsed_args,
+    params,
     turbconv_params,
 )
-    turbconv = parsed_args["turbconv"]
+    turbconv = params["turbconv"]
     @assert turbconv in (nothing, "edmf", "edmfx")
 
     return if turbconv == "edmf"
-        TC.EDMFModel(
-            FT,
-            moisture_model,
-            precip_model,
-            parsed_args,
-            turbconv_params,
-        )
+        TC.EDMFModel(FT, moisture_model, precip_model, params, turbconv_params)
     elseif turbconv == "edmfx"
         EDMFX{turbconv_params.updraft_number}(turbconv_params.min_area)
     else
@@ -329,16 +323,16 @@ function get_turbconv_model(
     end
 end
 
-function get_surface_thermo_state_type(parsed_args)
+function get_surface_thermo_state_type(params)
     dict = Dict()
     dict["GCMSurfaceThermoState"] = GCMSurfaceThermoState()
-    return dict[parsed_args["surface_thermo_state_type"]]
+    return dict[params["surface_thermo_state_type"]]
 end
 
 
-function get_surface_scheme(FT, parsed_args)
-    surface_scheme = parsed_args["surface_scheme"]
-    sfc_thermo_state_type = get_surface_thermo_state_type(parsed_args)
+function get_surface_scheme(FT, params)
+    surface_scheme = params["surface_scheme"]
+    sfc_thermo_state_type = get_surface_thermo_state_type(params)
     @assert surface_scheme in (nothing, "bulk", "monin_obukhov")
     return if surface_scheme == "bulk"
         BulkSurfaceScheme(sfc_thermo_state_type)
