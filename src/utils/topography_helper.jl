@@ -14,7 +14,7 @@ function topography_dcmip200(coords)
     rₘ = @. FT(acos(sind(ϕₘ) * sind(ϕ) + cosd(ϕₘ) * cosd(ϕ) * cosd(λ - λₘ))) # Great circle distance (rads)
     Rₘ = FT(3π / 4) # Moutain radius
     ζₘ = FT(π / 16) # Mountain oscillation half-width
-    h₀ = FT(200)
+    h₀ = FT(2000)
     zₛ = @. ifelse(
         rₘ < Rₘ,
         FT(h₀ / 2) * (1 + cospi(rₘ / Rₘ)) * (cospi(rₘ / ζₘ))^2,
@@ -31,6 +31,7 @@ function generate_topography_warp(earth_spline)
         elevation = @. FT(earth_spline(λ, Φ))
         zₛ = @. ifelse(elevation > FT(0), elevation, FT(0))
         @info "Assign elevation"
+        @show extrema(zₛ)
         return zₛ
     end
     return topography_earth
