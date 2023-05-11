@@ -120,7 +120,7 @@ function default_cache(
             Spaces.level(Y.f, half),
             thermo_state_type(atmos.moisture_model, FT),
         ),
-        ∂ᶜK∂ᶠw_data = similar(
+        ∂ᶜK∂ᶠu₃_data = similar(
             Y.c,
             Operators.StencilCoefs{-half, half, NTuple{2, FT}},
         ),
