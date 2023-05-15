@@ -303,7 +303,7 @@ function argparse_settings()
         help = "Define the surface smoothing kernel factor (integer) [`6 (default)`]"
         arg_type = Int
         default = 6
-        --apply_limiter"
+        "--apply_limiter"
         help = "Apply a horizontal limiter to every tracer [`true` (default), `false`]"
         arg_type = Bool
         default = true
