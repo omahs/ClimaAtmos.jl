@@ -365,7 +365,8 @@ function vertical_diffusion_boundary_layer_tendency!(
     FT = Spaces.undertype(axes(ᶜρ))
     (; ᶜp, ᶠK_E) = p # assume ᶜts and ᶜp have been updated
     (; C_E) = p.atmos.vert_diff
-    (; ρ_dif_flux_uₕ, ρ_dif_flux_h_tot, ρ_dif_flux_q_tot, ᶠp, z_bottom) = p
+    (; ρ_dif_flux_uₕ, ρ_dif_flux_h_tot, ρ_dif_flux_q_tot, ᶠp, z_bottom, z_sfc) = p
+    z_surface = Fields.Field(Fields.field_values(z_sfc[colidx]), axes(z_bottom))
 
     ᶠgradᵥ = Operators.GradientC2F() # apply BCs to ᶜdivᵥ, which wraps ᶠgradᵥ
 
@@ -374,7 +375,7 @@ function vertical_diffusion_boundary_layer_tendency!(
     @. ᶠK_E[colidx] = eddy_diffusivity_coefficient(
         C_E,
         norm(uₕ_int),
-        z_bottom[colidx],
+        z_bottom[colidx] - z_surface[colidx],
         ᶠp[colidx],
     )
 
