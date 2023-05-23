@@ -31,7 +31,6 @@ function generate_topography_warp(earth_spline)
         elevation = @. FT(earth_spline(λ, Φ))
         zₛ = @. ifelse(elevation > FT(0), elevation, FT(0))
         @info "Assign elevation"
-        @show extrema(zₛ)
         return zₛ
     end
     return topography_earth
