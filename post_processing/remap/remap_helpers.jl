@@ -1,6 +1,7 @@
 import ClimaCoreTempestRemap
-import ClimaCore.Spaces as Spaces
-
+import ClimaCore: Spaces, Fields
+import ClimaAtmos: SurfaceStates, CT3
+import ClimaCore.Utilities: half
 """
     create_weightfile(
         weightfile::String,
@@ -120,6 +121,7 @@ function remap2latlon(filein, data_dir, remap_tmpdir, weightfile, nlat, nlon)
     nc_K = defVar(nc, "kinetic_energy", FT, cspace, ("time",))
     nc_vort = defVar(nc, "vorticity", FT, cspace, ("time",))
     nc_T_sfc = defVar(nc, "sfc_temperature", FT, hspace, ("time",))
+    nc_z_sfc = defVar(nc, "sfc_elevation", FT, hspace, ("time",))
     nc_qt_sfc = defVar(nc, "sfc_qt", FT, hspace, ("time",))
     # define moist variables
     if :ρq_tot in propertynames(Y.c)
@@ -194,6 +196,7 @@ function remap2latlon(filein, data_dir, remap_tmpdir, weightfile, nlat, nlon)
     nc_K[:, 1] = diag.kinetic_energy
     nc_vort[:, 1] = diag.vorticity
     nc_T_sfc[:, 1] = diag.sfc_temperature
+    nc_z_sfc[:, 1] = Fields.level(Fields.coordinate_field(Y.f.u₃).z, half)
     nc_qt_sfc[:, 1] = diag.sfc_qt
 
     if :ρq_tot in propertynames(Y.c)
@@ -211,18 +214,20 @@ function remap2latlon(filein, data_dir, remap_tmpdir, weightfile, nlat, nlon)
     end
 
     if :sfc_flux_energy in propertynames(diag)
-        nc_sfc_flux_energy[:, 1] = diag.sfc_flux_energy.components.data.:1
+        sfc_flux_energy_phy = Geometry.WVector.(diag.sfc_flux_energy)
+        nc_sfc_flux_energy[:, 1] = sfc_flux_energy_phy.components.data.:1
         sfc_flux_momentum = diag.sfc_flux_momentum
-        w_unit =
-            Geometry.Covariant3Vector.(
-                Geometry.WVector.(ones(axes(sfc_flux_momentum)))
-            )
+        sfc_local_geometry = Fields.local_geometry_field(sfc_flux_momentum)
+        w_unit = @. CT3(
+            SurfaceStates.unit_basis_vector_data(CT3, sfc_local_geometry),
+        )
         sfc_flux_momentum_phy =
             Geometry.UVVector.(adjoint.(sfc_flux_momentum) .* w_unit)
         nc_sfc_flux_u[:, 1] = sfc_flux_momentum_phy.components.data.:1
         nc_sfc_flux_v[:, 1] = sfc_flux_momentum_phy.components.data.:2
         if :sfc_evaporation in propertynames(diag)
-            nc_sfc_evaporation[:, 1] = diag.sfc_evaporation.components.data.:1
+            sfc_evaporation_phy = Geometry.WVector.(diag.sfc_evaporation)
+            nc_sfc_evaporation[:, 1] = sfc_evaporation_phy.components.data.:1
         end
     end
 
@@ -256,6 +261,7 @@ function remap2latlon(filein, data_dir, remap_tmpdir, weightfile, nlat, nlon)
         "kinetic_energy",
         "vorticity",
         "sfc_temperature",
+        "sfc_elevation",
         "sfc_qt",
     ]
     if :ρq_tot in propertynames(Y.c)

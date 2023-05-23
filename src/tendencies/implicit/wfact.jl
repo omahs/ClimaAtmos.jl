@@ -24,11 +24,10 @@ import ClimaCore.Fields as Fields
 # ᶠu³ with CT3(ᶠu³_data + eps(ᶠu³_data)), which lets us avoid divisions by 0.
 # Since Operator2Stencil has not yet been extended to upwinding operators,
 # ᶠupwind_stencil is not available.
-# For simplicity, we approximate the Jacobian for FCT using the Jacobian for
-# third-order upwinding.
-# In the set_∂ᶜρχₜ∂ᶠu₃! function, we assume that ∂(ᶜχ)/∂(ᶠu₃_data) = 0;
-# if this is not the case, the additional term should be added to the result of
-# this function.
+# For simplicity, we approximate the value of ∂(ᶜρχₜ)/∂(ᶠu³_data) for FCT
+# (both Boris-Book and Zalesak) using the value for first-order upwinding.
+# In the following function, we assume that ∂(ᶜχ)/∂(ᶠu₃_data) = 0; if this is
+# not the case, the additional term should be added to this function's result.
 get_data_plus_ε(vector) = vector.u³ + eps(vector.u³)
 set_∂ᶜρχₜ∂ᶠu₃!(∂ᶜρχₜ∂ᶠu₃_data, ᶜJ, ᶜρ, ᶠu³, ᶜχ, ᶠg³³, ::Val{:none}) =
     @. ∂ᶜρχₜ∂ᶠu₃_data =
@@ -38,11 +37,15 @@ set_∂ᶜρχₜ∂ᶠu₃!(∂ᶜρχₜ∂ᶠu₃_data, ᶜJ, ᶜρ, ᶠu³, 
         ᶠwinterp(ᶜJ, ᶜρ) * ᶠupwind1(CT3(get_data_plus_ε(ᶠu³)), ᶜχ) /
         get_data_plus_ε(ᶠu³) * ᶠg³³,
     ))
-set_∂ᶜρχₜ∂ᶠu₃!(∂ᶜρχₜ∂ᶠu₃_data, ᶜJ, ᶜρ, ᶠu³, ᶜχ, ᶠg³³, _) =
+set_∂ᶜρχₜ∂ᶠu₃!(∂ᶜρχₜ∂ᶠu₃_data, ᶜJ, ᶜρ, ᶠu³, ᶜχ, ᶠg³³, ::Val{:third_order}) =
     @. ∂ᶜρχₜ∂ᶠu₃_data = -(ᶜadvdivᵥ_stencil(
         ᶠwinterp(ᶜJ, ᶜρ) * ᶠupwind3(CT3(get_data_plus_ε(ᶠu³)), ᶜχ) /
         get_data_plus_ε(ᶠu³) * ᶠg³³,
     ))
+set_∂ᶜρχₜ∂ᶠu₃!(∂ᶜρχₜ∂ᶠu₃_data, ᶜJ, ᶜρ, ᶠu³, ᶜχ, ᶠg³³, ::Val{:boris_book}) =
+    set_∂ᶜρχₜ∂ᶠu₃!(∂ᶜρχₜ∂ᶠu₃_data, ᶜJ, ᶜρ, ᶠu³, ᶜχ, ᶠg³³, Val(:first_order))
+set_∂ᶜρχₜ∂ᶠu₃!(∂ᶜρχₜ∂ᶠu₃_data, ᶜJ, ᶜρ, ᶠu³, ᶜχ, ᶠg³³, ::Val{:zalesak}) =
+    set_∂ᶜρχₜ∂ᶠu₃!(∂ᶜρχₜ∂ᶠu₃_data, ᶜJ, ᶜρ, ᶠu³, ᶜχ, ᶠg³³, Val(:first_order))
 
 function validate_flags!(Y, flags, energy_upwinding)
     # TODO: Add Operator2Stencil for UpwindBiasedProductC2F to ClimaCore

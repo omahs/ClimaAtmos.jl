@@ -70,9 +70,10 @@ function argparse_settings()
         help = "Vertical diffusion [`false` (default), `VerticalDiffusion`, `true` (defaults to `VerticalDiffusion`)]"
         arg_type = String
         default = "false"
-        "--surface_scheme"
-        help = "Surface flux scheme [`nothing` (default), `bulk`, `monin_obukhov`]"
+        "--surface_setup"
+        help = "Surface flux scheme [`DefaultExchangeCoefficients` (default), `DefaultMoninObukhov`]"
         arg_type = String
+        default = "DefaultExchangeCoefficients"
         "--surface_thermo_state_type"
         help = "Surface thermo state type [`GCMSurfaceThermoState` (default), `PrescribedThermoState`]"
         arg_type = String
@@ -448,8 +449,14 @@ end
 parsed_args_from_ARGS(ARGS, parsed_args = Dict()) =
     parsed_args_from_ARGS_string(strip(join(ARGS, " ")), parsed_args)
 
+function cmd_args(cmd::AbstractString)
+    i = findfirst(".jl ", cmd)
+    isnothing(i) && error("No Julia file found in $cmd.")
+    length(cmd) == last(i) && return ""
+    return String(cmd[(last(i) + 1):length(cmd)])
+end
 parsed_args_from_command_line_flags(str, parsed_args = Dict()) =
-    parsed_args_from_ARGS_string(strip(last(split(str, ".jl"))), parsed_args)
+    parsed_args_from_ARGS_string(strip(cmd_args(str)), parsed_args)
 
 function parsed_args_from_ARGS_string(str, parsed_args = Dict())
     str = replace(str, "    " => " ", "   " => " ", "  " => " ")
@@ -486,7 +493,9 @@ whose keys are the `job_id`s from buildkite yaml.
 To run the `sphere_aquaplanet_rhoe_equilmoist_allsky`
 buildkite job from the standard buildkite pipeline, use:
 ```
-using Revise; include("src/utils/cli_options.jl");
+using Revise;
+include("src/utils/cli_options.jl");
+include("src/utils/yaml_helper.jl");
 dict = parsed_args_per_job_id();
 parsed_args = dict["sphere_aquaplanet_rhoe_equilmoist_allsky"];
 include("examples/hybrid/driver.jl")
