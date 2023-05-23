@@ -249,7 +249,7 @@ version = "0.4.2"
 
 [[deps.ClimaCore]]
 deps = ["Adapt", "BlockArrays", "CUDA", "ClimaComms", "CubedSphere", "DataStructures", "DiffEqBase", "DocStringExtensions", "ForwardDiff", "GaussQuadrature", "GilbertCurves", "HDF5", "InteractiveUtils", "IntervalSets", "LinearAlgebra", "PkgVersion", "RecursiveArrayTools", "RootSolvers", "Rotations", "SparseArrays", "Static", "StaticArrays", "Statistics", "UnPack"]
-git-tree-sha1 = "c7e098ccee6a24e31edddf6d3eb3c867da8d1a1a"
+path = "../../ClimaCore.jl"
 uuid = "d414da3d-4745-48bb-8d80-42e94e092884"
 version = "0.10.35"
 
@@ -510,9 +510,9 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[deps.Distributions]]
 deps = ["ChainRulesCore", "DensityInterface", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SparseArrays", "SpecialFunctions", "Statistics", "StatsAPI", "StatsBase", "StatsFuns", "Test"]
-git-tree-sha1 = "aa8ae1e8e8d4b5ef38a8fbc028fc75f3c5cad73d"
+git-tree-sha1 = "5eeb2bd01e5065090ad591a205d8cad432ae6cb6"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.94"
+version = "0.25.93"
 
 [[deps.DocStringExtensions]]
 deps = ["LibGit2"]
