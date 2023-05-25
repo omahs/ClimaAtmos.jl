@@ -301,9 +301,9 @@ function argparse_settings()
         arg_type = String
         default = "NoWarp"
         "--topo-smoothing"
-        help = "Define the surface smoothing kernel factor (integer) [`6 (default)`]"
+        help = "Define the surface smoothing kernel factor (integer) [`3 (default)`]"
         arg_type = Int
-        default = 6
+        default = 3
         "--apply_limiter"
         help = "Apply a horizontal limiter to every tracer [`true` (default), `false`]"
         arg_type = Bool
