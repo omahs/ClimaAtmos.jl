@@ -109,7 +109,7 @@ function get_spaces(parsed_args, params, comms_ctx)
             lon = data["longitude"][:]
             lat = data["latitude"][:]
             # Apply Smoothing
-            smooth_degree = 15
+            smooth_degree = Int(parsed_args["topo-smoothing"])
             esmth = imfilter(zlevels, Kernel.gaussian(smooth_degree))
             linear_interpolation(
                 (lon, lat),

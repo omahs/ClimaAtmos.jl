@@ -110,6 +110,13 @@ function default_cache(
         ᶜp_ref,
         ᶜT = similar(Y.c, FT),
         ᶜf,
+        sfc_conditions,
+        z_sfc,
+        T_sfc,
+        ts_sfc = similar(
+            Spaces.level(Y.f, half),
+            thermo_state_type(atmos.moisture_model, FT),
+        ),
         ∂ᶜK∂ᶠu₃_data = similar(
             Y.c,
             Operators.StencilCoefs{-half, half, NTuple{2, FT}},

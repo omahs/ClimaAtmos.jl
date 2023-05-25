@@ -326,19 +326,19 @@ steps:
 
       - label: ":computer: baroclinic wave (ρe) topography (dcmip): no viscous sponge"
         command:
-          - julia --color=yes --project=examples examples/hybrid/driver.jl --job_id sphere_baroclinic_wave_rhoe_topography_dcmip_rs --topography DCMIP200 --initial_condition DryBaroclinicWave --dt 200secs --t_end 6days --dt_save_to_disk 6days --rayleigh_sponge true
+          - julia --color=yes --project=examples examples/hybrid/driver.jl --job_id sphere_baroclinic_wave_rhoe_topography_dcmip_rs --topography DCMIP200 --initial_condition DryBaroclinicWave --dt 200secs --t_end 6days --dt_save_to_disk 6days --rayleigh_sponge true --use_reference_state false
           - julia --color=yes --project=examples post_processing/remap/remap_pipeline.jl --data_dir sphere_baroclinic_wave_rhoe_topography_dcmip_rs --out_dir sphere_baroclinic_wave_rhoe_topography_dcmip_rs
         artifact_paths: "sphere_baroclinic_wave_rhoe_topography_dcmip_rs/*"
 
       - label: ":computer: held suarez (ρe) topography (dcmip)"
         command:
-          - julia --color=yes --project=examples examples/hybrid/driver.jl --forcing held_suarez --job_id sphere_held_suarez_rhoe_topography_dcmip --t_end 3days --topography DCMIP200 --dt 200secs --dt_save_to_disk 3days --rayleigh_sponge true --viscous_sponge true
+          - julia --color=yes --project=examples examples/hybrid/driver.jl --forcing held_suarez --job_id sphere_held_suarez_rhoe_topography_dcmip --t_end 3days --topography DCMIP200 --dt 200secs --dt_save_to_disk 3days --rayleigh_sponge true --viscous_sponge true --use_reference_state false
           - julia --color=yes --project=examples post_processing/remap/remap_pipeline.jl --data_dir sphere_held_suarez_rhoe_topography_dcmip --out_dir sphere_held_suarez_rhoe_topography_dcmip
         artifact_paths: "sphere_held_suarez_rhoe_topography_dcmip/*"
 
       - label: ":computer: held suarez (ρe) equilmoist topography (dcmip)"
         command:
-          - julia --color=yes --project=examples examples/hybrid/driver.jl --vert_diff true --surface_setup DefaultExchangeCoefficients --moist equil --forcing held_suarez --precip_model 0M --job_id sphere_held_suarez_rhoe_equilmoist_topography_dcmip --dt 200secs --t_end 2days --dt_save_to_disk 2days --topography DCMIP200 --rayleigh_sponge true --viscous_sponge true
+          - julia --color=yes --project=examples examples/hybrid/driver.jl --vert_diff true --surface_setup DefaultExchangeCoefficients --moist equil --forcing held_suarez --precip_model 0M --job_id sphere_held_suarez_rhoe_equilmoist_topography_dcmip --dt 200secs --t_end 2days --dt_save_to_disk 2days --topography DCMIP200 --rayleigh_sponge true --viscous_sponge true --use_reference_state false
           - julia --color=yes --project=examples post_processing/remap/remap_pipeline.jl --data_dir sphere_held_suarez_rhoe_equilmoist_topography_dcmip --out_dir sphere_held_suarez_rhoe_equilmoist_topography_dcmip
         artifact_paths: "sphere_held_suarez_rhoe_equilmoist_topography_dcmip/*"
         agents:

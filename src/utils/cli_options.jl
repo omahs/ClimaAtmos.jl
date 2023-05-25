@@ -300,6 +300,10 @@ function argparse_settings()
         help = "Define the surface elevation profile [`NoWarp`,`Earth`,`DCMIP200`,`Agnesi`]"
         arg_type = String
         default = "NoWarp"
+        "--topo-smoothing"
+        help = "Define the surface smoothing kernel factor (integer) [`3 (default)`]"
+        arg_type = Int
+        default = 3
         "--apply_limiter"
         help = "Apply a horizontal limiter to every tracer [`true` (default), `false`]"
         arg_type = Bool
