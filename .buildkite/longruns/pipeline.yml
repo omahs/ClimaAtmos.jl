@@ -246,7 +246,7 @@ steps:
 
       - label: ":computer: baroclinic wave (ρe_tot) high resolution topography (dcmip)"
         command:
-          - mpiexec julia --project=examples examples/hybrid/driver.jl --z_elem 45 --dz_bottom 30 --h_elem 16 --kappa_4 3e16 --initial_condition DryBaroclinicWave --dt 300secs --t_end 100days --dt_save_to_disk 10days --job_id longrun_bw_rhoe_highres_topography_dcmip --topography DCMIP200 --rayleigh_sponge true --use_reference_state false --alpha_rayleigh_w 1.0 --alpha_rayleigh_uh 0
+          - mpiexec julia --project=examples examples/hybrid/driver.jl --z_elem 45 --dz_bottom 30 --h_elem 16 --kappa_4 2e16 --initial_condition DryBaroclinicWave --dt 100secs --t_end 100days --dt_save_to_disk 10days --job_id longrun_bw_rhoe_highres_topography_dcmip --topography DCMIP200 --rayleigh_sponge true --use_reference_state false --alpha_rayleigh_w 1.0 --alpha_rayleigh_uh 0
           - julia --color=yes --project=examples post_processing/remap/remap_pipeline.jl --data_dir longrun_bw_rhoe_highres_topography_dcmip --out_dir longrun_bw_rhoe_highres_topography_dcmip
         artifact_paths: "longrun_bw_rhoe_highres_topography_dcmip/*"
         env:
