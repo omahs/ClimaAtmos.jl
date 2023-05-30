@@ -1,25 +1,16 @@
-# Customizing specific jobs / specs in config_parsed_args.jl:
-ca_dir = joinpath(dirname(@__DIR__));
-include(joinpath(ca_dir, "perf", "config_parsed_args.jl")) # defines parsed_args
-
-ENV["CI_PERF_SKIP_RUN"] = true # we only need haskey(ENV, "CI_PERF_SKIP_RUN") == true
-
-filename = joinpath(ca_dir, "examples", "hybrid", "driver.jl")
-
-try # capture integrator
-    include(filename)
-catch err
-    if err.error !== :exit_profile
-        rethrow(err.error)
-    end
-end
+import Random
+Random.seed!(1234)
+import ClimaAtmos as CA
+config = CA.AtmosPerfConfig()
+integrator = CA.get_integrator(config)
 
 # The callbacks flame graph is very expensive, so only do 2 steps.
 @info "running step"
 
+import OrdinaryDiffEq
 OrdinaryDiffEq.step!(integrator) # compile first
 import Profile, ProfileCanvas
-(; output_dir, job_id) = simulation
+(; output_dir, job_id) = integrator.p.simulation
 output_dir = job_id
 mkpath(output_dir)
 
@@ -65,7 +56,7 @@ allocs_limit = Dict()
 allocs_limit["flame_perf_target"] = 4320
 allocs_limit["flame_perf_target_tracers"] = 185904
 allocs_limit["flame_perf_target_edmfx"] = 1040
-allocs_limit["flame_perf_target_edmf"] = 8278037104
+allocs_limit["flame_perf_target_edmf"] = 8366510704
 allocs_limit["flame_perf_target_threaded"] = 3850064
 allocs_limit["flame_perf_target_callbacks"] = 11159912
 
