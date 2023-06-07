@@ -155,7 +155,7 @@ function get_spaces(parsed_args, params, comms_ctx)
                 z_elem,
                 z_stretch;
                 surface_warp = warp_function,
-                topo_smoothing = parsed_args["topo_smoothing"]
+                topo_smoothing = parsed_args["topo_smoothing"],
             )
         end
     elseif parsed_args["config"] == "column" # single column
