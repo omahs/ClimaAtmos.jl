@@ -308,7 +308,11 @@ function argparse_settings()
         help = "Define the surface elevation profile [`NoWarp`,`Earth`,`DCMIP200`,`Agnesi`]"
         arg_type = String
         default = "NoWarp"
-        "--topo-smoothing"
+        "--topo_smoothing"
+        help = "Choose whether to order-2 smoothing on the LGL mesh"
+        arg_type = Bool
+        default = false
+        "--smoothing_order"
         help = "Define the surface smoothing kernel factor (integer) [`3 (default)`]"
         arg_type = Int
         default = 3
