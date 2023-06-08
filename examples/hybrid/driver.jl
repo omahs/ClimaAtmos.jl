@@ -15,7 +15,9 @@ using Statistics: mean
 import ClimaAtmos.InitialConditions as ICs
 Random.seed!(1234)
 
-config = CA.AtmosConfig()
+if !(@isdefined config)
+    config = CA.AtmosConfig()
+end
 integrator = CA.get_integrator(config)
 sol_res = CA.solve_atmos!(integrator)
 
@@ -27,6 +29,7 @@ import OrderedCollections
 using ClimaCoreTempestRemap
 using ClimaCorePlots, Plots
 using ClimaCoreMakie, CairoMakie
+include(joinpath(pkgdir(CA), "perf", "jet_report_nfailures.jl"))
 include(joinpath(pkgdir(CA), "post_processing", "contours_and_profiles.jl"))
 include(joinpath(pkgdir(CA), "post_processing", "post_processing_funcs.jl"))
 include(

@@ -29,6 +29,12 @@ function get_atmos(config::AtmosConfig, turbconv_params)
     edmfx_entr_detr = parsed_args["edmfx_entr_detr"]
     @assert edmfx_entr_detr in (false, true)
 
+    edmfx_sgs_flux = parsed_args["edmfx_sgs_flux"]
+    @assert edmfx_sgs_flux in (false, true)
+
+    edmfx_nh_pressure = parsed_args["edmfx_nh_pressure"]
+    @assert edmfx_nh_pressure in (false, true)
+
     model_config = get_model_config(parsed_args)
     vert_diff = get_vertical_diffusion_model(diffuse_momentum, parsed_args, FT)
     atmos = AtmosModel(;
@@ -42,6 +48,8 @@ function get_atmos(config::AtmosConfig, turbconv_params)
         edmf_coriolis = get_edmf_coriolis(parsed_args, FT),
         edmfx_adv_test,
         edmfx_entr_detr,
+        edmfx_sgs_flux,
+        edmfx_nh_pressure,
         precip_model,
         forcing_type,
         turbconv_model = get_turbconv_model(
@@ -111,7 +119,7 @@ function get_spaces(parsed_args, params, comms_ctx)
             lon = data["longitude"][:]
             lat = data["latitude"][:]
             # Apply Smoothing
-            smooth_degree = Int(parsed_args["topo-smoothing"])
+            smooth_degree = Int(parsed_args["smoothing_order"])
             esmth = imfilter(zlevels, Kernel.gaussian(smooth_degree))
             linear_interpolation(
                 (lon, lat),
@@ -147,6 +155,7 @@ function get_spaces(parsed_args, params, comms_ctx)
                 z_elem,
                 z_stretch;
                 surface_warp = warp_function,
+                topo_smoothing = parsed_args["topo_smoothing"],
             )
         end
     elseif parsed_args["config"] == "column" # single column

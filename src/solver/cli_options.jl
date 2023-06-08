@@ -63,9 +63,17 @@ function argparse_settings()
         arg_type = Bool
         default = false
         "--edmfx_entr_detr"
-        help = "If set to true, it switches on EDMFX entrainment/detrainment closure.  [`true` (default), `false`]"
+        help = "If set to true, it switches on EDMFX entrainment/detrainment closure.  [`true`, `false` (default)]"
         arg_type = Bool
-        default = true
+        default = false
+        "--edmfx_sgs_flux"
+        help = "If set to true, it switches on EDMFX SGS flux.  [`true`, `false` (default)]"
+        arg_type = Bool
+        default = false
+        "--edmfx_nh_pressure"
+        help = "If set to true, it switches on EDMFX pressure drag closure.  [`true`, `false` (default)]"
+        arg_type = Bool
+        default = false
         "--vert_diff"
         help = "Vertical diffusion [`false` (default), `VerticalDiffusion`, `true` (defaults to `VerticalDiffusion`)]"
         arg_type = String
@@ -300,7 +308,11 @@ function argparse_settings()
         help = "Define the surface elevation profile [`NoWarp`,`Earth`,`DCMIP200`,`Agnesi`]"
         arg_type = String
         default = "NoWarp"
-        "--topo-smoothing"
+        "--topo_smoothing"
+        help = "Choose whether to order-2 smoothing on the LGL mesh"
+        arg_type = Bool
+        default = false
+        "--smoothing_order"
         help = "Define the surface smoothing kernel factor (integer) [`3 (default)`]"
         arg_type = Int
         default = 3

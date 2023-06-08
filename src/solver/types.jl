@@ -162,6 +162,8 @@ Base.@kwdef struct AtmosModel{
     EC,
     EAT,
     EED,
+    ESF,
+    ENP,
     TCM,
     SS,
     NOGW,
@@ -183,6 +185,8 @@ Base.@kwdef struct AtmosModel{
     edmf_coriolis::EC = nothing
     edmfx_adv_test::EAT = nothing
     edmfx_entr_detr::EED = nothing
+    edmfx_sgs_flux::ESF = nothing
+    edmfx_nh_pressure::ENP = nothing
     turbconv_model::TCM = nothing
     surface_scheme::SS = nothing
     non_orographic_gravity_wave::NOGW = nothing
@@ -233,6 +237,32 @@ struct AtmosConfig{FT, TD, PA, C}
 end
 
 import ClimaCore
+
+function AtmosTargetConfig(
+    s = argparse_settings();
+    target_job,
+    dict = parsed_args_per_job_id(; filter_name = "driver.jl"),
+)
+    parsed_args_defaults = cli_defaults(s)
+
+    # Start with performance target, and override anything provided in ARGS
+    parsed_args_prescribed = parsed_args_from_ARGS(ARGS)
+
+    _target_job = get(parsed_args_prescribed, "target_job", nothing)
+    if _target_job ≠ nothing && target_job ≠ nothing
+        error("Target job specified multiple times")
+    end
+    _target_job ≠ nothing && (target_job = _target_job)
+    parsed_args_perf_target = isnothing(target_job) ? Dict() : dict[target_job]
+
+    parsed_args = merge(
+        parsed_args_defaults,
+        parsed_args_perf_target,
+        parsed_args_prescribed,
+    )
+    return parsed_args
+end
+
 
 """
     AtmosPerfConfig()
@@ -330,7 +360,7 @@ end
 Base.eltype(::AtmosConfig{FT}) where {FT} = FT
 
 """
-Merges parsed_args with the toml_dict generated from CLIMAParameters. 
+Merges parsed_args with the toml_dict generated from CLIMAParameters.
 Priority for clashes: parsed_args > toml_dict > default_args
 Converts `nothing` to empty string, since CLIMAParameters does not support type Nothing.
 The dictionary overrides existing toml_dict values if there are clashes.
