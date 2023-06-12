@@ -51,7 +51,7 @@ function surface_thermo_state(
 end
 
 function vertical_diffusion_boundary_layer_tendency!(Yₜ, Y, p, t)
-    Fields.bycolumn(axes(Y.c.uₕ)) do colidx
+    atmos_bycolumn(axes(Y.c.uₕ)) do colidx
         (; vert_diff) = p.atmos
         vertical_diffusion_boundary_layer_tendency!(
             Yₜ,

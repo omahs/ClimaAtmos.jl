@@ -274,7 +274,7 @@ function compute_OGW_info(Y, elev_data, earth_radius, γ, h_frac)
             getproperty(topo_ll, varname),
             extrapolation_bc = (Periodic(), Flat()),
         )
-        Fields.bycolumn(axes(Y.c.ρ)) do colidx
+        atmos_bycolumn(axes(Y.c.ρ)) do colidx
             parent(getproperty(topo_cg, varname)[colidx]) .=
                 FT.(li_obj(parent(cg_lon[colidx]), parent(cg_lat[colidx])))
         end
@@ -308,7 +308,7 @@ function regrid_OGW_info(Y, orographic_info_rll)
             getproperty(topo_ll, varname),
             extrapolation_bc = (Periodic(), Flat()),
         )
-        Fields.bycolumn(axes(Y.c.ρ)) do colidx
+        atmos_bycolumn(axes(Y.c.ρ)) do colidx
             parent(getproperty(topo_cg, varname)[colidx]) .=
                 FT.(li_obj(parent(cg_lon[colidx]), parent(cg_lat[colidx])))
         end

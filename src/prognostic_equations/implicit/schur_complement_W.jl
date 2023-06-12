@@ -277,7 +277,7 @@ function LinearAlgebra.ldiv!(
         # of allocations for EDMFX.
 
         # Compute Schur complement
-        Fields.bycolumn(axes(x.c)) do colidx
+        atmos_bycolumn(axes(x.c)) do colidx
             _ldiv_serial!(
                 A,
                 x.c[colidx],

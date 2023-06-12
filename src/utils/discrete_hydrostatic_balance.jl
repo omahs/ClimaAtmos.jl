@@ -12,7 +12,7 @@ Modify the energy variable in state `Y` given Y and the cache `p` so that
 function set_discrete_hydrostatic_balanced_state!(Y, p)
     FT = Spaces.undertype(axes(Y.c))
     ᶠgradᵥ_ᶜp = similar(Y.f.u₃)
-    Fields.bycolumn(axes(Y.c.ρ)) do colidx
+    atmos_bycolumn(axes(Y.c.ρ)) do colidx
         set_discrete_hydrostatic_balanced_pressure!(
             p.ᶜp,
             ᶠgradᵥ_ᶜp,

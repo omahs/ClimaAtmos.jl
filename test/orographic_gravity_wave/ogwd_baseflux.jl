@@ -58,7 +58,7 @@ u_phy = Geometry.UVVector.(Y.c.uₕ).components.data.:1
 v_phy = Geometry.UVVector.(Y.c.uₕ).components.data.:2
 
 # Compute base flux
-Fields.bycolumn(axes(Y.c.ρ)) do colidx
+atmos_bycolumn(axes(Y.c.ρ)) do colidx
     CA.calc_base_flux!(
         topo_τ_x[colidx],
         topo_τ_y[colidx],

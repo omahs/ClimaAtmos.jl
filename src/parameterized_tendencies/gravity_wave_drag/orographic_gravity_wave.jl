@@ -93,7 +93,7 @@ function orographic_gravity_wave_tendency!(Yₜ, Y, p, t, ::OrographicGravityWav
 
     # get PBL info
     @. ᶜT = TD.air_temperature(thermo_params, ᶜts)
-    Fields.bycolumn(axes(Y.c.ρ)) do colidx
+    atmos_bycolumn(axes(Y.c.ρ)) do colidx
         parent(topo_k_pbl[colidx]) .=
             get_pbl(ᶜp[colidx], ᶜT[colidx], ᶜz[colidx], grav, cp_d)
     end
@@ -108,7 +108,7 @@ function orographic_gravity_wave_tendency!(Yₜ, Y, p, t, ::OrographicGravityWav
     v_phy = Geometry.UVVector.(Y.c.uₕ).components.data.:2
 
     # compute base flux at k_pbl
-    Fields.bycolumn(axes(Y.c.ρ)) do colidx
+    atmos_bycolumn(axes(Y.c.ρ)) do colidx
         calc_base_flux!(
             topo_τ_x[colidx],
             topo_τ_y[colidx],
@@ -139,7 +139,7 @@ function orographic_gravity_wave_tendency!(Yₜ, Y, p, t, ::OrographicGravityWav
     ᶠN = ᶠinterp.(ᶜN) # alternatively, can be computed from ᶠT and ᶠdTdz
 
     # compute saturation profile
-    Fields.bycolumn(axes(Y.c.ρ)) do colidx
+    atmos_bycolumn(axes(Y.c.ρ)) do colidx
         calc_saturation_profile!(
             topo_ᶠτ_sat[colidx],
             topo_U_sat[colidx],
@@ -166,7 +166,7 @@ function orographic_gravity_wave_tendency!(Yₜ, Y, p, t, ::OrographicGravityWav
     vforcing = zeros(axes(v_phy))
 
     # compute drag tendencies due to propagating part
-    Fields.bycolumn(axes(Y.c.ρ)) do colidx
+    atmos_bycolumn(axes(Y.c.ρ)) do colidx
         calc_propagate_forcing!(
             uforcing[colidx],
             vforcing[colidx],
@@ -180,7 +180,7 @@ function orographic_gravity_wave_tendency!(Yₜ, Y, p, t, ::OrographicGravityWav
     end
 
     # compute drag tendencies due to non-propagating part
-    Fields.bycolumn(axes(Y.c.ρ)) do colidx
+    atmos_bycolumn(axes(Y.c.ρ)) do colidx
         calc_nonpropagating_forcing!(
             uforcing[colidx],
             vforcing[colidx],

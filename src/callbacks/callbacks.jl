@@ -94,7 +94,7 @@ function turb_conv_affect_filter!(integrator)
     tc_params = CAP.turbconv_params(param_set)
 
     set_precomputed_quantities!(Y, p, t) # sets ᶜts for set_edmf_surface_bc
-    Fields.bycolumn(axes(Y.c)) do colidx
+    atmos_bycolumn(axes(Y.c)) do colidx
         state = TC.tc_column_state(Y, p, nothing, colidx, t)
         grid = TC.Grid(state)
         TC.affect_filter!(edmf, grid, state, tc_params, t)
@@ -294,7 +294,7 @@ function save_to_disk_func(integrator)
 
     if p.atmos.precip_model isa Microphysics0Moment
         (; ᶜS_ρq_tot, col_integrated_rain, col_integrated_snow) = p
-        Fields.bycolumn(axes(Y.c)) do colidx
+        atmos_bycolumn(axes(Y.c)) do colidx
             precipitation_tendency!(p.Yₜ, Y, p, t, colidx, p.precip_model)
         end # TODO: Set the diagnostics without computing the tendency.
         precip_diagnostic = (;

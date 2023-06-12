@@ -86,7 +86,7 @@ function explicit_vertical_advection_tendency!(Yₜ, Y, p, t)
         @. ᶜω³ = zero(ᶜω³)
     end
 
-    Fields.bycolumn(axes(Y.c)) do colidx
+    atmos_bycolumn(axes(Y.c)) do colidx
         @. ᶠω¹²[colidx] = ᶠcurlᵥ(Y.c.uₕ[colidx])
     end
     if p.atmos.turbconv_model isa EDMFX
@@ -102,7 +102,7 @@ function explicit_vertical_advection_tendency!(Yₜ, Y, p, t)
     end
     # Without the CT12(), the right-hand side would be a CT1 or CT2 in 2D space.
 
-    Fields.bycolumn(axes(Y.c)) do colidx
+    atmos_bycolumn(axes(Y.c)) do colidx
         @. Yₜ.c.uₕ[colidx] -=
             ᶜinterp(
                 ᶠω¹²[colidx] ×

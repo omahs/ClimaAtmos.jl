@@ -11,7 +11,7 @@ function implicit_tendency!(Yₜ, Y, p, t)
         @nvtx "precomputed quantities" color = colorant"orange" begin
             set_precomputed_quantities!(Y, p, t)
         end
-        Fields.bycolumn(axes(Y.c)) do colidx
+        atmos_bycolumn(axes(Y.c)) do colidx
             implicit_vertical_advection_tendency!(Yₜ, Y, p, t, colidx)
             if p.turbconv_model isa TurbulenceConvection.EDMFModel
                 implicit_sgs_flux_tendency!(

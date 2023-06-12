@@ -193,3 +193,6 @@ macro timed_str(ex)
         "$(prettytime(stats.time*1e9)) ($(Base.gc_alloc_count(stats.gcstats)) allocations: $(prettymemory(stats.gcstats.allocd)))"
     end
 end
+
+atmos_bycolumn(fn, space) = fn(Fields.ColumnIndex((1,), 1))
+Base.getindex(f::Fields.Field, colidx::Fields.ColumnIndex) = f

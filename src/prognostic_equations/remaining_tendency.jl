@@ -29,7 +29,7 @@ function additional_tendency!(Yₜ, Y, p, t)
     viscous_sponge_tendency!(Yₜ, Y, p, t, p.atmos.viscous_sponge)
 
     # Vertical tendencies
-    Fields.bycolumn(axes(Y.c)) do colidx
+    atmos_bycolumn(axes(Y.c)) do colidx
         rayleigh_sponge_tendency!(Yₜ, Y, p, t, colidx, p.atmos.rayleigh_sponge)
         forcing_tendency!(Yₜ, Y, p, t, colidx, p.forcing_type)
         subsidence_tendency!(Yₜ, Y, p, t, colidx, p.subsidence)

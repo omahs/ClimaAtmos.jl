@@ -133,7 +133,7 @@ function ᶜinterp_latlon2cg(lon, lat, datain, ᶜlocal_geometry)
 
     # interpolate onto cg grid and return Fields.Field
     gfdl_data = Fields.Field(FT, axes(ᶜlocal_geometry))
-    Fields.bycolumn(axes(ᶜlocal_geometry)) do colidx
+    atmos_bycolumn(axes(ᶜlocal_geometry)) do colidx
         lg = ᶜlocal_geometry[colidx]
         lat = lg.coordinates.lat
         lon = lg.coordinates.long
@@ -148,7 +148,7 @@ end
 
 function ᶜinterp2CAlevels(gfdl_z_full, gfdl_data, ᶜlocal_geometry)
     gfdl_ca_data = Fields.Field(FT, axes(ᶜlocal_geometry))
-    Fields.bycolumn(axes(ᶜlocal_geometry)) do colidx
+    atmos_bycolumn(axes(ᶜlocal_geometry)) do colidx
         li = linear_interpolation(
             parent(gfdl_z_full[colidx])[:],
             parent(gfdl_data[colidx])[:],
@@ -232,7 +232,7 @@ thermo_params = TD.Parameters.ThermodynamicsParameters{FT}(; pairs...)
 ᶠz = Fields.coordinate_field(Y.f).z
 
 # get PBL info
-Fields.bycolumn(axes(Y.c.ρ)) do colidx
+atmos_bycolumn(axes(Y.c.ρ)) do colidx
     parent(topo_k_pbl[colidx]) .=
         CA.get_pbl(ᶜp[colidx], ᶜT[colidx], ᶜz[colidx], grav, cp_d)
 end
@@ -247,7 +247,7 @@ u_phy = Y.c.u_phy
 v_phy = Y.c.v_phy
 
 # compute base flux at k_pbl
-Fields.bycolumn(axes(Y.c.ρ)) do colidx
+atmos_bycolumn(axes(Y.c.ρ)) do colidx
     CA.calc_base_flux!(
         topo_τ_x[colidx],
         topo_τ_y[colidx],
@@ -278,7 +278,7 @@ end
 ᶠN = ᶠinterp.(ᶜN) # alternatively, can be computed from ᶠT and ᶠdTdz
 
 # compute saturation profile
-Fields.bycolumn(axes(Y.c.ρ)) do colidx
+atmos_bycolumn(axes(Y.c.ρ)) do colidx
     CA.calc_saturation_profile!(
         topo_ᶠτ_sat[colidx],
         topo_U_sat[colidx],
@@ -305,7 +305,7 @@ uforcing = zeros(axes(u_phy))
 vforcing = zeros(axes(v_phy))
 
 # compute drag tendencies due to propagating part
-Fields.bycolumn(axes(Y.c.ρ)) do colidx
+atmos_bycolumn(axes(Y.c.ρ)) do colidx
     CA.calc_propagate_forcing!(
         uforcing[colidx],
         vforcing[colidx],
@@ -319,7 +319,7 @@ Fields.bycolumn(axes(Y.c.ρ)) do colidx
 end
 
 # compute drag tendencies due to non-propagating part
-Fields.bycolumn(axes(Y.c.ρ)) do colidx
+atmos_bycolumn(axes(Y.c.ρ)) do colidx
     CA.calc_nonpropagating_forcing!(
         uforcing[colidx],
         vforcing[colidx],

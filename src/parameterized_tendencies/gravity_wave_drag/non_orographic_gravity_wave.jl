@@ -154,26 +154,26 @@ function non_orographic_gravity_wave_tendency!(
     if model_config isa SingleColumnModel
         # source level: the index of the level that is closest to the source height
         source_level = similar(Fields.level(Y.c.ρ, 1))
-        Fields.bycolumn(axes(ᶜρ)) do colidx
+        atmos_bycolumn(axes(ᶜρ)) do colidx
             parent(source_level[colidx]) .=
                 argmin(abs.(parent(ᶜz[colidx]) .- gw_source_height))[1]
         end
         # damp level: for now we only deposit to top level for column setup
         damp_level = similar(Fields.level(Y.c.ρ, 1))
-        Fields.bycolumn(axes(ᶜρ)) do colidx
+        atmos_bycolumn(axes(ᶜρ)) do colidx
             parent(damp_level[colidx]) .= length(parent(ᶜz[colidx]))
         end
     elseif model_config isa SphericalModel
         (; ᶜp) = p
         # source level: the index of the highest level whose pressure is higher than source pressure
         source_level = similar(Fields.level(Y.c.ρ, 1))
-        Fields.bycolumn(axes(ᶜρ)) do colidx
+        atmos_bycolumn(axes(ᶜρ)) do colidx
             parent(source_level[colidx]) .=
                 findlast(parent(ᶜp[colidx]) .> gw_source_pressure)[1]
         end
         # damp level: the index of the lowest level whose pressure is lower than the damp pressure
         damp_level = similar(Fields.level(Y.c.ρ, 1))
-        Fields.bycolumn(axes(ᶜρ)) do colidx
+        atmos_bycolumn(axes(ᶜρ)) do colidx
             if sum(parent(ᶜp[colidx]) .< gw_damp_pressure) == 0
                 parent(damp_level[colidx]) .= length(parent(ᶜz[colidx]))
             else
@@ -192,7 +192,7 @@ function non_orographic_gravity_wave_tendency!(
     vforcing = ones(axes(u_phy))
 
     # GW parameterization applied bycolume
-    Fields.bycolumn(axes(ᶜρ)) do colidx
+    atmos_bycolumn(axes(ᶜρ)) do colidx
         parent(uforcing[colidx]) .= non_orographic_gravity_wave_forcing(
             copy(vec(parent(u_phy[colidx]))),
             copy(vec(parent(ᶜbuoyancy_frequency[colidx]))),

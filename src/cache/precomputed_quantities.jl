@@ -101,7 +101,7 @@ end
 
 # Interpolates the third contravariant component of Y.c.uₕ to cell faces.
 function set_ᶠuₕ³!(ᶠuₕ³, Y)
-    Fields.bycolumn(axes(Y.c)) do colidx
+    atmos_bycolumn(axes(Y.c)) do colidx
         ᶜJ = Fields.local_geometry_field(Y.c).J
         @. ᶠuₕ³[colidx] =
             ᶠwinterp(Y.c.ρ[colidx] * ᶜJ[colidx], CT3(Y.c.uₕ[colidx]))
@@ -132,7 +132,7 @@ end
 # This is used to set the grid-scale velocity quantities ᶜu, ᶠu³, ᶜK based on
 # ᶠu₃, and it is also used to set the SGS quantities based on ᶠu₃⁰ and ᶠu₃ʲ.
 function set_velocity_quantities!(ᶜu, ᶠu³, ᶜK, ᶠu₃, ᶜuₕ, ᶠuₕ³)
-    Fields.bycolumn(axes(ᶜu)) do colidx
+    atmos_bycolumn(axes(ᶜu)) do colidx
         @. ᶜu[colidx] = C123(ᶜuₕ[colidx]) + ᶜinterp(C123(ᶠu₃[colidx]))
         @. ᶠu³[colidx] = ᶠuₕ³[colidx] + CT3(ᶠu₃[colidx])
         compute_kinetic!(ᶜK[colidx], ᶜuₕ[colidx], ᶠu₃[colidx])
@@ -142,7 +142,7 @@ end
 function set_sgs_ᶠu₃!(w_function, ᶠu₃, Y, turbconv_model)
     ρaʲs(sgsʲs) = map(sgsʲ -> sgsʲ.ρa, sgsʲs)
     u₃ʲs(sgsʲs) = map(sgsʲ -> sgsʲ.u₃, sgsʲs)
-    Fields.bycolumn(axes(Y.c)) do colidx
+    atmos_bycolumn(axes(Y.c)) do colidx
         @. ᶠu₃[colidx] = w_function(
             ᶠinterp(ρaʲs(Y.c.sgsʲs[colidx])),
             u₃ʲs(Y.f.sgsʲs[colidx]),
@@ -163,7 +163,7 @@ function add_sgs_ᶜK!(ᶜK, Y, ᶜρa⁰, ᶠu₃⁰, turbconv_model)
                 ᶜρaʲ * ᶜinterp(dot(ᶠu₃ʲ - Yf.u₃, CT3(ᶠu₃ʲ - Yf.u₃))) / 2 / Yc.ρ
         end
     end
-    Fields.bycolumn(axes(Y.c)) do colidx
+    atmos_bycolumn(axes(Y.c)) do colidx
         do_col!(
             ᶜK[colidx],
             Y.c[colidx],
