@@ -193,3 +193,8 @@ macro timed_str(ex)
         "$(prettytime(stats.time*1e9)) ($(Base.gc_alloc_count(stats.gcstats)) allocations: $(prettymemory(stats.gcstats.allocd)))"
     end
 end
+
+import ClimaCore.Fields as Fields
+import ClimaCore.Spaces as Spaces
+Fields.bycolumn(fn, space::Spaces.SpectralElementSpace1D) = error("Oops")
+Fields.bycolumn(fn, space::Spaces.SpectralElementSpace2D) = error("Oops")
