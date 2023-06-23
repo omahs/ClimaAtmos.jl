@@ -97,13 +97,14 @@ function make_hybrid_spaces(
         face_space = Spaces.FaceExtrudedFiniteDifferenceSpace(center_space)
     else
         z_surface = surface_warp(Fields.coordinate_field(h_space))
+        FT = eltype(z_surface)
         topo_smoothing ? Hypsography.diffuse_surface_elevation!(z_surface) :
         nothing
         z_face_space = Spaces.FaceFiniteDifferenceSpace(z_mesh)
         face_space = Spaces.ExtrudedFiniteDifferenceSpace(
             h_space,
             z_face_space,
-            Hypsography.LinearAdaption(z_surface),
+            Hypsography.SLEVEAdaption(z_surface, FT(0.8), FT(0.65)),
         )
         center_space = Spaces.CenterExtrudedFiniteDifferenceSpace(face_space)
     end
