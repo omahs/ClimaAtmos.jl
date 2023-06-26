@@ -124,3 +124,29 @@ function benchmark_step!(integrator, Y₀, n_steps = 10)
     end
     return nothing
 end
+
+"""
+    cycle!(integrator; n_cycles = 1)
+
+Run `step!` as many times until all callbacks
+have been called at least `n_cycles` times.
+Returns the number of cycles.
+
+`cycle!` is the true atomic unit for performance,
+because, as opposed to `step!`, it takes all
+callbacks into account.
+"""
+function cycle!(integrator; n_cycles = 1)
+    # if 
+    # if integrator.callback.discrete_callbacks
+    steps_per_cycle = if isempty()
+        1
+    else
+        ldc()
+    end
+    n_steps = steps_per_cycle*n_cycles
+    for i in 1:n_steps
+        ODE.step!(integrator)
+    end
+    return n_steps
+end
