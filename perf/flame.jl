@@ -31,7 +31,7 @@ ProfileCanvas.html_file(joinpath(output_dir, "flame.html"), results)
 # use new allocation profiler
 @info "collecting allocations"
 Profile.Allocs.clear()
-Profile.Allocs.@profile sample_rate = 0.01 OrdinaryDiffEq.step!(integrator)
+Profile.Allocs.@profile sample_rate = 0.02 OrdinaryDiffEq.step!(integrator)
 results = Profile.Allocs.fetch()
 Profile.Allocs.clear()
 profile = ProfileCanvas.view_allocs(results)
@@ -55,10 +55,10 @@ allocs = @allocated OrdinaryDiffEq.step!(integrator)
 allocs_limit = Dict()
 allocs_limit["flame_perf_target"] = 4320
 allocs_limit["flame_perf_target_tracers"] = 185904
-allocs_limit["flame_perf_target_edmfx"] = 279872
-allocs_limit["flame_perf_target_edmf"] = 8565576304
+allocs_limit["flame_perf_target_edmfx"] = 277568
+allocs_limit["flame_perf_target_edmf"] = 8504529520
 allocs_limit["flame_perf_target_threaded"] = 6175664
-allocs_limit["flame_perf_target_callbacks"] = 9085498936
+allocs_limit["flame_perf_target_callbacks"] = 8489208
 
 if allocs < allocs_limit[job_id] * buffer
     @info "TODO: lower `allocs_limit[$job_id]` to: $(allocs)"
