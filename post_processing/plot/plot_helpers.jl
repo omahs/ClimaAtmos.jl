@@ -24,11 +24,12 @@ function create_plot!(
     linewidth = 6,
     level::Int = 1,
     timeind::Int = 1,
+    linestyle = :solid,
 )
     if Z == nothing
         generic_axis = fig[p_loc[1], p_loc[2]] = GridLayout()
         Axis(generic_axis[1, 1]; title, xlabel, ylabel, xscale, yscale)
-        CairoMakie.lines!(X, Y; title, linewidth)
+        CairoMakie.lines!(X, Y; title, linewidth, linestyle)
     else
         generic_axis = fig[p_loc[1], p_loc[2]] = GridLayout() # Generic Axis Layout
         Axis(generic_axis[1, 1]; title, xlabel, ylabel, yscale) # Plot specific attributes
@@ -365,16 +366,29 @@ function generate_elevation_spectra(fig_dir, nc_files)
             xlabel = "Zonal wavenumber",
             ylabel = "Surface elevation spectrum",
             yscale = log10,
+            xscale = log10,
         )
         create_plot!(
             fig;
             p_loc = (1,2),
-            X = collect(0:1:(mesh_info.num_spherical))[2:end], # plot against the spherical wavenumber, m
-            Y = (sum(orography_spectrum[:, :, 1], dims = 2))[2:end], # sum along the total wavenumber, n
+            X = collect(1:1:(mesh_info.num_spherical))[1:end], # plot against the spherical wavenumber, m
+            Y = (sum(orography_spectrum[:, :, 1], dims = 2))[1:end], # sum along the total wavenumber, n
             title = "Diagnostic: Surface Elevation Spectrum",
             xlabel = "Spherical wavenumber",
             ylabel = "Surface elevation spectrum",
             yscale = log10,
+            xscale = log10,
+        )
+        create_plot!(
+            fig;
+            p_loc = (1,2),
+            X = collect(1:1:(mesh_info.num_spherical))[2:end], # plot against the spherical wavenumber, m
+            Y = X .^ (-2) * 2e5 , # sum along the total wavenumber, n
+            yscale = log10,
+            xscale = log10,
+            linestyle = :dash,
+            xlabel="",
+            ylabel="",
         )
 
         CairoMakie.save(fig_dir * "/surface_elev_spectrum.png", fig)
