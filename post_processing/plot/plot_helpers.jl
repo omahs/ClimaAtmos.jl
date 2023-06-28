@@ -360,10 +360,21 @@ function generate_elevation_spectra(fig_dir, nc_files)
             fig;
             p_loc = (1, 1),
             X = collect(0:1:(mesh_info.num_fourier))[2:end], # plot against the zonal wavenumber, m
-            Y = log.(sum(orography_spectrum[:, :, 1], dims = 2))[2:end], # sum along the total wavenumber, n
+            Y = (sum(orography_spectrum[:, :, 1], dims = 2))[2:end], # sum along the total wavenumber, n
             title = "Diagnostic: Surface Elevation Spectrum",
             xlabel = "Zonal wavenumber",
-            ylabel = "Log surface elevation spectrum",
+            ylabel = "Surface elevation spectrum",
+            yscale = log10,
+        )
+        create_plot!(
+            fig;
+            p_loc = (1,2),
+            X = collect(0:1:(mesh_info.num_spherical))[2:end], # plot against the spherical wavenumber, m
+            Y = (sum(orography_spectrum[:, :, 1], dims = 2))[2:end], # sum along the total wavenumber, n
+            title = "Diagnostic: Surface Elevation Spectrum",
+            xlabel = "Spherical wavenumber",
+            ylabel = "Surface elevation spectrum",
+            yscale = log10,
         )
 
         CairoMakie.save(fig_dir * "/surface_elev_spectrum.png", fig)
