@@ -379,17 +379,7 @@ function generate_elevation_spectra(fig_dir, nc_files)
             yscale = log10,
             xscale = log10,
         )
-        create_plot!(
-            fig;
-            p_loc = (1,2),
-            X = collect(1:1:(mesh_info.num_spherical))[2:end], # plot against the spherical wavenumber, m
-            Y = X .^ (-2) * 2e5 , # sum along the total wavenumber, n
-            yscale = log10,
-            xscale = log10,
-            linestyle = :dash,
-            xlabel="",
-            ylabel="",
-        )
+       
 
         CairoMakie.save(fig_dir * "/surface_elev_spectrum.png", fig)
 
