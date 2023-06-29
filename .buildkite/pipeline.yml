@@ -793,8 +793,9 @@ steps:
         key: "gpu_explicit_barowave"
         command:
           - "julia --project -e 'using CUDA; CUDA.versioninfo()'"
-          - "julia --color=yes --project=examples examples/hybrid/driver.jl --job_id gpu_explicit_barowave --ode_algo SSP33ShuOsher --z_elem 25 --h_elem 12 --initial_condition DryBaroclinicWave --t_end 1mins --dt 1secs --dt_save_to_sol Inf --dt_save_to_disk Inf --device CUDADevice"
+          - "julia --color=yes --project=examples examples/hybrid/driver.jl --job_id gpu_explicit_barowave --ode_algo SSP33ShuOsher --z_elem 25 --h_elem 12 --initial_condition DryBaroclinicWave --t_end 1mins --dt 1secs --dt_save_to_sol Inf --dt_save_to_disk Inf --device CUDADevice --reference_job_id cpu_explicit_barowave"
         artifact_paths: "gpu_explicit_barowave/*"
+        depends_on: "cpu_explicit_barowave"
         agents:
           slurm_gpus: 1
 
