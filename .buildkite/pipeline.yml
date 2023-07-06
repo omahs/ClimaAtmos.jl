@@ -809,6 +809,15 @@ steps:
         agents:
           slurm_gpus: 1
 
+      - label: "Perf: GPU implicit moist baro wave"
+        key: "gpu_moist_implicit_barowave"
+        command:
+          - "julia --project -e 'using CUDA; CUDA.versioninfo()'"
+          - "nsys profile --trace=nvtx,cuda --output=gpu_moist_implicit_barowave/report julia --color=yes --project=examples examples/hybrid/driver.jl --job_id gpu_moist_implicit_barowave --moist equil --precip_model 0M --z_elem 25 --h_elem 12 --initial_condition MoistBaroclinicWave --t_end 1mins --dt 1secs --dt_save_to_sol Inf --dt_save_to_disk Inf --apply_limiter false --device CUDADevice"
+        artifact_paths: "gpu_moist_implicit_barowave/*"
+        agents:
+          slurm_gpus: 1
+
       - label: "Perf: CPU explicit baro wave"
         key: "cpu_explicit_barowave"
         command: "nsys profile --trace=nvtx,cuda --output=cpu_explicit_barowave/report julia --color=yes --project=examples examples/hybrid/driver.jl --job_id cpu_explicit_barowave --ode_algo SSP33ShuOsher --z_elem 25 --h_elem 12 --initial_condition DryBaroclinicWave --t_end 1mins --dt 1secs --dt_save_to_sol Inf --dt_save_to_disk Inf --device CPUSingleThreaded"
