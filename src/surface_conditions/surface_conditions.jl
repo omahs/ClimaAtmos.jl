@@ -1,8 +1,3 @@
-# TODO: Remove this type piracy.
-Base.Broadcast.BroadcastStyle(
-    ::Base.Broadcast.Style{Tuple},
-    ds::DataLayouts.DataStyle,
-) = ds
 
 """
     unit_basis_vector_data(type, local_geometry)
