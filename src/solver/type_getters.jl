@@ -385,12 +385,11 @@ function jac_kwargs(ode_algo, Y, energy_form)
 end
 
 #=
-    ode_configuration(Y, parsed_args, atmos)
+    ode_configuration(Y, parsed_args)
 
 Returns the ode algorithm
 =#
-function ode_configuration(Y, parsed_args, atmos)
-    FT = Spaces.undertype(axes(Y.c))
+function ode_configuration(::Type{FT}, parsed_args) where {FT}
     ode_name = parsed_args["ode_algo"]
     alg_or_tableau = if startswith(ode_name, "ODE.")
         @warn "apply_limiter flag is ignored for OrdinaryDiffEq algorithms"
@@ -459,75 +458,69 @@ function get_callbacks(parsed_args, simulation, atmos, params)
     FT = eltype(params)
     (; dt) = simulation
 
-    tc_callbacks =
-        call_every_n_steps(turb_conv_affect_filter!; skip_first = true)
-    flux_accumulation_callback = call_every_n_steps(
-        flux_accumulation!;
-        skip_first = true,
-        call_at_end = true,
-    )
+    callbacks = ()
+    if startswith(parsed_args["ode_algo"], "ODE.")
+        callbacks = (callbacks..., call_every_n_steps(dss_callback!))
+    end
+    dt_save_to_disk = time_to_seconds(parsed_args["dt_save_to_disk"])
+    if !(dt_save_to_disk == Inf)
+        callbacks = (
+            callbacks...,
+            call_every_dt(
+                save_to_disk_func,
+                dt_save_to_disk;
+                skip_first = simulation.restart,
+            ),
+        )
+    end
 
-    additional_callbacks =
-        if atmos.radiation_mode isa RRTMGPI.AbstractRRTMGPMode
-            # TODO: better if-else criteria?
-            dt_rad = if parsed_args["config"] == "column"
-                dt
-            else
-                FT(time_to_seconds(parsed_args["dt_rad"]))
-            end
-            (call_every_dt(rrtmgp_model_callback!, dt_rad),)
-        else
-            ()
-        end
+    dt_save_restart = time_to_seconds(parsed_args["dt_save_restart"])
+    if !(dt_save_restart == Inf)
+        callbacks =
+            (callbacks..., call_every_dt(save_restart_func, dt_save_restart))
+    end
 
-    if atmos.turbconv_model isa TC.EDMFModel
-        additional_callbacks = (additional_callbacks..., tc_callbacks)
+    if is_distributed(simulation.comms_ctx)
+        callbacks = (
+            callbacks...,
+            call_every_n_steps(
+                gc_func,
+                parse(Int, get(ENV, "CLIMAATMOS_GC_NSTEPS", "1000")),
+                skip_first = true,
+            ),
+        )
     end
 
     if parsed_args["check_conservation"]
-        additional_callbacks =
-            (flux_accumulation_callback, additional_callbacks...)
-    end
-
-    dt_save_to_disk = time_to_seconds(parsed_args["dt_save_to_disk"])
-    dt_save_restart = time_to_seconds(parsed_args["dt_save_restart"])
-
-    dss_cb = if startswith(parsed_args["ode_algo"], "ODE.")
-        call_every_n_steps(dss_callback!)
-    else
-        nothing
-    end
-    save_to_disk_callback = if dt_save_to_disk == Inf
-        nothing
-    elseif simulation.restart
-        call_every_dt(save_to_disk_func, dt_save_to_disk; skip_first = true)
-    else
-        call_every_dt(save_to_disk_func, dt_save_to_disk)
-    end
-
-    save_restart_callback = if dt_save_restart == Inf
-        nothing
-    else
-        call_every_dt(save_restart_func, dt_save_restart)
-    end
-
-    gc_callback = if is_distributed(simulation.comms_ctx)
-        call_every_n_steps(
-            gc_func,
-            parse(Int, get(ENV, "CLIMAATMOS_GC_NSTEPS", "1000")),
-            skip_first = true,
+        callbacks = (
+            callbacks...,
+            call_every_n_steps(
+                flux_accumulation!;
+                skip_first = true,
+                call_at_end = true,
+            ),
         )
-    else
-        nothing
     end
 
-    return ODE.CallbackSet(
-        dss_cb,
-        save_to_disk_callback,
-        save_restart_callback,
-        gc_callback,
-        additional_callbacks...,
-    )
+    if atmos.radiation_mode isa RRTMGPI.AbstractRRTMGPMode
+        # TODO: better if-else criteria?
+        dt_rad = if parsed_args["config"] == "column"
+            dt
+        else
+            FT(time_to_seconds(parsed_args["dt_rad"]))
+        end
+        callbacks =
+            (callbacks..., call_every_dt(rrtmgp_model_callback!, dt_rad))
+    end
+
+    if atmos.turbconv_model isa TC.EDMFModel
+        callbacks = (
+            callbacks...,
+            call_every_n_steps(turb_conv_affect_filter!; skip_first = true),
+        )
+    end
+
+    return ODE.CallbackSet(callbacks...)
 end
 
 
@@ -639,6 +632,7 @@ function args_integrator(parsed_args, Y, p, tspan, ode_algo, callback)
     else
         [tspan[1]:dt_save_to_sol:tspan[2]..., tspan[2]]
     end # ensure that tspan[2] is always saved
+    @info "dt_save_to_sol: $dt_save_to_sol, length(saveat): $(length(saveat))"
     args = (problem, ode_algo)
     kwargs = (; saveat, callback, dt, additional_integrator_kwargs(ode_algo)...)
     return (args, kwargs)
@@ -724,8 +718,9 @@ function get_integrator(config::AtmosConfig)
         set_discrete_hydrostatic_balanced_state!(Y, p)
     end
 
+    FT = Spaces.undertype(axes(Y.c))
     s = @timed_str begin
-        ode_algo = ode_configuration(Y, config.parsed_args, atmos)
+        ode_algo = ode_configuration(FT, config.parsed_args)
     end
     @info "ode_configuration: $s"
 
@@ -733,6 +728,8 @@ function get_integrator(config::AtmosConfig)
         callback = get_callbacks(config.parsed_args, simulation, atmos, params)
     end
     @info "get_callbacks: $s"
+    @info "n_steps_per_cycle_per_cb: $(n_steps_per_cycle_per_cb(callback, simulation.dt))"
+    @info "n_steps_per_cycle: $(n_steps_per_cycle(callback, simulation.dt))"
     tspan = (t_start, simulation.t_end)
     s = @timed_str begin
         integrator_args, integrator_kwargs = args_integrator(
