@@ -110,7 +110,6 @@ steps:
         artifact_paths: "longrun_aquaplanet_rhoe_equil_highres_clearsky_ft64_earth_100s_limiter/*"
         env:
           CLIMACORE_DISTRIBUTED: "MPI"
-          RESTART_FILE: "/central/scratch/esm/slurm-buildkite/climaatmos-longruns/1070/climaatmos-longruns/longrun_aquaplanet_rhoe_equil_highres_clearsky_ft64_earth_100s/day100.0.hdf5"
         agents:
           slurm_ntasks: 64
-          slurm_mem: 256GB
+          slurm_mem: 128GB
