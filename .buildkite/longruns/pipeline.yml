@@ -79,12 +79,39 @@ steps:
       
       - label: ":computer: no lim ARS aquaplanet (ρe_tot) equilmoist high resolution clearsky radiation Float64 (earth) 100s"
         command:
-          - mpiexec julia --project=examples examples/hybrid/driver.jl --vert_diff true --surface_setup DefaultMoninObukhov --moist equil --rad clearsky --precip_model 0M --z_elem 45 --dz_bottom 30 --h_elem 16 --kappa_4 4e16 --rayleigh_sponge true --alpha_rayleigh_uh 0 --dt 100secs --t_end 300days --fps 30 --job_id longrun_aquaplanet_rhoe_equil_highres_clearsky_ft64_earth_100s --dt_save_to_sol 10days --dt_save_to_disk 10days --FLOAT_TYPE Float64 --apply_limiter false --topography Earth --alpha_rayleigh_w 1.0 --use_reference_state false --topo_smoothing true
+          - mpiexec julia --project=examples examples/hybrid/driver.jl --vert_diff true --surface_setup DefaultMoninObukhov --moist equil --rad clearsky --precip_model 0M --z_elem 45 --dz_bottom 30 --h_elem 16 --kappa_4 6e16 --rayleigh_sponge true --alpha_rayleigh_uh 0 --dt 100secs --t_end 300days --fps 30 --job_id longrun_aquaplanet_rhoe_equil_highres_clearsky_ft64_earth_100s --dt_save_to_sol 10days --dt_save_to_disk 10days --FLOAT_TYPE Float64 --apply_limiter false --topography Earth --alpha_rayleigh_w 1.0 --use_reference_state false --topo_smoothing true
           - julia --color=yes --project=examples post_processing/remap/remap_pipeline.jl --data_dir longrun_aquaplanet_rhoe_equil_highres_clearsky_ft64_earth_100s --out_dir longrun_aquaplanet_rhoe_equil_highres_clearsky_ft64_earth_100s
           - julia --color=yes --project=examples post_processing/plot/plot_pipeline.jl --nc_dir longrun_aquaplanet_rhoe_equil_highres_clearsky_ft64_earth_100s --fig_dir longrun_aquaplanet_rhoe_equil_highres_clearsky_ft64_earth_100s --case_name aquaplanet
         artifact_paths: "longrun_aquaplanet_rhoe_equil_highres_clearsky_ft64_earth_100s/*"
         env:
           CLIMACORE_DISTRIBUTED: "MPI"
+          RESTART_FILE: "/central/scratch/esm/slurm-buildkite/climaatmos-longruns/1070/climaatmos-longruns/longrun_aquaplanet_rhoe_equil_highres_clearsky_ft64_earth_100s/day100.0.hdf5"
+        agents:
+          slurm_ntasks: 64
+          slurm_mem: 256GB
+      
+      - label: ":computer: no lim ARS aquaplanet (ρe_tot) equilmoist high resolution clearsky radiation Float64 (earth) 100s"
+        command:
+          - mpiexec julia --project=examples examples/hybrid/driver.jl --vert_diff true --surface_setup DefaultMoninObukhov --moist equil --rad clearsky --precip_model 0M --z_elem 45 --dz_bottom 30 --h_elem 16 --kappa_4 4e16 --rayleigh_sponge true --alpha_rayleigh_uh 0 --dt 100secs --t_end 300days --fps 30 --job_id longrun_aquaplanet_rhoe_equil_highres_clearsky_ft64_earth_100s --dt_save_to_sol 10days --dt_save_to_disk 1days --FLOAT_TYPE Float64 --apply_limiter false --topography Earth --alpha_rayleigh_w 1.0 --use_reference_state false --topo_smoothing true
+          - julia --color=yes --project=examples post_processing/remap/remap_pipeline.jl --data_dir longrun_aquaplanet_rhoe_equil_highres_clearsky_ft64_earth_100s --out_dir longrun_aquaplanet_rhoe_equil_highres_clearsky_ft64_earth_100s
+          - julia --color=yes --project=examples post_processing/plot/plot_pipeline.jl --nc_dir longrun_aquaplanet_rhoe_equil_highres_clearsky_ft64_earth_100s --fig_dir longrun_aquaplanet_rhoe_equil_highres_clearsky_ft64_earth_100s --case_name aquaplanet
+        artifact_paths: "longrun_aquaplanet_rhoe_equil_highres_clearsky_ft64_earth_100s/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+          RESTART_FILE: "/central/scratch/esm/slurm-buildkite/climaatmos-longruns/1070/climaatmos-longruns/longrun_aquaplanet_rhoe_equil_highres_clearsky_ft64_earth_100s/day100.0.hdf5"
+        agents:
+          slurm_ntasks: 64
+          slurm_mem: 256GB
+      
+      - label: ":computer: no lim ARS aquaplanet (ρe_tot) equilmoist high resolution clearsky radiation Float64 (earth) 100s limiter"
+        command:
+          - mpiexec julia --project=examples examples/hybrid/driver.jl --vert_diff true --surface_setup DefaultMoninObukhov --moist equil --rad clearsky --precip_model 0M --z_elem 45 --dz_bottom 30 --h_elem 16 --kappa_4 6e16 --rayleigh_sponge true --alpha_rayleigh_uh 0 --dt 100secs --t_end 300days --fps 30 --job_id longrun_aquaplanet_rhoe_equil_highres_clearsky_ft64_earth_100s_limiter --dt_save_to_sol 10days --dt_save_to_disk 10days --FLOAT_TYPE Float64 --apply_limiter true --topography Earth --alpha_rayleigh_w 1.0 --use_reference_state false --topo_smoothing true
+          - julia --color=yes --project=examples post_processing/remap/remap_pipeline.jl --data_dir longrun_aquaplanet_rhoe_equil_highres_clearsky_ft64_earth_100s_limiter --out_dir longrun_aquaplanet_rhoe_equil_highres_clearsky_ft64_earth_100s_limiter
+          - julia --color=yes --project=examples post_processing/plot/plot_pipeline.jl --nc_dir longrun_aquaplanet_rhoe_equil_highres_clearsky_ft64_earth_100s_limiter --fig_dir longrun_aquaplanet_rhoe_equil_highres_clearsky_ft64_earth_100s_limiter --case_name aquaplanet
+        artifact_paths: "longrun_aquaplanet_rhoe_equil_highres_clearsky_ft64_earth_100s_limiter/*"
+        env:
+          CLIMACORE_DISTRIBUTED: "MPI"
+          RESTART_FILE: "/central/scratch/esm/slurm-buildkite/climaatmos-longruns/1070/climaatmos-longruns/longrun_aquaplanet_rhoe_equil_highres_clearsky_ft64_earth_100s/day100.0.hdf5"
         agents:
           slurm_ntasks: 64
           slurm_mem: 256GB
