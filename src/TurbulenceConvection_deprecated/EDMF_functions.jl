@@ -169,8 +169,8 @@ function compute_diffusive_fluxes(
     prog_gm = center_prog_grid_mean(state)
     ts_gm = center_aux_grid_mean_ts(state)
     IfKH = CCO.InterpolateC2F(;
-        bottom = CCO.SetValue(aeKH[kc_surf]),
-        top = CCO.SetValue(aeKH[kc_toa]),
+        bottom = CCO.SetValue(surf(aeKH)),
+        top = CCO.SetValue(toa(aeKH)),
     )
     IfKM = CCO.InterpolateC2F(;
         bottom = CCO.SetValue(aeKM[kc_surf]),
