@@ -34,36 +34,6 @@ const CenterFields = Union{
     CC.Fields.CenterFiniteDifferenceField,
 }
 
-Base.@propagate_inbounds Base.getindex(field::FDFields, i::Integer) =
-    Base.getproperty(field, i)
-
-Base.@propagate_inbounds Base.getindex(field::CenterFields, i::Cent) =
-    Base.getindex(CC.Fields.field_values(field), i.i)
-Base.@propagate_inbounds Base.setindex!(field::CenterFields, v, i::Cent) =
-    Base.setindex!(CC.Fields.field_values(field), v, i.i)
-
-Base.@propagate_inbounds Base.getindex(field::FaceFields, i::CCO.PlusHalf) =
-    Base.getindex(CC.Fields.field_values(field), i.i)
-Base.@propagate_inbounds Base.setindex!(field::FaceFields, v, i::CCO.PlusHalf) =
-    Base.setindex!(CC.Fields.field_values(field), v, i.i)
-
-Base.@propagate_inbounds Base.getindex(field::FaceFields, ::Cent) =
-    error("Attempting to getindex with a center index (Cent) into a Face field")
-Base.@propagate_inbounds Base.getindex(field::CenterFields, ::CCO.PlusHalf) =
-    error(
-        "Attempting to getindex with a face index (PlusHalf) into a Center field",
-    )
-
-Base.@propagate_inbounds Base.setindex!(field::FaceFields, v, ::Cent) =
-    error("Attempting to setindex with a center index (Cent) into a Face field")
-Base.@propagate_inbounds Base.setindex!(
-    field::CenterFields,
-    v,
-    ::CCO.PlusHalf,
-) = error(
-    "Attempting to setindex with a face index (PlusHalf) into a Center field",
-)
-
 function Base.cumsum(field::CC.Fields.FiniteDifferenceField)
     Base.cumsum(
         parent(CC.Fields.weighted_jacobian(field)) .* vec(field),
