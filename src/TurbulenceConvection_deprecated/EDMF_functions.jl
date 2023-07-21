@@ -51,8 +51,6 @@ function compute_sgs_flux!(
     ρ_f = aux_gm_f.ρ
     ρ_c = prog_gm.ρ
     p_c = center_aux_grid_mean_p(state)
-    kf_surf = kf_surface(grid)
-    kc_surf = kc_surface(grid)
     massflux = aux_tc_f.massflux
     massflux_h = aux_tc_f.massflux_h
     massflux_qt = aux_tc_f.massflux_qt
@@ -114,8 +112,11 @@ function compute_sgs_flux!(
             )
     end
 
-    massflux_h[kf_surf] = zero(eltype(massflux_h))
-    massflux_qt[kf_surf] = zero(eltype(massflux_qt))
+    massflux_h_surf = surf(massflux_h)
+    massflux_qt_surf = surf(massflux_qt)
+    massflux_h_surf .= zero(eltype(massflux_h))
+    massflux_qt_surf .= zero(eltype(massflux_qt))
+
 
     diffusive_flux_h = aux_tc_f.diffusive_flux_h
     diffusive_flux_qt = aux_tc_f.diffusive_flux_qt
@@ -130,9 +131,13 @@ function compute_sgs_flux!(
     @. sgs_flux_uₕ = diffusive_flux_uₕ # + massflux_u
 
     # apply surface BC as SGS flux at lowest level
-    sgs_flux_h_tot[kf_surf] = surface_conditions.ρ_flux_h_tot
-    sgs_flux_q_tot[kf_surf] = surface_conditions.ρ_flux_q_tot
-    sgs_flux_uₕ[kf_surf] =
+    sgs_flux_h_tot_surf = surf(sgs_flux_h_tot)
+    sgs_flux_q_tot_surf = surf(sgs_flux_q_tot)
+    sgs_flux_uₕ_surf = surf(sgs_flux_uₕ)
+
+    sgs_flux_h_tot_surf .= surface_conditions.ρ_flux_h_tot
+    sgs_flux_q_tot_surf .= surface_conditions.ρ_flux_q_tot
+    sgs_flux_uₕ_surf .=
         edmf.zero_uv_fluxes ? zero(surface_conditions.ρ_flux_uₕ) :
         surface_conditions.ρ_flux_uₕ
     return nothing
@@ -163,9 +168,6 @@ function compute_diffusive_fluxes(
     a_en = aux_en.area
     @. aeKM = a_en * KM
     @. aeKH = a_en * KH
-    kc_surf = kc_surface(grid)
-    kc_toa = kc_top_of_atmos(grid)
-    kf_surf = kf_surface(grid)
     prog_gm = center_prog_grid_mean(state)
     ts_gm = center_aux_grid_mean_ts(state)
     IfKH = CCO.InterpolateC2F(;
@@ -173,8 +175,8 @@ function compute_diffusive_fluxes(
         top = CCO.SetValue(toa(aeKH)),
     )
     IfKM = CCO.InterpolateC2F(;
-        bottom = CCO.SetValue(aeKM[kc_surf]),
-        top = CCO.SetValue(aeKM[kc_toa]),
+        bottom = CCO.SetValue(surf(aeKM)),
+        top = CCO.SetValue(toa(aeKM)),
     )
     Ic = CCO.InterpolateF2C()
 
@@ -182,11 +184,9 @@ function compute_diffusive_fluxes(
     @. aux_tc_f.ρ_ae_KM = IfKM(aeKM) * ρ_f
 
     aeKHq_tot_bc =
-        -surface_conditions.ρ_flux_q_tot / a_en[kc_surf] /
-        aux_tc_f.ρ_ae_KH[kf_surf]
+        -surface_conditions.ρ_flux_q_tot / surf(a_en) / surf(aux_tc_f.ρ_ae_KH)
     aeKHh_tot_bc =
-        -surface_conditions.ρ_flux_h_tot / a_en[kc_surf] /
-        aux_tc_f.ρ_ae_KH[kf_surf]
+        -surface_conditions.ρ_flux_h_tot / surf(a_en) / surf(aux_tc_f.ρ_ae_KH)
     ∇q_tot_en = CCO.GradientC2F(;
         bottom = CCO.SetGradient(aeKHq_tot_bc),
         top = CCO.SetGradient(zero(aeKHq_tot_bc)),
@@ -200,7 +200,7 @@ function compute_diffusive_fluxes(
         surface_conditions.ρ_flux_uₕ
     ∇uₕ_gm = CCO.GradientC2F(;
         bottom = CCO.SetGradient(
-            -ρ_flux_uₕ / a_en[kc_surf] / aux_tc_f.ρ_ae_KM[kf_surf],
+            -ρ_flux_uₕ / surf(a_en) / surf(aux_tc_f.ρ_ae_KM),
         ),
         top = CCO.SetGradient(zero(ρ_flux_uₕ)),
     )
@@ -237,8 +237,6 @@ function set_edmf_surface_bc(
     thermo_params = TCP.thermodynamics_params(param_set)
     FT = float_type(state)
     N_up = n_updrafts(edmf)
-    kc_surf = kc_surface(grid)
-    kf_surf = kf_surface(grid)
     prog_gm = center_prog_grid_mean(state)
     prog_gm_uₕ = grid_mean_uₕ(state)
     prog_up = center_prog_updrafts(state)
@@ -248,6 +246,7 @@ function set_edmf_surface_bc(
     p_c = TD.air_pressure.(thermo_params, ts_gm)
     C123 = CCG.Covariant123Vector
     Ic = CCO.InterpolateF2C()
+    z = grid.zc.z
     @inbounds for i in 1:N_up
         θ_surf = θ_surface_bc(grid, state, edmf, i, param_set)
         q_surf = q_surface_bc(grid, state, edmf, i, param_set)
@@ -255,21 +254,26 @@ function set_edmf_surface_bc(
         e_kin = @. LA.norm_sqr(
             C123(prog_gm_uₕ) + C123(Ic(CCG.WVector(prog_up_f[i].w))),
         ) / 2
-        e_pot_surf = geopotential(thermo_params, grid.zc.z[kc_surf])
+        e_pot_surf = geopotential(thermo_params, surf(z))
         ts_up_i_surf =
-            TD.PhaseEquil_pθq(thermo_params, p_c[kc_surf], θ_surf, q_surf)
+            TD.PhaseEquil_pθq(thermo_params, surf(p_c), θ_surf, q_surf)
         e_tot_surf = TD.total_energy(
             thermo_params,
             ts_up_i_surf,
-            e_kin[kc_surf],
+            surf(e_kin),
             e_pot_surf,
         )
-        prog_up[i].ρarea[kc_surf] = ρ_c[kc_surf] * a_surf
-        prog_up[i].ρae_tot[kc_surf] = prog_up[i].ρarea[kc_surf] * e_tot_surf
-        prog_up[i].ρaq_tot[kc_surf] = prog_up[i].ρarea[kc_surf] * q_surf
-        prog_up_f[i].w[kf_surf] = CCG.Covariant3Vector(
+        ρarea_surf = surf(prog_up[i].ρarea)
+        ρae_tot_surf = surf(prog_up[i].ρae_tot)
+        ρaq_tot_surf = surf(prog_up[i].ρaq_tot)
+        w_surf = surf(prog_up_f[i].w)
+
+        ρarea_surf .= surf(ρ_c) * a_surf
+        ρae_tot_surf .= surf(prog_up[i].ρarea) * e_tot_surf
+        ρaq_tot_surf .= surf(prog_up[i].ρarea) * q_surf
+        w_surf .= CCG.Covariant3Vector(
             CCG.WVector(FT(0)),
-            CC.Fields.local_geometry_field(axes(prog_up_f))[kf_surf],
+            surf(CC.Fields.local_geometry_field(axes(prog_up_f))),
         )
     end
     return nothing
@@ -310,11 +314,10 @@ function θ_surface_bc(
     (; surface_conditions) = state
     thermo_params = TCP.thermodynamics_params(param_set)
     aux_gm = center_aux_grid_mean(state)
-    kc_surf = kc_surface(grid)
     ts_gm = center_aux_grid_mean_ts(state)
-    c_p = TD.cp_m(thermo_params, ts_gm[kc_surf])
+    c_p = TD.cp_m(thermo_params, surf(ts_gm))
     (; ustar, zLL, oblength, ρLL) = surface_helper(grid, state)
-    surface_conditions.buoyancy_flux > 0 || return aux_gm.θ_liq_ice[kc_surf]
+    surface_conditions.buoyancy_flux > 0 || return surf(aux_gm.θ_liq_ice)
     a_total = edmf.surface_area
     a_ = area_surface_bc(surface_conditions, edmf)
     ρθ_liq_ice_flux = surface_conditions.ρ_flux_θ
@@ -329,7 +332,7 @@ function θ_surface_bc(
         1 - a_total + (i - 1) * a_,
         1 - a_total + i * a_,
     )
-    return aux_gm.θ_liq_ice[kc_surf] + surface_scalar_coeff * sqrt(h_var)
+    return surf(aux_gm.θ_liq_ice) + surface_scalar_coeff * sqrt(h_var)
 end
 
 function q_surface_bc(
@@ -341,8 +344,7 @@ function q_surface_bc(
 )
     (; surface_conditions) = state
     aux_gm = center_aux_grid_mean(state)
-    kc_surf = kc_surface(grid)
-    surface_conditions.buoyancy_flux > 0 || return aux_gm.q_tot[kc_surf]
+    surface_conditions.buoyancy_flux > 0 || return surf(aux_gm.q_tot)
     a_total = edmf.surface_area
     a_ = area_surface_bc(surface_conditions, edmf)
     (; ustar, zLL, oblength, ρLL) = surface_helper(grid, state)
@@ -358,7 +360,7 @@ function q_surface_bc(
         1 - a_total + (i - 1) * a_,
         1 - a_total + i * a_,
     )
-    return aux_gm.q_tot[kc_surf] + surface_scalar_coeff * sqrt(qt_var)
+    return surf(aux_gm.q_tot) + surface_scalar_coeff * sqrt(qt_var)
 end
 
 function compute_implicit_up_tendencies!(
@@ -367,8 +369,6 @@ function compute_implicit_up_tendencies!(
     state::State,
 )
     N_up = n_updrafts(edmf)
-    kc_surf = kc_surface(grid)
-    kf_surf = kf_surface(grid)
     FT = float_type(state)
 
     prog_up = center_prog_updrafts(state)
@@ -406,9 +406,12 @@ function compute_implicit_up_tendencies!(
             volume_term
         @. tends_ρaq_tot += -∇c(LBF(Ic(CCG.WVector(w_up)) * ρaq_tot))
 
-        tends_ρarea[kc_surf] = 0
-        tends_ρae_tot[kc_surf] = 0
-        tends_ρaq_tot[kc_surf] = 0
+        tends_ρarea_surf = surf(tends_ρarea)
+        tends_ρae_tot_surf = surf(tends_ρae_tot)
+        tends_ρaq_tot_surf = surf(tends_ρaq_tot)
+        tends_ρarea_surf .= 0
+        tends_ρae_tot_surf .= 0
+        tends_ρaq_tot_surf .= 0
     end
 
     # Solve for updraft velocity
@@ -424,7 +427,8 @@ function compute_implicit_up_tendencies!(
         w_up = prog_up_f[i].w
         tends_w = tendencies_up_f[i].w
         @. tends_w += -grad_f(LBC(LA.norm_sqr(CCG.WVector(w_up)) / 2))
-        tends_w[kf_surf] = zero(tends_w[kf_surf])
+        tends_w_surf = surf(tends_w)
+        tends_w_surf .= zero(tends_w_surf)
     end
 
     return nothing
@@ -436,8 +440,6 @@ function compute_explicit_up_tendencies!(
     state::State,
 )
     N_up = n_updrafts(edmf)
-    kc_surf = kc_surface(grid)
-    kf_surf = kf_surface(grid)
     FT = float_type(state)
 
     aux_up = center_aux_updrafts(state)
@@ -505,10 +507,14 @@ function compute_explicit_up_tendencies!(
         )
 
         # TODO - to be removed?
-        tendencies_up[i].ρarea[kc_surf] = 0
-        tendencies_up[i].ρae_tot[kc_surf] = 0
-        tendencies_up[i].ρaq_tot[kc_surf] = 0
-        tendencies_up_f[i].w[kf_surf] = zero(tendencies_up_f[i].w[kf_surf])
+        ρarea_surf = surf(tendencies_up[i].ρarea)
+        ρae_tot_surf = surf(tendencies_up[i].ρae_tot)
+        ρaq_tot_surf = surf(tendencies_up[i].ρaq_tot)
+        w_surf = surf(tendencies_up_f[i].w)
+        ρarea_surf .= 0
+        ρae_tot_surf .= 0
+        ρaq_tot_surf .= 0
+        w_surf .= zero(w_surf)
     end
     return nothing
 end
@@ -521,7 +527,6 @@ function filter_updraft_vars(
 )
     (; surface_conditions) = state
     N_up = n_updrafts(edmf)
-    kc_surf = kc_surface(grid)
     FT = float_type(state)
     N_up = n_updrafts(edmf)
 
@@ -616,18 +621,22 @@ function filter_updraft_vars(
         e_kin = @. LA.norm_sqr(
             C123(prog_gm_uₕ) + C123(Ic(CCG.WVector(prog_up_f[i].w))),
         ) / 2
-        e_pot_surf = geopotential(thermo_params, grid.zc.z[kc_surf])
+        e_pot_surf = geopotential(thermo_params, surf(z))
         ts_up_i_surf =
-            TD.PhaseEquil_pθq(thermo_params, p_c[kc_surf], θ_surf, q_surf)
+            TD.PhaseEquil_pθq(thermo_params, surf(p_c), θ_surf, q_surf)
         e_tot_surf = TD.total_energy(
             thermo_params,
             ts_up_i_surf,
-            e_kin[kc_surf],
+            surf(e_kin),
             e_pot_surf,
         )
-        prog_up[i].ρarea[kc_surf] = ρ_c[kc_surf] * a_surf
-        prog_up[i].ρae_tot[kc_surf] = prog_up[i].ρarea[kc_surf] * e_tot_surf
-        prog_up[i].ρaq_tot[kc_surf] = prog_up[i].ρarea[kc_surf] * q_surf
+        ρarea_surf = surf(prog_up[i].ρarea)
+        ρae_tot_surf = surf(prog_up[i].ρae_tot)
+        ρaq_tot_surf = surf(prog_up[i].ρaq_tot)
+
+        ρarea_surf .= surf(ρ_c) * a_surf
+        ρae_tot_surf .= surf(prog_up[i].ρarea) * e_tot_surf
+        ρaq_tot_surf .= surf(prog_up[i].ρarea) * q_surf
     end
     return nothing
 end

@@ -23,8 +23,6 @@ function update_aux!(
     thermo_params = TCP.thermodynamics_params(param_set)
     microphys_params = TCP.microphysics_params(param_set)
     N_up = n_updrafts(edmf)
-    kc_surf = kc_surface(grid)
-    kf_surf = kf_surface(grid)
     c_m = TCP.tke_ed_coeff(param_set)
     KM = center_aux_turbconv(state).KM
     KH = center_aux_turbconv(state).KH
@@ -256,8 +254,8 @@ function update_aux!(
     )
 
     # compute the buoyancy
-    LBF_ρ = CCO.LeftBiasedC2F(; bottom = CCO.SetValue(ρ_f[kf_surf]))
-    #LBF_ρ = CCO.LeftBiasedC2F(; bottom = CCO.SetValue(ρ_c[kc_surf]))
+    LBF_ρ = CCO.LeftBiasedC2F(; bottom = CCO.SetValue(surf(ρ_f)))
+    #LBF_ρ = CCO.LeftBiasedC2F(; bottom = CCO.SetValue(surf(ρ_c)))
     LBF_a = CCO.LeftBiasedC2F(; bottom = CCO.SetValue(edmf.surface_area))
     @. aux_en_f.buoy = buoyancy_c(
         thermo_params,
@@ -495,7 +493,7 @@ function update_aux!(
         gradient_Richardson_number(param_set, bg.∂b∂z, Shear², FT(eps(FT))),
     )
 
-    tke_surf = aux_en.tke[kc_surf]
+    tke_surf = surf(aux_en.tke)
 
     @. aux_tc.mixing_length = mixing_length(
         param_set,

@@ -22,8 +22,7 @@ struct Grid{NZ, CS, FS, SC, SF}
     end
 end
 
-Grid(mesh::Meshes.IntervalMesh) =
-    Grid(Spaces.CenterFiniteDifferenceSpace(mesh))
+Grid(mesh::Meshes.IntervalMesh) = Grid(Spaces.CenterFiniteDifferenceSpace(mesh))
 
 function Grid(Δz::FT, nz::Int) where {FT <: AbstractFloat}
     z₀, z₁ = FT(0), FT(nz * Δz)
@@ -37,14 +36,6 @@ function Grid(Δz::FT, nz::Int) where {FT <: AbstractFloat}
     mesh = Meshes.IntervalMesh(domain, nelems = nz)
     return Grid(mesh)
 end
-
-n_cells(::Grid{NZ}) where {NZ} = NZ
-
-# Index of the first interior cell above the surface
-kc_surface(grid::Grid) = Cent(1)
-kf_surface(grid::Grid) = CCO.PlusHalf(1)
-kc_top_of_atmos(grid::Grid) = Cent(n_cells(grid))
-
 
 fc_index(
     i,
@@ -62,5 +53,7 @@ fc_index(
     },
 ) = i
 
+# Index of the first interior cell above the surface
 surf(f::Fields.Field) = Spaces.level(f, fc_index(1, axes(f)))
-toa(f::Fields.Field) = Spaces.level(f, fc_index(Spaces.nlevels(axes(f)), axes(f)))
+toa(f::Fields.Field) =
+    Spaces.level(f, fc_index(Spaces.nlevels(axes(f)), axes(f)))
