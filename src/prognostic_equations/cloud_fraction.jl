@@ -1,12 +1,21 @@
 import StaticArrays as SA
 
+# TODO: write a test with scalars that are linear with z
+function get_covariance(coeff, ᶜmixing_length, ᶜscalar1, ᶜscalar2)
+    ᶜscalar1_grad = @. Geometry.WVector(ᶜgradᵥ(ᶠinterp(ᶜscalar1)))
+    ᶜscalar2_grad = @. Geometry.WVector(ᶜgradᵥ(ᶠinterp(ᶜscalar2)))
+    return @. 2 * coeff * ᶜmixing_length^2 * dot(ᶜscalar1_grad, ᶜscalar2_grad)
+end
+
 function get_cloud_fraction(thermo_params, env_thermo_quad, ᶜp, ᶜts)
     q_tot = @. TD.total_specific_humidity(thermo_params, ᶜts)
     FT = eltype(thermo_params)
     θ_liq_ice = @. TD.liquid_ice_pottemp(thermo_params, ᶜts)
-    qt′qt′ = @. (FT(0.05) * q_tot)^2
-    θl′θl′ = @. FT(5)
-    θl′qt′ = @. FT(0)
+    coeff = FT(2.1)
+    ᶜmixing_length = FT(1)
+    qt′qt′ = get_covariance(coeff, ᶜmixing_length, q_tot, q_tot)
+    θl′θl′ = get_covariance(coeff, ᶜmixing_length, θ_liq_ice, θ_liq_ice)
+    θl′qt′ = get_covariance(coeff, ᶜmixing_length, θ_liq_ice, q_tot)
     return @. compute_cloud_fraction(
         env_thermo_quad,
         thermo_params,
