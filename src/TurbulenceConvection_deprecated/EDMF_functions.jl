@@ -10,30 +10,17 @@ function update_cloud_frac(edmf::EDMFModel, state::State)
         a_up_bulk * aux_bulk.cloud_fraction
 end
 
-function compute_implicit_turbconv_tendencies!(
-    edmf::EDMFModel,
-    grid::Grid,
-    state::State,
-)
-    compute_implicit_up_tendencies!(edmf, grid, state)
+function compute_implicit_turbconv_tendencies!(edmf::EDMFModel, state::State)
+    compute_implicit_up_tendencies!(edmf, state)
     return nothing
 end
 
-function compute_explicit_turbconv_tendencies!(
-    edmf::EDMFModel,
-    grid::Grid,
-    state::State,
-)
-    compute_explicit_up_tendencies!(edmf, grid, state)
+function compute_explicit_turbconv_tendencies!(edmf::EDMFModel, state::State)
+    compute_explicit_up_tendencies!(edmf, state)
     return nothing
 end
 
-function compute_sgs_flux!(
-    edmf::EDMFModel,
-    grid::Grid,
-    state::State,
-    param_set::APS,
-)
+function compute_sgs_flux!(edmf::EDMFModel, state::State, param_set::APS)
     (; surface_conditions) = state
     thermo_params = TCP.thermodynamics_params(param_set)
     N_up = n_updrafts(edmf)
@@ -143,12 +130,7 @@ function compute_sgs_flux!(
     return nothing
 end
 
-function compute_diffusive_fluxes(
-    edmf::EDMFModel,
-    grid::Grid,
-    state::State,
-    param_set::APS,
-)
+function compute_diffusive_fluxes(edmf::EDMFModel, state::State, param_set::APS)
     (; surface_conditions) = state
     thermo_params = TCP.thermodynamics_params(param_set)
     FT = float_type(state)
@@ -212,32 +194,22 @@ function compute_diffusive_fluxes(
     return nothing
 end
 
-function affect_filter!(
-    edmf::EDMFModel,
-    grid::Grid,
-    state::State,
-    param_set::APS,
-    t::Real,
-)
+function affect_filter!(edmf::EDMFModel, state::State, param_set::APS, t::Real)
     ###
     ### Filters
     ###
-    set_edmf_surface_bc(edmf, grid, state, param_set)
-    filter_updraft_vars(edmf, grid, state, param_set)
+    set_edmf_surface_bc(edmf, state, param_set)
+    filter_updraft_vars(edmf, state, param_set)
     return nothing
 end
 
-function set_edmf_surface_bc(
-    edmf::EDMFModel,
-    grid::Grid,
-    state::State,
-    param_set::APS,
-)
+function set_edmf_surface_bc(edmf::EDMFModel, state::State, param_set::APS)
     (; surface_conditions) = state
     thermo_params = TCP.thermodynamics_params(param_set)
     FT = float_type(state)
     N_up = n_updrafts(edmf)
     prog_gm = center_prog_grid_mean(state)
+    aux_gm = center_aux_grid_mean(state)
     prog_gm_uₕ = grid_mean_uₕ(state)
     prog_up = center_prog_updrafts(state)
     prog_up_f = face_prog_updrafts(state)
@@ -246,10 +218,33 @@ function set_edmf_surface_bc(
     p_c = TD.air_pressure.(thermo_params, ts_gm)
     C123 = CCG.Covariant123Vector
     Ic = CCO.InterpolateF2C()
-    z = grid.zc.z
+    ᶠspace = axes(prog_up_f)
+    z = Fields.coordinate_field(axes(prog_up)).z
+    zLL = surf(z)
+    ρLL = surf(ρ_c)
+    θ_liq_iceLL = surf(aux_gm.θ_liq_ice)
+    q_totLL = surf(aux_gm.q_tot)
     @inbounds for i in 1:N_up
-        θ_surf = θ_surface_bc(grid, state, edmf, i, param_set)
-        q_surf = q_surface_bc(grid, state, edmf, i, param_set)
+        θ_surf = θ_surface_bc(
+            θ_liq_iceLL,
+            ᶠspace,
+            zLL,
+            ρLL,
+            surface_conditions,
+            edmf,
+            i,
+            param_set,
+        )
+        q_surf = q_surface_bc(
+            q_totLL,
+            ᶠspace,
+            zLL,
+            ρLL,
+            surface_conditions,
+            edmf,
+            i,
+            param_set,
+        )
         a_surf = area_surface_bc(surface_conditions, edmf)
         e_kin = @. LA.norm_sqr(
             C123(prog_gm_uₕ) + C123(Ic(CCG.WVector(prog_up_f[i].w))),
@@ -279,19 +274,6 @@ function set_edmf_surface_bc(
     return nothing
 end
 
-function surface_helper(grid::Grid, state::State)
-    (; surface_conditions) = state
-    FT = float_type(state)
-    zLL::FT = grid.zc[Cent(1)].z
-    ρLL = center_prog_grid_mean(state).ρ[Cent(1)]
-    return (;
-        ustar = surface_conditions.ustar,
-        zLL,
-        oblength = surface_conditions.obukhov_length,
-        ρLL,
-    )
-end
-
 function a_up_boundary_conditions(surface_conditions, edmf::EDMFModel)
     a_surf = area_surface_bc(surface_conditions, edmf)
     return (; bottom = CCO.SetValue(a_surf), top = CCO.Extrapolate())
@@ -304,20 +286,20 @@ function area_surface_bc(surface_conditions, edmf::EDMFModel)
 end
 
 function θ_surface_bc(
-    grid::Grid,
-    state::State,
+    θ_liq_iceLL,
+    ᶠspace,
+    zLL,
+    ρLL,
+    surface_conditions,
     edmf::EDMFModel,
     i::Int,
     param_set::APS,
 )
     FT = eltype(edmf)
-    (; surface_conditions) = state
-    thermo_params = TCP.thermodynamics_params(param_set)
-    aux_gm = center_aux_grid_mean(state)
-    ts_gm = center_aux_grid_mean_ts(state)
-    c_p = TD.cp_m(thermo_params, surf(ts_gm))
-    (; ustar, zLL, oblength, ρLL) = surface_helper(grid, state)
-    surface_conditions.buoyancy_flux > 0 || return surf(aux_gm.θ_liq_ice)
+    ustar = surface_conditions.ustar
+    oblength = surface_conditions.obukhov_length
+
+    surface_conditions.buoyancy_flux > 0 || return θ_liq_iceLL
     a_total = edmf.surface_area
     a_ = area_surface_bc(surface_conditions, edmf)
     ρθ_liq_ice_flux = surface_conditions.ρ_flux_θ
@@ -326,48 +308,47 @@ function θ_surface_bc(
         ustar,
         zLL,
         oblength,
-        Fields.local_geometry_field(Fields.level(grid.fs, Fields.half))[],
+        Fields.local_geometry_field(Fields.level(ᶠspace, Fields.half))[],
     )
     surface_scalar_coeff = percentile_bounds_mean_norm(
         1 - a_total + (i - 1) * a_,
         1 - a_total + i * a_,
     )
-    return surf(aux_gm.θ_liq_ice) + surface_scalar_coeff * sqrt(h_var)
+    return θ_liq_iceLL + surface_scalar_coeff * sqrt(h_var)
 end
 
 function q_surface_bc(
-    grid::Grid,
-    state::State,
+    q_totLL,
+    ᶠspace,
+    zLL,
+    ρLL,
+    surface_conditions,
     edmf::EDMFModel,
     i::Int,
     param_set,
 )
-    (; surface_conditions) = state
-    aux_gm = center_aux_grid_mean(state)
-    surface_conditions.buoyancy_flux > 0 || return surf(aux_gm.q_tot)
+    surface_conditions.buoyancy_flux > 0 || return q_totLL
     a_total = edmf.surface_area
     a_ = area_surface_bc(surface_conditions, edmf)
-    (; ustar, zLL, oblength, ρLL) = surface_helper(grid, state)
+    ustar = surface_conditions.ustar
+    oblength = surface_conditions.obukhov_length
+
     ρq_tot_flux = surface_conditions.ρ_flux_q_tot
     qt_var = get_surface_variance(
         ρq_tot_flux / ρLL,
         ustar,
         zLL,
         oblength,
-        Fields.local_geometry_field(Fields.level(grid.fs, Fields.half))[],
+        Fields.local_geometry_field(Fields.level(ᶠspace, Fields.half))[],
     )
     surface_scalar_coeff = percentile_bounds_mean_norm(
         1 - a_total + (i - 1) * a_,
         1 - a_total + i * a_,
     )
-    return surf(aux_gm.q_tot) + surface_scalar_coeff * sqrt(qt_var)
+    return q_totLL + surface_scalar_coeff * sqrt(qt_var)
 end
 
-function compute_implicit_up_tendencies!(
-    edmf::EDMFModel,
-    grid::Grid,
-    state::State,
-)
+function compute_implicit_up_tendencies!(edmf::EDMFModel, state::State)
     N_up = n_updrafts(edmf)
     FT = float_type(state)
 
@@ -434,11 +415,7 @@ function compute_implicit_up_tendencies!(
     return nothing
 end
 
-function compute_explicit_up_tendencies!(
-    edmf::EDMFModel,
-    grid::Grid,
-    state::State,
-)
+function compute_explicit_up_tendencies!(edmf::EDMFModel, state::State)
     N_up = n_updrafts(edmf)
     FT = float_type(state)
 
@@ -519,12 +496,7 @@ function compute_explicit_up_tendencies!(
     return nothing
 end
 
-function filter_updraft_vars(
-    edmf::EDMFModel,
-    grid::Grid,
-    state::State,
-    param_set::APS,
-)
+function filter_updraft_vars(edmf::EDMFModel, state::State, param_set::APS)
     (; surface_conditions) = state
     N_up = n_updrafts(edmf)
     FT = float_type(state)
@@ -534,6 +506,7 @@ function filter_updraft_vars(
     prog_up = center_prog_updrafts(state)
     prog_gm = center_prog_grid_mean(state)
     prog_gm_uₕ = grid_mean_uₕ(state)
+    aux_gm = center_aux_grid_mean(state)
     aux_gm_f = face_aux_grid_mean(state)
     aux_bulk = center_aux_bulk(state)
     prog_up_f = face_prog_updrafts(state)
@@ -596,6 +569,13 @@ function filter_updraft_vars(
         )
     end
 
+    ᶠspace = axes(prog_up_f)
+    z = Fields.coordinate_field(axes(prog_up)).z
+    zLL = surf(z)
+    ρLL = surf(ρ_c)
+    θ_liq_iceLL = surf(aux_gm.θ_liq_ice)
+    q_totLL = surf(aux_gm.q_tot)
+
     Ic = CCO.InterpolateF2C()
     C123 = CCG.Covariant123Vector
     @inbounds for i in 1:N_up
@@ -615,8 +595,26 @@ function filter_updraft_vars(
             prog_up[i].ρaq_tot,
         )
 
-        θ_surf = θ_surface_bc(grid, state, edmf, i, param_set)
-        q_surf = q_surface_bc(grid, state, edmf, i, param_set)
+        θ_surf = θ_surface_bc(
+            θ_liq_iceLL,
+            ᶠspace,
+            zLL,
+            ρLL,
+            surface_conditions,
+            edmf,
+            i,
+            param_set,
+        )
+        q_surf = q_surface_bc(
+            q_totLL,
+            ᶠspace,
+            zLL,
+            ρLL,
+            surface_conditions,
+            edmf,
+            i,
+            param_set,
+        )
         a_surf = area_surface_bc(surface_conditions, edmf)
         e_kin = @. LA.norm_sqr(
             C123(prog_gm_uₕ) + C123(Ic(CCG.WVector(prog_up_f[i].w))),

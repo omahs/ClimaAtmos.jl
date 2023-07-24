@@ -52,7 +52,6 @@ end
 
 function compute_implicit_gm_tendencies!(
     edmf::TC.EDMFModel,
-    grid::TC.Grid,
     state::TC.State,
     param_set::APS,
 )
@@ -62,7 +61,7 @@ function compute_implicit_gm_tendencies!(
     ρ_c = prog_gm.ρ
     tendencies_gm_uₕ = TC.tendencies_grid_mean_uₕ(state)
 
-    TC.compute_sgs_flux!(edmf, grid, state, param_set)
+    TC.compute_sgs_flux!(edmf, state, param_set)
 
     ∇sgs = Operators.DivergenceF2C()
     @. tendencies_gm.ρe_tot += -∇sgs(aux_gm_f.sgs_flux_h_tot)
@@ -172,7 +171,6 @@ function implicit_sgs_flux_tendency!(Yₜ, Y, p, t, colidx, ::TC.EDMFModel)
 
     state = TC.tc_column_state(Y_filtered, p, Yₜ, colidx, t)
 
-    grid = TC.Grid(state)
     if test_consistency
         parent(state.aux.face) .= NaN
         parent(state.aux.cent) .= NaN
@@ -180,15 +178,13 @@ function implicit_sgs_flux_tendency!(Yₜ, Y, p, t, colidx, ::TC.EDMFModel)
 
     assign_thermo_aux!(state, edmf.moisture_model, thermo_params)
 
-    TC.affect_filter!(edmf, grid, state, tc_params, t)
+    TC.affect_filter!(edmf, state, tc_params, t)
 
-    TC.update_aux!(edmf, grid, state, tc_params, t, Δt)
+    TC.update_aux!(edmf, state, tc_params, t, Δt)
 
-    imex_edmf_turbconv &&
-        TC.compute_implicit_turbconv_tendencies!(edmf, grid, state)
+    imex_edmf_turbconv && TC.compute_implicit_turbconv_tendencies!(edmf, state)
 
-    imex_edmf_gm &&
-        compute_implicit_gm_tendencies!(edmf, grid, state, tc_params)
+    imex_edmf_gm && compute_implicit_gm_tendencies!(edmf, state, tc_params)
 
     # Note: The "filter relaxation tendency" should not be included in the
     # implicit tendency because its derivative with respect to Y is
@@ -211,7 +207,6 @@ function explicit_sgs_flux_tendency!(Yₜ, Y, p, t, colidx, ::TC.EDMFModel)
 
     state = TC.tc_column_state(Y_filtered, p, Yₜ, colidx, t)
 
-    grid = TC.Grid(state)
     if test_consistency
         parent(state.aux.face) .= NaN
         parent(state.aux.cent) .= NaN
@@ -219,20 +214,18 @@ function explicit_sgs_flux_tendency!(Yₜ, Y, p, t, colidx, ::TC.EDMFModel)
 
     assign_thermo_aux!(state, edmf.moisture_model, thermo_params)
 
-    TC.affect_filter!(edmf, grid, state, tc_params, t)
+    TC.affect_filter!(edmf, state, tc_params, t)
 
-    TC.update_aux!(edmf, grid, state, tc_params, t, Δt)
+    TC.update_aux!(edmf, state, tc_params, t, Δt)
 
     # Ensure that, when a tendency is not computed with an IMEX formulation,
     # both its implicit and its explicit components are computed here.
 
-    TC.compute_explicit_turbconv_tendencies!(edmf, grid, state)
-    imex_edmf_turbconv ||
-        TC.compute_implicit_turbconv_tendencies!(edmf, grid, state)
+    TC.compute_explicit_turbconv_tendencies!(edmf, state)
+    imex_edmf_turbconv || TC.compute_implicit_turbconv_tendencies!(edmf, state)
 
     # TODO: incrementally disable this and enable proper grid mean terms
-    imex_edmf_gm ||
-        compute_implicit_gm_tendencies!(edmf, grid, state, tc_params)
+    imex_edmf_gm || compute_implicit_gm_tendencies!(edmf, state, tc_params)
 
     # Note: This "filter relaxation tendency" can be scaled down if needed, but
     # it must be present in order to prevent Y and Y_filtered from diverging

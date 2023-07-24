@@ -1,6 +1,5 @@
 function update_aux!(
     edmf::EDMFModel,
-    grid::Grid,
     state::State,
     param_set::APS,
     t::Real,
@@ -511,7 +510,7 @@ function update_aux!(
     @. KM = c_m * aux_tc.mixing_length * sqrt(max(aux_en.tke, 0))
     @. KH = KM / aux_tc.prandtl_nvec
 
-    compute_diffusive_fluxes(edmf, grid, state, param_set)
+    compute_diffusive_fluxes(edmf, state, param_set)
 
     # compute precipitation formation tendencies from updrafts
     @. aux_bulk.e_tot_tendency_precip_formation = 0

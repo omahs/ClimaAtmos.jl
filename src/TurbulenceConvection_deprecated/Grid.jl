@@ -54,6 +54,6 @@ fc_index(
 ) = i
 
 # Index of the first interior cell above the surface
-surf(f::Fields.Field) = Spaces.level(f, fc_index(1, axes(f)))
+surf(f::Fields.Field) = Spaces.level(f, fc_index(1, axes(f)))[]
 toa(f::Fields.Field) =
-    Spaces.level(f, fc_index(Spaces.nlevels(axes(f)), axes(f)))
+    Spaces.level(f, fc_index(Spaces.nlevels(axes(f)), axes(f)))[]
