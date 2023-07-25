@@ -199,7 +199,7 @@ function compute_diffusive_fluxes(
         surface_conditions.ρ_flux_uₕ
     ∇uₕ_gm = CCO.GradientC2F(;
         bottom = CCO.SetGradient(
-            .- ρ_flux_uₕ ./ surf(a_en) ./ surf(aux_tc_f.ρ_ae_KM),
+            .-ρ_flux_uₕ ./ surf(a_en) ./ surf(aux_tc_f.ρ_ae_KM),
         ),
         top = CCO.SetGradient(zero(ρ_flux_uₕ)),
     )
@@ -599,6 +599,7 @@ function filter_updraft_vars(
 
     Ic = CCO.InterpolateF2C()
     C123 = CCG.Covariant123Vector
+    kc_surf = kc_surface(grid)
     @inbounds for i in 1:N_up
         @. prog_up[i].ρarea = ifelse(
             Ic(wcomponent(CCG.WVector(prog_up_f[i].w))) <= 0,
@@ -631,9 +632,12 @@ function filter_updraft_vars(
             e_kin[kc_surf],
             e_pot_surf,
         )
-        prog_up[i].ρarea[kc_surf] = ρ_c[kc_surf] * a_surf
-        prog_up[i].ρae_tot[kc_surf] = prog_up[i].ρarea[kc_surf] * e_tot_surf
-        prog_up[i].ρaq_tot[kc_surf] = prog_up[i].ρarea[kc_surf] * q_surf
+        ρarea_surf = surf(prog_up[i].ρarea)
+        ρae_tot_surf = surf(prog_up[i].ρae_tot)
+        ρaq_tot_surf = surf(prog_up[i].ρaq_tot)
+        ρarea_surf .= surf(ρ_c) .* a_surf
+        ρae_tot_surf .= surf(prog_up[i].ρarea) .* e_tot_surf
+        ρaq_tot_surf .= surf(prog_up[i].ρarea) .* q_surf
     end
     return nothing
 end
