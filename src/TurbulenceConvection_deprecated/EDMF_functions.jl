@@ -183,9 +183,11 @@ function compute_diffusive_fluxes(
     @. aux_tc_f.ρ_ae_KM = IfKM(aeKM) * ρ_f
 
     aeKHq_tot_bc =
-        -surface_conditions.ρ_flux_q_tot ./ surf(a_en) ./ surf(aux_tc_f.ρ_ae_KH)
+        .-surface_conditions.ρ_flux_q_tot ./ surf(a_en) ./
+        surf(aux_tc_f.ρ_ae_KH)
     aeKHh_tot_bc =
-        -surface_conditions.ρ_flux_h_tot ./ surf(a_en) ./ surf(aux_tc_f.ρ_ae_KH)
+        .-surface_conditions.ρ_flux_h_tot ./ surf(a_en) ./
+        surf(aux_tc_f.ρ_ae_KH)
     ∇q_tot_en = CCO.GradientC2F(;
         bottom = CCO.SetGradient(aeKHq_tot_bc),
         top = CCO.SetGradient(zero(aeKHq_tot_bc)),
