@@ -53,7 +53,7 @@ steps:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
           slurm_ntasks: 64
-          slurm_mem: 128GB
+          slurm_mem: 64GB
 
       - label: ":computer: no lim ARS aquaplanet (ρe_tot) equilmoist high resolution clearsky radiation Float64 (earth)"
         command:
@@ -65,7 +65,7 @@ steps:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
           slurm_ntasks: 64
-          slurm_mem: 128GB
+          slurm_mem: 64GB
       
       - label: ":computer: no lim ARS aquaplanet (ρe_tot) equilmoist high resolution clearsky radiation Float64 (earth)"
         command:
@@ -77,7 +77,7 @@ steps:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
           slurm_ntasks: 64
-          slurm_mem: 128GB
+          slurm_mem: 64GB
       
       - label: ":computer: no lim ARS aquaplanet (ρe_tot) equilmoist high resolution clearsky radiation Float64 (earth)"
         command:
@@ -89,4 +89,4 @@ steps:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
           slurm_ntasks: 64
-          slurm_mem: 128GB
+          slurm_mem: 64GB
