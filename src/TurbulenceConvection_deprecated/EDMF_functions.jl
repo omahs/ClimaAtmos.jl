@@ -114,8 +114,8 @@ function compute_sgs_flux!(
 
     massflux_h_surf = surf(massflux_h)
     massflux_qt_surf = surf(massflux_qt)
-    massflux_h_surf .= zero(eltype(massflux_h))
-    massflux_qt_surf .= zero(eltype(massflux_qt))
+    massflux_h_surf .= zero.(eltype(massflux_h))
+    massflux_qt_surf .= zero.(eltype(massflux_qt))
 
     diffusive_flux_h = aux_tc_f.diffusive_flux_h
     diffusive_flux_qt = aux_tc_f.diffusive_flux_qt
@@ -183,9 +183,9 @@ function compute_diffusive_fluxes(
     @. aux_tc_f.ρ_ae_KM = IfKM(aeKM) * ρ_f
 
     aeKHq_tot_bc =
-        -surface_conditions.ρ_flux_q_tot / surf(a_en) / surf(aux_tc_f.ρ_ae_KH)
+        -surface_conditions.ρ_flux_q_tot ./ surf(a_en) ./ surf(aux_tc_f.ρ_ae_KH)
     aeKHh_tot_bc =
-        -surface_conditions.ρ_flux_h_tot / surf(a_en) / surf(aux_tc_f.ρ_ae_KH)
+        -surface_conditions.ρ_flux_h_tot ./ surf(a_en) ./ surf(aux_tc_f.ρ_ae_KH)
     ∇q_tot_en = CCO.GradientC2F(;
         bottom = CCO.SetGradient(aeKHq_tot_bc),
         top = CCO.SetGradient(zero(aeKHq_tot_bc)),
@@ -199,7 +199,7 @@ function compute_diffusive_fluxes(
         surface_conditions.ρ_flux_uₕ
     ∇uₕ_gm = CCO.GradientC2F(;
         bottom = CCO.SetGradient(
-            -ρ_flux_uₕ / surf(a_en) / surf(aux_tc_f.ρ_ae_KM),
+            .- ρ_flux_uₕ ./ surf(a_en) ./ surf(aux_tc_f.ρ_ae_KM),
         ),
         top = CCO.SetGradient(zero(ρ_flux_uₕ)),
     )
@@ -271,9 +271,7 @@ function set_edmf_surface_bc(
         ρarea_surf .= surf(ρ_c) .* a_surf
         ρae_tot_surf .= surf(prog_up[i].ρarea) .* e_tot_surf
         ρaq_tot_surf .= surf(prog_up[i].ρarea) .* q_surf
-        lf_surf = surf(CC.Fields.local_geometry_field(axes(prog_up_f)))
-        w0 = CCG.WVector(FT(0))
-        @. w_surf .= CCG.Covariant3Vector(w0, lf_surf)
+        @. w_surf = CCG.Covariant3Vector(FT(0))
     end
     return nothing
 end
@@ -431,7 +429,7 @@ function compute_implicit_up_tendencies!(
         tends_w = tendencies_up_f[i].w
         @. tends_w += -grad_f(LBC(LA.norm_sqr(CCG.WVector(w_up)) / 2))
         tends_w_surf = surf(tends_w)
-        tends_w_surf .= zero(tends_w_surf)
+        @. tends_w_surf = zero(tends_w_surf)
     end
 
     return nothing
