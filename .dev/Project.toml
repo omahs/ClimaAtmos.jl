@@ -1,4 +1,5 @@
 [deps]
+ClimaCore = "d414da3d-4745-48bb-8d80-42e94e092884"
 JuliaFormatter = "98e50ef6-434e-11e9-1051-2b60c6c9e899"
 
 [compat]
