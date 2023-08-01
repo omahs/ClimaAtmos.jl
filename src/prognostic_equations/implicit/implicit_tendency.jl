@@ -7,7 +7,8 @@ import ClimaCore: Fields, Geometry
 function implicit_tendency!(Yₜ, Y, p, t)
     fill_with_nans!(p)
     @nvtx "implicit tendency" color = colorant"yellow" begin
-        Yₜ .= zero(eltype(Yₜ))
+        FT = Spaces.undertype(axes(Yₜ.c))
+        Yₜ .= zero(FT)
         @nvtx "precomputed quantities" color = colorant"orange" begin
             set_precomputed_quantities!(Y, p, t)
         end

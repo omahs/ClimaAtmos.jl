@@ -72,7 +72,7 @@ function edmfx_nh_pressure_tendency!(Yₜ, Y, p, t, colidx, turbconv_model::EDMF
 
     n = n_mass_flux_subdomains(turbconv_model)
     (; params, ᶜρʲs, ᶜρ_ref, ᶠgradᵥ_ᶜΦ, ᶜuʲs, ᶜu⁰, ᶠu₃⁰) = p
-    FT = eltype(Y)
+    FT = Spaces.undertype(axes(Y.c))
     ᶜz = Fields.coordinate_field(Y.c).z
     ᶠlg = Fields.local_geometry_field(Y.f)
 

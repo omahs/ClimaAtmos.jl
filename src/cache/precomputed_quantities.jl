@@ -35,7 +35,7 @@ In addition, there are several other SGS quantities for the EDMFX model:
 TODO: Rename `ᶜK` to `ᶜκ`.
 """
 function precomputed_quantities(Y, atmos)
-    FT = eltype(Y)
+    FT = Spaces.undertype(axes(Y.c))
     @assert (
         !(atmos.moisture_model isa DryModel) &&
         atmos.energy_form isa TotalEnergy

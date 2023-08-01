@@ -121,7 +121,7 @@ function export_nc(
     cspace = center_space(Y)
     fspace = face_space(Y)
     # create a temporary dir for intermediate data
-    FT = eltype(Y)
+    FT = Spaces.undertype(axes(Y.c))
     NCDatasets.NCDataset(nc_filename, "c") do nc
         # defines the appropriate dimensions and variables for a space coordinate
         # defines the appropriate dimensions and variables for a time coordinate (by default, unlimited size)

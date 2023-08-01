@@ -16,7 +16,7 @@ function exact_column_jacobian_block(
     Yₜ_name,
     Y_name,
 )
-    T = eltype(Y)
+    T = Spaces.undertype(axes(Y.c))
     Y_var = get_var(Y, Y_name)
     Y_var_vert_space = Spaces.column(axes(Y_var), i, j, h)
     bot_level = Operators.left_idx(Y_var_vert_space)

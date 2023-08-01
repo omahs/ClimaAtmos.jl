@@ -13,7 +13,8 @@ using ClimaCore.Utilities: half
 import ClimaCore.Fields: ColumnField
 
 function limited_tendency!(Yₜ, Y, p, t)
-    Yₜ .= zero(eltype(Yₜ))
+    FT = Spaces.undertype(axes(Yₜ.c))
+    Yₜ .= zero(FT)
     set_precomputed_quantities!(Y, p, t)
     horizontal_tracer_advection_tendency!(Yₜ, Y, p, t)
     NVTX.@range "tracer hyperdiffusion tendency" color = colorant"yellow" begin

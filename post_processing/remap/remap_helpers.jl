@@ -91,7 +91,7 @@ function remap2latlon(filein, data_dir, remap_tmpdir, weightfile, nlat, nlon)
     end
 
     # float type
-    FT = eltype(Y)
+    FT = Spaces.undertype(axes(Y.c))
     ᶜinterp = Operators.InterpolateF2C()
 
     # reconstruct space

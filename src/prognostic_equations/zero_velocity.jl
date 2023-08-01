@@ -5,7 +5,7 @@
 function zero_velocity_tendency!(Yₜ, Y, p, t, colidx)
     # turn off all monmentum tendencies in the advection test
     if p.atmos.edmfx_adv_test
-        FT = eltype(Y)
+        FT = Spaces.undertype(axes(Y.c))
         n = n_mass_flux_subdomains(p.atmos.turbconv_model)
 
         @. Yₜ.c.uₕ[colidx] = C12(FT(0), FT(0))

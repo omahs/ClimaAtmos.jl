@@ -8,7 +8,7 @@ import ClimaCore.Spaces as Spaces
 
 function hyperdiffusion_cache(Y, atmos, do_dss)
     isnothing(atmos.hyperdiff) && return (;)
-    FT = eltype(Y)
+    FT = Spaces.undertype(axes(Y.c))
     n = n_mass_flux_subdomains(atmos.turbconv_model)
 
     # Grid scale quantities

@@ -82,7 +82,7 @@ function vertical_diffusion_boundary_layer_tendency!(
 
     ᶠgradᵥ = Operators.GradientC2F() # apply BCs to ᶜdivᵥ, which wraps ᶠgradᵥ
 
-    FT = eltype(Y)
+    FT = Spaces.undertype(axes(Y.c))
     interior_uₕ = Fields.level(Y.c.uₕ, 1)
     interior_coordinates = Fields.level(Fields.coordinate_field(Y.c), 1)
     z_surface =

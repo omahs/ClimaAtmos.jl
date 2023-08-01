@@ -82,7 +82,7 @@ Updates the precomputed quantities stored in `p` for diagnostic edmfx.
 """
 function set_diagnostic_edmf_precomputed_quantities!(Y, p, t)
     (; moisture_model, turbconv_model) = p.atmos
-    FT = eltype(Y)
+    FT = Spaces.undertype(axes(Y.c))
     n = n_mass_flux_subdomains(turbconv_model)
     ᶜz = Fields.coordinate_field(Y.c).z
     ᶜdz = Fields.Δz_field(axes(Y.c))

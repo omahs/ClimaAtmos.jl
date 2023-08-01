@@ -41,7 +41,7 @@ const T2 = 290
     integrator = CA.get_integrator(config)
     (; p, t) = integrator
     Y = integrator.u
-    FT = eltype(Y)
+    FT = Spaces.undertype(axes(Y.c))
     thermo_params = CAP.thermodynamics_params(p.params)
 
     # Override p.sfc_setup with a Field of SurfaceStates. The value of T is
@@ -85,7 +85,7 @@ end
     integrator = CA.get_integrator(config)
     (; p, t) = integrator
     Y = integrator.u
-    FT = eltype(Y)
+    FT = Spaces.undertype(axes(Y.c))
     thermo_params = CAP.thermodynamics_params(p.params)
 
     # Allocate fields for storing the thermodynamic state and fluxes at the
