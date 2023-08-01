@@ -8,8 +8,7 @@ integrator = CA.get_integrator(config)
 @info "running step"
 
 import OrdinaryDiffEq
-OrdinaryDiffEq.step!(integrator) # compile first
-CA.call_all_callbacks!(integrator) # compile callbacks
+CA.cycle!(integrator) # compile first
 import Profile, ProfileCanvas
 (; output_dir, job_id) = integrator.p.simulation
 output_dir = job_id
@@ -18,7 +17,7 @@ mkpath(output_dir)
 
 @info "collect profile"
 Profile.clear()
-prof = Profile.@profile OrdinaryDiffEq.step!(integrator)
+prof = Profile.@profile CA.cycle!(integrator)
 results = Profile.fetch()
 Profile.clear()
 
@@ -32,7 +31,7 @@ ProfileCanvas.html_file(joinpath(output_dir, "flame.html"), results)
 # use new allocation profiler
 @info "collecting allocations"
 Profile.Allocs.clear()
-Profile.Allocs.@profile sample_rate = 0.01 OrdinaryDiffEq.step!(integrator)
+Profile.Allocs.@profile sample_rate = 0.01 CA.cycle!(integrator)
 results = Profile.Allocs.fetch()
 Profile.Allocs.clear()
 profile = ProfileCanvas.view_allocs(results)
@@ -49,8 +48,8 @@ buffer = occursin("threaded", job_id) ? 1.4 : 1
 
 
 ## old allocation profiler (TODO: remove this)
-allocs = @allocated OrdinaryDiffEq.step!(integrator)
-@timev OrdinaryDiffEq.step!(integrator)
+allocs = @allocated CA.cycle!(integrator)
+@timev CA.cycle!(integrator)
 @info "`allocs ($job_id)`: $(allocs)"
 
 allocs_limit = Dict()
