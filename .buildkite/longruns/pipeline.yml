@@ -1,18 +1,16 @@
-env:
-  JULIA_VERSION: "1.8.5"
-  MPI_IMPL: "openmpi"
-  OPENMPI_VERSION: "4.1.1"
-  CUDA_VERSION: "11.2"
-  OPENBLAS_NUM_THREADS: 1
-  BUILDKITE_COMMIT: "${BUILDKITE_COMMIT}"
-  BUILDKITE_BRANCH: "${BUILDKITE_BRANCH}"
-  CONFIG_PATH: "config/longrun_configs"
-
 agents:
-  config: cpu
   queue: central
-  slurm_ntasks: 1
-  slurm_time: 24:00:00
+  slurm_mem_per_cpu: 8G
+  modules: julia/1.9.2 cuda/11.8 ucx/1.14.1_cuda-11.8 openmpi/4.1.5_cuda-11.8 hdf5/1.12.2-ompi415 nsight-systems/2023.2.1
+
+env:
+  JULIA_LOAD_PATH: "${JULIA_LOAD_PATH}:${BUILDKITE_BUILD_CHECKOUT_PATH}/.buildkite"
+  OPENBLAS_NUM_THREADS: 1
+  JULIA_NVTX_CALLBACKS: gc
+  OMPI_MCA_opal_warn_on_missing_libcuda: 0
+  JULIA_MAX_NUM_PRECOMPILE_FILES: 100
+  JULIA_CPU_TARGET: 'broadwell;skylake'
+  CONFIG_PATH: "config/longrun_configs"
 
 timeout_in_minutes: 1440
 
@@ -20,21 +18,16 @@ steps:
   - label: "init :computer:"
     key: "init_cpu_env"
     command:
-      - echo "--- Configure MPI"
-      - julia -e 'using Pkg; Pkg.add("MPIPreferences"); using MPIPreferences; use_system_binary()'
-
       - echo "--- Instantiate"
       - "julia --project=examples -e 'using Pkg; Pkg.instantiate(;verbose=true)'"
       - "julia --project=examples -e 'using Pkg; Pkg.precompile()'"
       - "julia --project=examples -e 'using Pkg; Pkg.status()'"
-
-      - echo "--- Instantiate perf"
-      - "julia --project=perf -e 'using Pkg; Pkg.instantiate(;verbose=true)'"
-      - "julia --project=perf -e 'using Pkg; Pkg.precompile()'"
-      - "julia --project=perf -e 'using Pkg; Pkg.status()'"
+      - "julia --project=examples artifacts/download_artifacts.jl"
+      - "julia --project=examples -e 'using CUDA; CUDA.precompile_runtime()'"
 
     agents:
       slurm_cpus_per_task: 8
+      slurm_gpus: 1
     env:
       JULIA_NUM_PRECOMPILE_TASKS: 8
 
@@ -54,6 +47,8 @@ steps:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
           slurm_ntasks: 32
+          slurm_time: 24:00:00
+
 
       - label: ":computer: no lim ARS baroclinic wave (ρe_tot) equilmoist high resolution"
         command:
@@ -65,6 +60,8 @@ steps:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
           slurm_ntasks: 32
+          slurm_time: 24:00:00
+
 
       - label: ":computer: lim ARS zalesak baroclinic wave (ρe_tot) equilmoist high resolution"
         command:
@@ -77,6 +74,7 @@ steps:
         agents:
           slurm_ntasks: 32
           slurm_mem_per_cpu: 16GB
+          slurm_time: 24:00:00
 
       - label: ":computer: SSP baroclinic wave (ρe_tot) equilmoist high resolution centered diff"
         command:
@@ -99,6 +97,7 @@ steps:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
           slurm_ntasks: 32
+          slurm_time: 24:00:00
 
       - label: ":computer: SSP 3rd-order tracer & energy upwind equilmoist baroclinic wave (ρe_tot) high resolution"
         command:
@@ -110,6 +109,7 @@ steps:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
           slurm_ntasks: 32
+          slurm_time: 24:00:00
 
       - label: ":computer: held suarez (ρe_tot) high resolution hightop"
         command:
@@ -121,6 +121,7 @@ steps:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
           slurm_ntasks: 32
+          slurm_time: 24:00:00
 
       - label: ":computer: no lim ARS held suarez (ρe_tot) equilmoist high resolution"
         command:
@@ -132,6 +133,7 @@ steps:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
           slurm_ntasks: 64
+          slurm_time: 24:00:00
 
       - label: ":computer: lim ARS zalesak held suarez (ρe_tot) equilmoist high resolution"
         command:
@@ -144,6 +146,7 @@ steps:
         agents:
           slurm_ntasks: 64
           slurm_mem_per_cpu: 16GB
+          slurm_time: 24:00:00
 
       - label: ":computer: no lim ARS aquaplanet (ρe_tot) equilmoist high resolution clearsky radiation Float64"
         command:
@@ -155,6 +158,7 @@ steps:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
           slurm_ntasks: 64
+          slurm_time: 24:00:00
 
       - label: ":computer: lim ARS zalesak aquaplanet (ρe_tot) equilmoist high resolution clearsky radiation Float64"
         command:
@@ -167,6 +171,7 @@ steps:
         agents:
           slurm_ntasks: 64
           slurm_mem_per_cpu: 16GB
+          slurm_time: 24:00:00
 
       - label: ":computer: held suarez (ρe_tot) equilmoist high resolution hightop rayleigh sponge(30e3, 10)"
         command:
@@ -178,6 +183,7 @@ steps:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
           slurm_ntasks: 64
+          slurm_time: 24:00:00
 
       - label: ":computer: aquaplanet (ρe_tot) equilmoist clearsky high resolution hightop rayleigh sponge(35e3, 10) Float64"
         command:
@@ -189,6 +195,7 @@ steps:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
           slurm_ntasks: 64
+          slurm_time: 24:00:00
       
       - label: ":computer: baroclinic wave (ρe_tot) equilmoist high resolution topography (earth)"
         command:
@@ -199,7 +206,8 @@ steps:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
           slurm_ntasks: 32
-          slurm_mem: 128GB
+          slurm_mem_per_cpu: 16GB
+          slurm_time: 24:00:00
 
       - label: ":computer: held suarez (ρe_tot) equilmoist high resolution topography (earth)"
         command:
@@ -210,7 +218,8 @@ steps:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
           slurm_ntasks: 64
-          slurm_mem: 256GB
+          slurm_mem_per_cpu: 16GB
+          slurm_time: 24:00:00
 
       - label: ":computer: no lim ARS aquaplanet (ρe_tot) equilmoist high resolution clearsky radiation Float64 (earth)"
         command:
@@ -222,7 +231,8 @@ steps:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
           slurm_ntasks: 64
-          slurm_mem: 256GB
+          slurm_mem_per_cpu: 16GB
+          slurm_time: 24:00:00
 
   - group: "Low resolution long runs"
 
@@ -236,6 +246,7 @@ steps:
         artifact_paths: "longrun_sphere_hydrostatic_balance_rhoe/*"
         agents:
           slurm_cpus_per_task: 8
+          slurm_time: 24:00:00
 
       - label: ":computer: aquaplanet (ρe_tot) equilmoist gray radiation"
         command:
@@ -245,6 +256,7 @@ steps:
         artifact_paths: "longrun_aquaplanet_rhoe_equil_gray/*"
         agents:
           slurm_cpus_per_task: 8
+          slurm_time: 24:00:00
       
 
   - group: "Experimental Long runs"
@@ -261,6 +273,7 @@ steps:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
           slurm_ntasks: 32
+          slurm_time: 24:00:00
 
       - label: ":computer: aquaplanet (ρe_tot) equilmoist high resolution allsky radiation float64"
         command:
@@ -271,6 +284,7 @@ steps:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
           slurm_ntasks: 32
+          slurm_time: 24:00:00
 
   - group: "TurbulenceConvection"
     steps:
@@ -280,3 +294,4 @@ steps:
         artifact_paths: "longrun_compressible_edmf_trmm/*"
         agents:
           slurm_mem: 20GB
+          slurm_time: 24:00:00
