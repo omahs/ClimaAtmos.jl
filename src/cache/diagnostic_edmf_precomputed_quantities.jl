@@ -432,7 +432,7 @@ function set_diagnostic_edmf_precomputed_quantities!(Y, p, t)
                     local_geometry_prev_level.J *
                     ρaʲ_prev_level *
                     (
-                        entr_detrʲ_prev_level.entr * h_tot_prev_level -
+                        entr_detrʲ_prev_level.entr * h_tot⁰_prev_level -
                         entr_detrʲ_prev_level.detr * h_totʲ_prev_level
                     )
                 )
