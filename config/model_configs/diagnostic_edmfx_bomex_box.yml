@@ -21,6 +21,6 @@ y_elem: 2
 z_elem: 60 
 z_max: 3e3 
 z_stretch: false
-dt: "10secs" 
+dt: "2secs" 
 t_end: "6hours" 
 dt_save_to_disk: "10mins"
