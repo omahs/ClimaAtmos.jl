@@ -80,13 +80,7 @@ function hyperdiffusion_tendency!(Yₜ, Y, p, t)
     end
 
     # Grid scale hyperdiffusion
-    @. ᶜ∇²u = C123(wgradₕ(divₕ(p.ᶜu)))
-    # Without the C123(), the right-hand side would be a C1 or C2 in 2D space.
-    if point_type <: Geometry.Abstract3DPoint
-        @. p.ᶜtemp_C123 = C123(curlₕ(C12(p.ᶜu))) + C123(curlₕ(C3(p.ᶜu)))
-        @. ᶜ∇²u -=
-            C123(wcurlₕ(C12(p.ᶜtemp_C123))) + C123(wcurlₕ(C3(p.ᶜtemp_C123)))
-    end
+    @. ᶜ∇²u = C123(wgradₕ(divₕ(u))) - C123(wcurlₕ(C123(curlₕ(u))))
     if :θ in propertynames(ᶜspecific)
         @. ᶜ∇²specific_energy = wdivₕ(gradₕ(ᶜspecific.θ))
     elseif :e_tot in propertynames(ᶜspecific)
@@ -164,18 +158,12 @@ function hyperdiffusion_tendency!(Yₜ, Y, p, t)
         end
     end
 
-    # Grid scale hyperdiffusion continued
-    @. Yₜ.c.uₕ -= κ₄ * divergence_damping_factor * C12(wgradₕ(divₕ(ᶜ∇²u)))
-    # Without the C123(), the right-hand side would be a C1 or C2 in 2D space.
-    if point_type <: Geometry.Abstract3DPoint
-        @. p.ᶜtemp_C123 = C123(curlₕ(C12(ᶜ∇²u))) + C123(curlₕ(C3(ᶜ∇²u)))
-        @. Yₜ.c.uₕ +=
-            κ₄ *
-            (C12(wcurlₕ(C12(p.ᶜtemp_C123))) + C12(wcurlₕ(C3(p.ᶜtemp_C123))))
-        # Reuse the buffer variable here so we don't need an extra one
-        @. ᶜ∇²uᵥ = C3(wcurlₕ(C12(p.ᶜtemp_C123))) + C3(wcurlₕ(C3(p.ᶜtemp_C123)))
-        @. Yₜ.f.u₃ += κ₄ * ᶠwinterp(ᶜJ * Y.c.ρ, ᶜ∇²uᵥ)
-    end
+    # re-use to store the curl-curl part
+    @. ᶜ∇²u = C123(wcurlₕ(C123(curlₕ(ᶜ∇²u))))
+    @. Yₜ.c.uₕ -=
+        κ₄ * (divergence_damping_factor * C12(wgradₕ(divₕ(ᶜ∇²u)) - C12(ᶜ∇²u)))
+    @. Yₜ.f.u₃ += κ₄ * ᶠwinterp(ᶜJ * Y.c.ρ, C3(ᶜ∇²u))
+
     ᶜρ_energyₜ = :θ in propertynames(ᶜspecific) ? Yₜ.c.ρθ : Yₜ.c.ρe_tot
     @. ᶜρ_energyₜ -= κ₄ * wdivₕ(Y.c.ρ * gradₕ(ᶜ∇²specific_energy))
 
