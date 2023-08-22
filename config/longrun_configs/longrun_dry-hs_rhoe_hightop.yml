@@ -1,0 +1,12 @@
+dz_bottom: 30.0
+dz_top: 3000.0
+dt_save_to_disk: "10days"
+t_end: "1000days"
+h_elem: 16
+z_elem: 63
+z_max: 55000.0
+kappa_4: 2.0e16
+forcing: "held_suarez"
+dt: "300secs"
+rayleigh_sponge: "true"
+job_id: "longrun_dry-hs_rhoe_highres_hightop"
