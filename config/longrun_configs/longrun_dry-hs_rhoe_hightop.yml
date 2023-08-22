@@ -9,4 +9,4 @@ kappa_4: 2.0e16
 forcing: "held_suarez"
 dt: "300secs"
 job_id: "longrun_dry-hs_rhoe_highres_hightop"
-output_dir: "/central/scratch/asridhar/Milestone_1-5-2a/longrun_dry-hs_rhoe_highres_hightop"
+output_dir: "/central/scratch/asridhar/Milestone_1-5-2a"
