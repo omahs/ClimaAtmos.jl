@@ -3,6 +3,8 @@ dt: "300secs"
 t_end: "1000days"
 h_elem: 16
 z_max: 55000.0
+rayleigh_sponge: "true"
+zd_rayleigh: 35000.0
 z_elem: 63
 vert_diff: "true" 
 kappa_4: 2e16
