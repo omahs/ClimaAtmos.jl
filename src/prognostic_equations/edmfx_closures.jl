@@ -185,7 +185,8 @@ function pi_groups_entr_detr(
         # (kinematic, bubble, Bomex)
         # and/or we can calibrate things in ClimaAtmos
         entr = max(0, min(entr_coeff * ᶜwʲ / ᶜz, 1 / dt))
-        detr = max(0, min(detr_coeff * ᶜwʲ, 1 / dt))
+        #detr = max(0, min(detr_coeff * ᶜwʲ, 1 / dt))
+        detr = max(0, min(FT(0.12) * ᶜbuoyʲ / ᶜwʲ, 1 / dt))
 
         return (; entr, detr)
     end
