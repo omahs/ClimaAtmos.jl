@@ -15,3 +15,4 @@ rayleigh_sponge: true
 zd_rayleigh: 35000.0
 forcing: "held_suarez"
 job_id: "longrun_hs_rhoe_equilmoist_nz64_0M_55km_rs35km"
+output_dir: "/central/scratch/asridhar/Milestone_1-5-2a/"
