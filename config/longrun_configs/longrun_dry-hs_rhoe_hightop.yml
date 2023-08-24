@@ -8,7 +8,7 @@ z_max: 55000.0
 kappa_4: 2.0e16
 forcing: "held_suarez"
 dt: "300secs"
-rayleigh_sponge: "true"
+rayleigh_sponge: true
 zd_rayleigh: 35000.0
 job_id: "longrun_dry-hs_rhoe_highres_hightop"
 output_dir: "/central/scratch/asridhar/Milestone_1-5-2a/"
