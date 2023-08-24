@@ -505,6 +505,7 @@ steps:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
           slurm_ntasks: 2
+          slurm_mem_per_cpu: 8G
 
       - label: ":computer: Test restart for MPI baroclinic wave"
         key: "restart_mpi_baro_wave"
@@ -518,6 +519,7 @@ steps:
           RESTART_FILE: "mpi_make_restart/restart/day5.0.hdf5"
         agents:
           slurm_ntasks: 2
+          slurm_mem_per_cpu: 8G
         timeout_in_minutes: 20
         soft_fail: true
         #retry:
@@ -532,7 +534,7 @@ steps:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
           slurm_ntasks: 2
-          slurm_mem: 20GB
+          slurm_mem_per_cpu: 8GB
 
       - label: ":computer: Prep for calling remap pipeline"
         key: "prep_remap"
@@ -544,6 +546,7 @@ steps:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
           slurm_ntasks: 2
+          slurm_mem_per_cpu: 8G
 
       - label: ":computer: Exercise remap pipeline"
         key: "remap_pipeline"
@@ -590,6 +593,7 @@ steps:
           CLIMACORE_DISTRIBUTED: "MPI"
         agents:
           slurm_ntasks: 2
+          slurm_mem_per_cpu: 8G
 
       # TODO: we should somehow decouple this unit test from the perf env / scripts
       - label: ":computer: checkbounds"
