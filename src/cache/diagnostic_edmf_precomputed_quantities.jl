@@ -560,8 +560,6 @@ function set_diagnostic_edmf_precomputed_quantities!(Y, p, t)
         ᶜentr_detrʲ = ᶜentr_detrʲs.:($j)
         ᶜS_q_totʲ = ᶜS_q_totʲs.:($j)
         ᶜS_e_totʲ_helper = ᶜS_e_totʲs_helper.:($j)
-        ᶜq_totʲ = ᶜq_totʲs.:($j)
-        ᶜtsʲ = ᶜtsʲs.:($j)
 
         u³ʲ_halflevel = Fields.field_values(Fields.level(ᶠu³ʲ, i_top + half))
         @. u³ʲ_halflevel = CT3(0)
@@ -573,8 +571,6 @@ function set_diagnostic_edmf_precomputed_quantities!(Y, p, t)
         S_q_totʲ_level = Fields.field_values(Fields.level(ᶜS_q_totʲ, i_top))
         S_e_totʲ_helper_level =
             Fields.field_values(Fields.level(ᶜS_e_totʲ_helper, i_top))
-        q_totʲ_level = Fields.field_values(Fields.level(ᶜq_totʲ, i_top))
-        tsʲ_level = Fields.field_values(Fields.level(ᶜtsʲ, i_top))
         @. S_q_totʲ_level = FT(0)
         @. S_e_totʲ_helper_level = FT(0)
     end
