@@ -108,6 +108,7 @@ function precomputed_quantities(Y, atmos)
             ᶜnh_pressureʲs = similar(Y.c, NTuple{n, CT3{FT}}),
             ᶜS_q_totʲs = similar(Y.c, NTuple{n, FT}),
             ᶜS_q_tot⁰ = similar(Y.c, FT),
+            ᶜS_e_totʲs_helper = similar(Y.c, NTuple{n, FT}),
             ᶠu³⁰ = similar(Y.f, CT3{FT}),
             ᶜu⁰ = similar(Y.c, C123{FT}),
             ᶜtke⁰ = similar(Y.c, FT),

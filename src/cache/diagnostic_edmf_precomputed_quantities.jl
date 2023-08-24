@@ -106,6 +106,7 @@ function set_diagnostic_edmf_precomputed_quantities!(Y, p, t)
         ᶜentr_detrʲs,
         ᶜnh_pressureʲs,
         ᶜS_q_totʲs,
+        ᶜS_e_totʲs_helper,
     ) = p
     (; ᶠu³⁰, ᶜu⁰, ᶜtke⁰, ᶜlinear_buoygrad, ᶜshear², ᶜmixing_length, ᶜS_q_tot⁰) =
         p
@@ -157,7 +158,6 @@ function set_diagnostic_edmf_precomputed_quantities!(Y, p, t)
         ᶜtsʲ = ᶜtsʲs.:($j)
         ᶜρʲ = ᶜρʲs.:($j)
         ᶜq_totʲ = ᶜq_totʲs.:($j)
-        ᶜS_q_totʲ = ᶜS_q_totʲs.:($j)
 
         ρaʲ_int_level = Fields.field_values(Fields.level(ᶜρaʲ, 1))
         u³ʲ_int_halflevel = Fields.field_values(Fields.level(ᶠu³ʲ, half))
@@ -275,6 +275,7 @@ function set_diagnostic_edmf_precomputed_quantities!(Y, p, t)
             ᶜentr_detrʲ = ᶜentr_detrʲs.:($j)
             ᶜnh_pressureʲ = ᶜnh_pressureʲs.:($j)
             ᶜS_q_totʲ = ᶜS_q_totʲs.:($j)
+            ᶜS_e_totʲ_helper = ᶜS_e_totʲs_helper.:($j)
 
             ρaʲ_level = Fields.field_values(Fields.level(ᶜρaʲ, i))
             u³ʲ_halflevel = Fields.field_values(Fields.level(ᶠu³ʲ, i - half))
@@ -302,6 +303,8 @@ function set_diagnostic_edmf_precomputed_quantities!(Y, p, t)
                 CAP.R_d(params) * CAP.T_surf_ref(params) / CAP.grav(params)
             S_q_totʲ_prev_level =
                 Fields.field_values(Fields.level(ᶜS_q_totʲ, i - 1))
+            S_e_totʲ_helper_prev_level =
+                Fields.field_values(Fields.level(ᶜS_e_totʲ_helper, i - 1))
 
             @. entr_detrʲ_prev_level = pi_groups_entr_detr(
                 params,
@@ -444,6 +447,12 @@ function set_diagnostic_edmf_precomputed_quantities!(Y, p, t)
                 ρaʲu³ʲ_data / sqrt(max(0, u³ʲ_datau³ʲ_data)),
             )
 
+            @. S_e_totʲ_helper_prev_level =
+                e_tot_0M_precipitation_sources_helper(
+                    thermo_params,
+                    tsʲ_prev_level,
+                    Φ_prev_level,
+                )
             @. ρaʲu³ʲ_datah_tot =
                 (1 / local_geometry_halflevel.J) * (
                     local_geometry_prev_halflevel.J *
@@ -458,12 +467,7 @@ function set_diagnostic_edmf_precomputed_quantities!(Y, p, t)
                     (
                         entr_detrʲ_prev_level.entr * h_tot_prev_level -
                         entr_detrʲ_prev_level.detr * h_totʲ_prev_level +
-                        S_q_totʲ_prev_level *
-                        e_tot_0M_precipitation_sources_helper(
-                            thermo_params,
-                            tsʲ_prev_level,
-                            Φ_prev_level,
-                        )
+                        S_q_totʲ_prev_level * S_e_totʲ_helper_prev_level
                     )
                 )
             @. h_totʲ_level = ifelse(
@@ -555,6 +559,7 @@ function set_diagnostic_edmf_precomputed_quantities!(Y, p, t)
         ᶠu³ʲ = ᶠu³ʲs.:($j)
         ᶜentr_detrʲ = ᶜentr_detrʲs.:($j)
         ᶜS_q_totʲ = ᶜS_q_totʲs.:($j)
+        ᶜS_e_totʲ_helper = ᶜS_e_totʲs_helper.:($j)
         ᶜq_totʲ = ᶜq_totʲs.:($j)
         ᶜtsʲ = ᶜtsʲs.:($j)
 
@@ -566,16 +571,12 @@ function set_diagnostic_edmf_precomputed_quantities!(Y, p, t)
         @. ᶜuʲ = C123(Y.c.uₕ) + ᶜinterp(C123(ᶠu³ʲ))
 
         S_q_totʲ_level = Fields.field_values(Fields.level(ᶜS_q_totʲ, i_top))
+        S_e_totʲ_helper_level =
+            Fields.field_values(Fields.level(ᶜS_e_totʲ_helper, i_top))
         q_totʲ_level = Fields.field_values(Fields.level(ᶜq_totʲ, i_top))
         tsʲ_level = Fields.field_values(Fields.level(ᶜtsʲ, i_top))
-        @. S_q_totʲ_level = q_tot_precipitation_sources(
-            precip_model,
-            thermo_params,
-            microphys_params,
-            dt,
-            q_totʲ_level,
-            tsʲ_level,
-        )
+        @. S_q_totʲ_level = FT(0)
+        @. S_e_totʲ_helper_level = FT(0)
     end
 
     q_tot_level = Fields.field_values(Fields.level(q_tot, i_top))

@@ -96,6 +96,7 @@ function precipitation_tendency!(
         ᶜ3d_rain,
         ᶜ3d_snow,
         ᶜS_ρq_tot,
+        ᶜS_e_totʲs_helper,
         col_integrated_rain,
         col_integrated_snow,
         params,
@@ -128,12 +129,30 @@ function precipitation_tendency!(
         col_integrated_snow[colidx] / CAP.ρ_cloud_liq(params)
 
     if :ρe_tot in propertynames(Y.c)
-        @. Yₜ.c.ρe_tot[colidx] +=
-            ᶜS_ρq_tot[colidx] * e_tot_0M_precipitation_sources_helper(
-                thermo_params,
-                ᶜts[colidx],
-                ᶜΦ[colidx],
-            )
+        #TODO - this is a hack right now. But it will be easier to clean up
+        # once we drop the support for the old EDMF code
+        if turbconv_model isa DiagnosticEDMFX
+            @. Yₜ.c.ρe_tot[colidx] +=
+                sum(
+                    p.ᶜS_q_totʲs[colidx] *
+                    p.ᶜρaʲs[colidx] *
+                    p.ᶜS_e_totʲs_helper[colidx],
+                ) +
+                p.ᶜS_q_tot⁰[colidx] *
+                Y.c.ρ[colidx] *
+                e_tot_0M_precipitation_sources_helper(
+                    thermo_params,
+                    ᶜts[colidx],
+                    ᶜΦ[colidx],
+                )
+        else
+            @. Yₜ.c.ρe_tot[colidx] +=
+                ᶜS_ρq_tot[colidx] * e_tot_0M_precipitation_sources_helper(
+                    thermo_params,
+                    ᶜts[colidx],
+                    ᶜΦ[colidx],
+                )
+        end
     end
     return nothing
 end
