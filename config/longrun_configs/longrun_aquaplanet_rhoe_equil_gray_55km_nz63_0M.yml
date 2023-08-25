@@ -1,5 +1,5 @@
 dt_save_to_disk: "10days"
-dt: "300secs" 
+dt: "150secs" 
 t_end: "1000days"
 h_elem: 16
 z_max: 55000.0
