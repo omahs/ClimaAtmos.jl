@@ -10,6 +10,16 @@ import Insolation.Parameters as IP
 import Thermodynamics as TD
 import CloudMicrophysics as CM
 
+function override_climaatmos_defaults(
+    defaults::NamedTuple,
+    overrides::NamedTuple,
+)
+    intersect_keys = intersect(keys(defaults), keys(overrides))
+    intersect_vals = getproperty.(Ref(overrides), intersect_keys)
+    intersect_overrides = (; zip(intersect_keys, intersect_vals)...)
+    return merge(defaults, intersect_overrides)
+end
+
 function create_climaatmos_parameter_set(
     toml_dict::CP.AbstractTOMLDict,
     parsed_args,
