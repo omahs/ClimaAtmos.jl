@@ -13,4 +13,4 @@ z_max: 45000.0
 precip_model: "0M"
 job_id: "longrun_hs_rhoe_equilmoist_highres_hightop_rayleigh30e3"
 moist: "equil"
-toml: toml/longrun_hs_rhoe_equilmoist_highres_hightop_rayleigh30e3.toml
+toml: [toml/longrun_hs_rhoe_equilmoist_highres_hightop_rayleigh30e3.toml]
