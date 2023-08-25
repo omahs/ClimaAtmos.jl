@@ -10,16 +10,6 @@ import Insolation.Parameters as IP
 import Thermodynamics as TD
 import CloudMicrophysics as CM
 
-function override_climaatmos_defaults(
-    defaults::NamedTuple,
-    overrides::NamedTuple,
-)
-    intersect_keys = intersect(keys(defaults), keys(overrides))
-    intersect_vals = getproperty.(Ref(overrides), intersect_keys)
-    intersect_overrides = (; zip(intersect_keys, intersect_vals)...)
-    return merge(defaults, intersect_overrides)
-end
-
 function create_climaatmos_parameter_set(
     toml_dict::CP.AbstractTOMLDict,
     parsed_args,
@@ -30,14 +20,16 @@ function create_climaatmos_parameter_set(
 
     aliases = string.(fieldnames(TD.Parameters.ThermodynamicsParameters))
     pairs = CP.get_parameter_values!(toml_dict, aliases, "Thermodynamics")
-    pairs = override_climaatmos_defaults((; pairs...), overrides)
     thermo_params = TD.Parameters.ThermodynamicsParameters{FTD}(; pairs...)
     TP = typeof(thermo_params)
 
     aliases = string.(fieldnames(CM.Parameters.CloudMicrophysicsParameters))
     aliases = setdiff(aliases, ["thermo_params"])
     pairs = CP.get_parameter_values!(toml_dict, aliases, "CloudMicrophysics")
-    pairs = override_climaatmos_defaults((; pairs...), overrides)
+    if parsed_args["override_τ_precip"]
+        pairs = (; pairs..., τ_precip = FT(CA.time_to_seconds(parsed_args["dt"]))
+        )
+    end
     microphys_params = CM.Parameters.CloudMicrophysicsParameters{FTD, TP}(;
         pairs...,
         thermo_params,
@@ -134,13 +126,18 @@ function create_parameter_set(config::AtmosConfig)
     (; toml_dict, parsed_args) = config
     FT = eltype(config)
     dt = FT(CA.time_to_seconds(parsed_args["dt"]))
+    println("OVERRIDE CASE")
+
     return if CA.is_column_edmf(parsed_args)
+        println("Column EDMF")
         overrides = (; MSLP = 100000.0, τ_precip = dt)
         create_climaatmos_parameter_set(toml_dict, parsed_args, overrides)
     elseif CA.is_column_without_edmf(parsed_args)
-        overrides = (; τ_precip = dt)
+        println("Column without EDMF")
+        overrides = (;)
         create_climaatmos_parameter_set(toml_dict, parsed_args, overrides)
     else
+        println("Else")
         overrides = (;
             R_d = 287.0,
             MSLP = 1.0e5,
@@ -148,7 +145,6 @@ function create_parameter_set(config::AtmosConfig)
             Omega = 7.29212e-5,
             planet_radius = 6.371229e6,
             ρ_cloud_liq = 1e3,
-            τ_precip = dt,
             qc_0 = 5e-6, # criterion for removal after supersaturation
         )
         create_climaatmos_parameter_set(toml_dict, parsed_args, overrides)
