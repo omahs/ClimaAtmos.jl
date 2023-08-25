@@ -96,7 +96,6 @@ function precipitation_tendency!(
         ᶜ3d_rain,
         ᶜ3d_snow,
         ᶜS_ρq_tot,
-        ᶜS_e_totʲs_helper,
         col_integrated_rain,
         col_integrated_snow,
         params,
