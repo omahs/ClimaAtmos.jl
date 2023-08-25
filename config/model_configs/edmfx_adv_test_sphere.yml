@@ -9,4 +9,3 @@ ode_algo: "SSP33ShuOsher"
 advection_test: true
 job_id: "edmfx_adv_test_sphere"
 moist: "equil"
-toml: toml/non_column.toml

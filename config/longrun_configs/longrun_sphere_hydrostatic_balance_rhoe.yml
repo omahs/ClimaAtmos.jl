@@ -6,4 +6,3 @@ dt_save_to_disk: "10days"
 fps: 30 
 job_id: "longrun_sphere_hydrostatic_balance_rhoe"
 
-toml: toml/non_column.toml

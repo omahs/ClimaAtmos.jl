@@ -26,4 +26,3 @@ ls_adv: "Bomex"
 job_id: "edmfx_bomex_box_v2"
 moist: "equil"
 
-toml: toml/non_column.toml

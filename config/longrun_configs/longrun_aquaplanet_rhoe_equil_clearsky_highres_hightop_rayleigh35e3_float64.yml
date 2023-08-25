@@ -18,4 +18,3 @@ precip_model: "0M"
 job_id: "longrun_aquaplanet_rhoe_equil_clearsky_highres_hightop_rayleigh35e3_float64"
 moist: "equil"
 
-toml: toml/non_column.toml

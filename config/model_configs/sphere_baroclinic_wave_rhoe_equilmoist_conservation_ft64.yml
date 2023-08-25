@@ -8,4 +8,3 @@ FLOAT_TYPE: "Float64"
 job_id: "sphere_baroclinic_wave_rhoe_equilmoist_conservation_ft64"
 rad: "clearsky"
 
-toml: toml/non_column.toml

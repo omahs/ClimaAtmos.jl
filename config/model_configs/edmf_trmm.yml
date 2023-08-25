@@ -20,4 +20,3 @@ dt_save_to_sol: "5mins"
 job_id: "edmf_trmm"
 rad: "TRMM_LBA"
 
-toml: toml/column_edmf.toml

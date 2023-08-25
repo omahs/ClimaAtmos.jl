@@ -20,4 +20,3 @@ use_krylov_method: true
 job_id: edmf_gabls_jfnk_imex
 dt: 600secs
 
-toml: toml/column_edmf.toml

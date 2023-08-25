@@ -15,4 +15,3 @@ job_id: "longrun_ssp_first_tracer_energy_upwind_bw_rhoe_equil_highres"
 moist: "equil"
 apply_limiter: true
 
-toml: toml/non_column.toml

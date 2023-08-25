@@ -7,4 +7,3 @@ dt: "500secs"
 t_end: "8days" 
 dt_save_to_disk: "4days"
 
-toml: toml/non_column.toml

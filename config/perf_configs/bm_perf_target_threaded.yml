@@ -1,4 +1,3 @@
 perf_summary: true
 job_id: "bm_perf_target_threaded"
 
-toml: toml/non_column.toml

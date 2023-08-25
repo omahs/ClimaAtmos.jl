@@ -6,4 +6,3 @@ dt: "450secs"
 job_id: "sphere_baroclinic_wave_rhoe_equilmoist"
 moist: "equil"
 
-toml: toml/non_column.toml

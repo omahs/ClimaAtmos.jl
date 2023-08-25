@@ -137,29 +137,8 @@ end
 # TODO: unify these parameters and refactor this method.
 function create_parameter_set(config::AtmosConfig)
     (; toml_dict, parsed_args) = config
-    FT = eltype(config)
-    dt = FT(CA.time_to_seconds(parsed_args["dt"]))
-    println("OVERRIDE CASE")
 
-    return if CA.is_column_edmf(parsed_args)
-        println("Column EDMF")
-        overrides = (; MSLP = 1.0e5)
-        create_climaatmos_parameter_set(toml_dict, parsed_args, overrides)
-    elseif CA.is_column_without_edmf(parsed_args)
-        println("Column without EDMF")
         overrides = (;)
-        create_climaatmos_parameter_set(toml_dict, parsed_args, overrides)
-    else
-        println("Else")
-        overrides = (;
-            R_d = 287.0,
-            MSLP = 1.0e5,
-            grav = 9.80616,
-            Omega = 7.29212e-5,
-            planet_radius = 6.371229e6,
-            ρ_cloud_liq = 1e3,
-            qc_0 = 5e-6, # criterion for removal after supersaturation
-        )
-        create_climaatmos_parameter_set(toml_dict, parsed_args, overrides)
-    end
+
+    return create_climaatmos_parameter_set(toml_dict, parsed_args, overrides)
 end

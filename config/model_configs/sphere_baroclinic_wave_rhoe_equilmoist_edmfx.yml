@@ -11,4 +11,3 @@ edmfx_sgs_flux: true
 job_id: "sphere_baroclinic_wave_rhoe_equilmoist_edmfx"
 moist: "equil"
 
-toml: toml/non_column.toml

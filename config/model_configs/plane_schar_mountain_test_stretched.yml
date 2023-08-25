@@ -17,4 +17,3 @@ z_max: 25000.0
 topography: "Schar"
 job_id: "plane_schar_mountain_test_stretched"
 
-toml: toml/non_column.toml

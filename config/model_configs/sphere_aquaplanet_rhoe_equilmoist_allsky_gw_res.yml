@@ -17,4 +17,3 @@ regression_test: true
 job_id: "sphere_aquaplanet_rhoe_equilmoist_allsky_gw_res"
 moist: "equil"
 
-toml: toml/non_column.toml

@@ -19,4 +19,3 @@ dt_save_to_sol: "5mins"
 job_id: "edmf_dycoms_rf01"
 rad: "DYCOMS_RF01"
 
-toml: toml/column_edmf.toml

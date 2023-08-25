@@ -6,4 +6,3 @@ forcing: "held_suarez"
 dt: "500secs"
 job_id: "sphere_held_suarez_rhotheta"
 
-toml: toml/non_column.toml

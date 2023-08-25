@@ -33,7 +33,7 @@ ls_adv: Bomex
 dt_save_to_sol: 5mins
 job_id: edmf_bomex
 moist: equil
-toml: toml/column_edmf.toml
+
 ```
 
 To add a new configuration argument/key, open `.buildkite/default_config.yml`.

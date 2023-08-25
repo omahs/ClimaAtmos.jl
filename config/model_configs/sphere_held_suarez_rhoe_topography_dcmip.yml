@@ -9,4 +9,3 @@ dt: "200secs"
 viscous_sponge: true
 job_id: "sphere_held_suarez_rhoe_topography_dcmip"
 
-toml: toml/non_column.toml

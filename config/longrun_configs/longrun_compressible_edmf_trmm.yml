@@ -16,4 +16,3 @@ zd_rayleigh: 15000
 job_id: "longrun_compressible_edmf_trmm" 
 dt: "0.2secs" 
 t_end: "3.8hours"
-toml: toml/column_edmf.toml

@@ -16,4 +16,3 @@ moist: equil
 job_id: edmf_nieuwstadt
 dt: 0.5secs
 
-toml: toml/column_edmf.toml

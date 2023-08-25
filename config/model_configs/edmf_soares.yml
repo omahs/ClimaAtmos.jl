@@ -16,4 +16,3 @@ dt_save_to_sol: "5mins"
 job_id: "edmf_soares"
 moist: "equil"
 
-toml: toml/column_edmf.toml

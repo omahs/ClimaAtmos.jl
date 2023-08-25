@@ -21,4 +21,3 @@ dt_save_to_sol: "5mins"
 job_id: "dycore_consistency"
 moist: "equil"
 
-toml: toml/column_edmf.toml

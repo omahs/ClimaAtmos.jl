@@ -19,4 +19,3 @@ job_id: "longrun_zalesak_tracer_energy_aquaplanet_rhoe_equil_highres_clearsky_ft
 moist: "equil"
 apply_limiter: true
 
-toml: toml/non_column.toml

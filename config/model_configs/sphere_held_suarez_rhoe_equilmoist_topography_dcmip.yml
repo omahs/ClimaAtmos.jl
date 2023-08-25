@@ -11,4 +11,3 @@ topography: "DCMIP200"
 job_id: "sphere_held_suarez_rhoe_equilmoist_topography_dcmip"
 moist: "equil"
 
-toml: toml/non_column.toml

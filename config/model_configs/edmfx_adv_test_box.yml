@@ -17,4 +17,3 @@ kappa_4: 1.0e8
 job_id: "edmfx_adv_test_box"
 moist: "equil"
 
-toml: toml/non_column.toml

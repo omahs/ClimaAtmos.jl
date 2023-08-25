@@ -14,4 +14,3 @@ dt: 50secs
 t_end: 3hours 
 dt_save_to_disk: 600secs
 
-toml: toml/non_column.toml

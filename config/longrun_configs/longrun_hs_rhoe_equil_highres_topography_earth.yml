@@ -15,4 +15,3 @@ topography: "Earth"
 job_id: "longrun_hs_rhoe_equil_highres_topography_earth"
 moist: "equil"
 
-toml: toml/non_column.toml

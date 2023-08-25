@@ -13,4 +13,3 @@ job_id: "longrun_zalesak_tracer_energy_bw_rhoe_equil_highres"
 moist: "equil"
 apply_limiter: true
 
-toml: toml/non_column.toml

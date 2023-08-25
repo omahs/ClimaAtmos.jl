@@ -8,4 +8,3 @@ use_reference_state: false
 dt: "200secs"
 job_id: "sphere_baroclinic_wave_rhoe_topography_dcmip_rs"
 
-toml: toml/non_column.toml
