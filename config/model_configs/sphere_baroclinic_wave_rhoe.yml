@@ -4,3 +4,5 @@ initial_condition: "DryBaroclinicWave"
 dt: "580secs"
 t_end: "10days"
 job_id: "sphere_baroclinic_wave_rhoe"
+
+toml: toml/non_column.toml

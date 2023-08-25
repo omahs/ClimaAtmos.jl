@@ -9,3 +9,5 @@ fps: 30
 job_id: "longrun_aquaplanet_rhoe_equil_gray" 
 dt_save_to_sol: "1days" 
 dt_save_to_disk: "10days"
+
+toml: toml/non_column.toml

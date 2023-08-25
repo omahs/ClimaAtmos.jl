@@ -18,3 +18,5 @@ reference_job_id: "edmf_soares"
 dt_save_to_sol: "5mins"
 job_id: "edmf_soares_jfnk_imex"
 moist: "equil"
+
+toml: toml/column_edmf.toml

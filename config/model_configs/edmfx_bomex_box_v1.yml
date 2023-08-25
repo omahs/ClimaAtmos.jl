@@ -24,3 +24,5 @@ z_max: 3000.0
 ls_adv: "Bomex"
 job_id: "edmfx_bomex_box_v1"
 moist: "equil"
+
+toml: toml/non_column.toml

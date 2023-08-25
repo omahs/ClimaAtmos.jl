@@ -7,3 +7,5 @@ perturb_initstate: false
 FLOAT_TYPE: "Float64"
 job_id: "sphere_hydrostatic_balance_rhoe_ft64"
 dt_save_to_sol: "600secs"
+
+toml: toml/non_column.toml

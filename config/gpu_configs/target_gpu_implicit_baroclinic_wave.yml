@@ -5,3 +5,5 @@ z_elem: 45
 dt: "150secs"
 dt_save_to_sol: "Inf"
 job_id: "target_gpu_implicit_baroclinic_wave"
+
+toml: toml/non_column.toml

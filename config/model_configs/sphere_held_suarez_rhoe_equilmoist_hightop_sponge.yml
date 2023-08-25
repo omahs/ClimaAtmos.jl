@@ -14,3 +14,5 @@ regression_test: true
 viscous_sponge: true
 job_id: "sphere_held_suarez_rhoe_equilmoist_hightop_sponge"
 moist: "equil"
+
+toml: toml/non_column.toml

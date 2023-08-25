@@ -1,0 +1,35 @@
+[R_d]
+alias = "R_d"
+value = 287.0
+type = "float"
+
+[MSLP]
+alias = "MSLP"
+value = 1.0e5
+type = "float"
+
+[grav]
+alias = "grav"
+value = 9.80616
+type = "float"
+
+[Omega]
+alias = "Omega"
+value = 7.29212e-5
+type = "float"
+
+[planet_radius]
+alias = "planet_radius"
+value = 6.371229e6
+type = "float"
+
+[ρ_cloud_liq]
+alias = "ρ_cloud_liq"
+value = 1e3
+type = "float"
+
+[qc_0]
+alias = "qc_0"
+value = 5e-6
+type = "float"
+ 

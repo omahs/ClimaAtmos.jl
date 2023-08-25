@@ -11,3 +11,4 @@ z_stretch: false
 post_process: false 
 dt_save_to_sol: "10secs" 
 dt_save_to_disk: "10secs"
+toml: toml/non_column.toml

@@ -1,0 +1,4 @@
+[mean_sea_level_pressure]
+alias = "MSLP"
+value = 1.0e5
+type = "float"

@@ -18,3 +18,5 @@ ls_adv: "LifeCycleTan2018"
 dt_save_to_sol: "5mins"
 job_id: "edmf_life_cycle_tan2018"
 moist: "equil"
+
+toml: toml/column_edmf.toml

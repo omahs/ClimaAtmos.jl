@@ -24,3 +24,5 @@ z_stretch: false
 dt: 10secs 
 t_end: 4hours 
 dt_save_to_disk: 2mins
+
+toml: toml/non_column.toml

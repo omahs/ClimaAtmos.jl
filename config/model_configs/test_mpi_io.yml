@@ -3,3 +3,5 @@ t_end: "2hours"
 dt_save_to_sol: "1hours"
 dt_save_to_disk: "1hours"
 post_process: false
+
+toml: toml/non_column.toml
