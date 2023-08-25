@@ -30,12 +30,15 @@ function create_climaatmos_parameter_set(
 
     aliases = string.(fieldnames(TD.Parameters.ThermodynamicsParameters))
     pairs = CP.get_parameter_values!(toml_dict, aliases, "Thermodynamics")
+    pairs = override_climaatmos_defaults((; pairs...), overrides)
     thermo_params = TD.Parameters.ThermodynamicsParameters{FTD}(; pairs...)
     TP = typeof(thermo_params)
 
     aliases = string.(fieldnames(CM.Parameters.CloudMicrophysicsParameters))
     aliases = setdiff(aliases, ["thermo_params"])
     pairs = CP.get_parameter_values!(toml_dict, aliases, "CloudMicrophysics")
+    pairs = override_climaatmos_defaults((; pairs...), overrides)
+    # temporary fix for τ_precip
     if parsed_args["override_τ_precip"]
         pairs = (; pairs..., τ_precip = FT(CA.time_to_seconds(parsed_args["dt"]))
         )
@@ -140,7 +143,7 @@ function create_parameter_set(config::AtmosConfig)
 
     return if CA.is_column_edmf(parsed_args)
         println("Column EDMF")
-        overrides = (; MSLP = 100000.0, τ_precip = dt)
+        overrides = (; MSLP = 100000.0)
         create_climaatmos_parameter_set(toml_dict, parsed_args, overrides)
     elseif CA.is_column_without_edmf(parsed_args)
         println("Column without EDMF")
