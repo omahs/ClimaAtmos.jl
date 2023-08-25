@@ -13,4 +13,4 @@ z_max: 45000.0
 precip_model: "0M"
 job_id: "flame_perf_gw"
 moist: "equil"
-toml: toml/flame_perf_gw.toml
+toml: [toml/flame_perf_gw.toml]
