@@ -236,7 +236,7 @@ subsidence:
   value: ~
 toml:
   help: "TOML file(s) used to override model parameters"
-  value: ~
+  value: []
 prognostic_tke:
   help: "A flag for prognostic TKE [`false` (default), `true`]"
   value: false
