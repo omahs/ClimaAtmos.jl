@@ -46,6 +46,13 @@ function set_diagnostic_edmfx_env_quantities_level!(
     u³_halflevel,
     u³ʲs_halflevel,
     u³⁰_halflevel,
+    uₕ,
+    K⁰_level,
+    K_level,
+    h_tot⁰_level,
+    h_tot_level,
+    local_geometry_level,
+    local_geometry_halflevel,
     turbconv_model,
 )
     @. u³⁰_halflevel = divide_by_ρa(
@@ -55,6 +62,22 @@ function set_diagnostic_edmfx_env_quantities_level!(
         ρ_level,
         turbconv_model,
     )
+    @. K⁰_level =
+        (
+            dot(
+                C123(uₕ, local_geometry_level),
+                CT123(u³⁰_halflevel, local_geometry_level),
+            ) +
+            dot(
+                C123(u³⁰_halflevel, local_geometry_halflevel),
+                CT123(u³⁰_halflevel, local_geometry_halflevel),
+            ) +
+            2 * dot(
+                CT123(uₕ, local_geometry_level),
+                C123(u³⁰_halflevel, local_geometry_halflevel),
+            )
+        ) / 2
+    @. h_tot⁰_level = h_tot_level - K_level + K⁰_level
     return nothing
 end
 
@@ -90,7 +113,7 @@ function set_diagnostic_edmf_precomputed_quantities!(Y, p, t)
     ᶜdz = Fields.Δz_field(axes(Y.c))
     (; params) = p
     (; dt) = p.simulation
-    (; ᶜp, ᶜΦ, ᶜρ_ref, ᶠu³, ᶜu, ᶜts, ᶜh_tot) = p
+    (; ᶜp, ᶜΦ, ᶜρ_ref, ᶠu³, ᶜu, ᶜts, ᶜh_tot, ᶜK) = p
     (; q_tot) = p.ᶜspecific
     (; ustar, obukhov_length, buoyancy_flux, ρ_flux_h_tot, ρ_flux_q_tot) =
         p.sfc_conditions
@@ -106,7 +129,7 @@ function set_diagnostic_edmf_precomputed_quantities!(Y, p, t)
         ᶜentr_detrʲs,
         ᶜnh_pressureʲs,
     ) = p
-    (; ᶠu³⁰, ᶜu⁰, ᶜtke⁰, ᶜlinear_buoygrad, ᶜshear², ᶜmixing_length) = p
+    (; ᶠu³⁰, ᶜu⁰, ᶜK⁰, ᶜtke⁰, ᶜlinear_buoygrad, ᶜshear², ᶜmixing_length) = p
     (; ᶜK_h, ᶜK_u, ρatke_flux) = p
     thermo_params = CAP.thermodynamics_params(params)
     ᶜlg = Fields.local_geometry_field(Y.c)
@@ -215,6 +238,10 @@ function set_diagnostic_edmf_precomputed_quantities!(Y, p, t)
         u³_int_halflevel,
         u³ʲs_int_halflevel,
         u³⁰_int_halflevel,
+        K⁰_level,
+        K_level,
+        h_tot⁰_level,
+        h_tot_level,
         turbconv_model,
     )
 
@@ -432,7 +459,7 @@ function set_diagnostic_edmf_precomputed_quantities!(Y, p, t)
                     local_geometry_prev_level.J *
                     ρaʲ_prev_level *
                     (
-                        entr_detrʲ_prev_level.entr * h_tot⁰_prev_level -
+                        entr_detrʲ_prev_level.entr * h_tot_prev_level -
                         entr_detrʲ_prev_level.detr * h_totʲ_prev_level
                     )
                 )
@@ -499,6 +526,10 @@ function set_diagnostic_edmf_precomputed_quantities!(Y, p, t)
             u³_halflevel,
             u³ʲs_halflevel,
             u³⁰_halflevel,
+            K⁰_level,
+            K_level,
+            h_tot⁰_level,
+            h_tot_level,
             turbconv_model,
         )
     end
